@@ -11,6 +11,7 @@ export const connectorEvents = new EventEmitter();
 
 let extensions: ExtensionInfo[] = [];
 let running = false;
+let sseConnected = false;
 let presenceTimer: ReturnType<typeof setInterval> | null = null;
 
 export async function start(): Promise<void> {
@@ -36,25 +37,31 @@ export function getExtensionList(): ExtensionInfo[] {
   return extensions;
 }
 
+export function isNfonConnected(): boolean {
+  return sseConnected;
+}
+
 async function loadExtensions(): Promise<void> {
   try {
     const exts = await getExtensions();
     const states = await getLineStates();
 
-    const stateMap = new Map<string, string>();
+    const stateMap = new Map<string, { presence: string; line: string }>();
     for (const s of states) {
-      stateMap.set(s.extension, s.presence);
+      stateMap.set(s.extension, { presence: s.presence, line: s.line });
     }
 
     const nameMap = new Map<string, string>();
 
     extensions = exts.map((ext) => {
       nameMap.set(ext.extension_number, ext.name);
+      const state = stateMap.get(ext.extension_number);
       return {
         uuid: ext.uuid,
         extensionNumber: ext.extension_number,
         name: ext.name,
-        presence: stateMap.get(ext.extension_number) || "offline",
+        presence: state?.presence || "offline",
+        line: state?.line || "offline",
       };
     });
 
@@ -70,16 +77,19 @@ function startPresencePolling(): void {
   presenceTimer = setInterval(async () => {
     try {
       const states = await getLineStates();
-      const stateMap = new Map<string, string>();
+      const stateMap = new Map<string, { presence: string; line: string }>();
       for (const s of states) {
-        stateMap.set(s.extension, s.presence);
+        stateMap.set(s.extension, { presence: s.presence, line: s.line });
       }
 
       let changed = false;
       for (const ext of extensions) {
-        const newPresence = stateMap.get(ext.extensionNumber) || "offline";
-        if (ext.presence !== newPresence) {
+        const state = stateMap.get(ext.extensionNumber);
+        const newPresence = state?.presence || "offline";
+        const newLine = state?.line || "offline";
+        if (ext.presence !== newPresence || ext.line !== newLine) {
           ext.presence = newPresence;
+          ext.line = newLine;
           changed = true;
         }
       }
@@ -103,6 +113,7 @@ async function connectSSE(): Promise<void> {
         throw new Error("Kein Response-Body");
       }
 
+      sseConnected = true;
       connectorEvents.emit("sse:connected");
       console.log("[Connector] SSE-Stream verbunden.");
 
@@ -138,6 +149,7 @@ async function connectSSE(): Promise<void> {
 
       console.log("[Connector] SSE-Stream geschlossen.");
     } catch (err) {
+      sseConnected = false;
       console.error("[Connector] SSE-Fehler:", err);
       connectorEvents.emit("sse:disconnected");
     }

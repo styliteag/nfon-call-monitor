@@ -29,6 +29,7 @@ NFON SSE → nfon-connector.ts → call-aggregator.ts → db.ts (SQLite)
 | SQLite statt Postgres/MySQL | Kein externer DB-Server nötig, Single-File, ausreichend für diesen Use-Case |
 | Socket.IO statt plain WebSocket | Auto-Reconnect, Room-Support, Fallback auf Polling |
 | Tailwind CSS v4 | Utility-First, kein separater CSS-Build-Step mit `@tailwindcss/vite` |
+| Dark Mode via class-Strategie | `@custom-variant dark (&:where(.dark, .dark *))` in `index.css`, Toggle in `useDarkMode` hook, localStorage-persistiert |
 
 ## Projektstruktur
 
@@ -45,8 +46,8 @@ src/                         # Backend (Express + NFON-Anbindung)
   routes/calls.ts            # GET /api/calls (paginiert + Filter)
   routes/extensions.ts       # GET /api/extensions
 frontend/                    # React + Vite + Tailwind
-  src/hooks/                 # useSocket, useCalls, useExtensions
-  src/components/            # UI-Komponenten
+  src/hooks/                 # useSocket, useCalls, useExtensions, useDarkMode
+  src/components/            # UI-Komponenten (alle mit dark: Varianten)
   src/lib/                   # API-Client, Formatter
 ```
 
@@ -58,6 +59,8 @@ frontend/                    # React + Vite + Tailwind
 - **Frontend**: ESM (`"type": "module"`), Vite + React 19
 - **SQLite named params**: `:name` Syntax (Node.js built-in), NICHT `@name` (better-sqlite3)
 - **Ports**: Backend 3001, Frontend Dev 5173 (Vite proxy für `/api` und `/socket.io`)
+- **Dark Mode**: Alle neuen Komponenten müssen `dark:` Varianten haben
+- **tsx -e**: Top-level await geht nicht (CJS), `require('./src/foo.ts')` statt `import './src/foo.js'`
 
 ## NFON Call States
 
@@ -72,6 +75,17 @@ start → dial → ring → answer → bridge → hangup → end
   - `timeout` / `cancel` → "missed"
   - `busy` → "busy"
   - `reject` → "rejected"
+
+## NFON API Presence-Werte
+
+Die `/v1/extensions/phone/states` API liefert pro Extension **zwei Status-Felder**:
+- `presence`: `"available"` oder `"offline"` (NICHT "online"!)
+- `line`: `"idle"`, `"offline"`, `"busy"`, `"ringing"`
+
+Beide werden als farbige Punkte auf den Extension-Cards angezeigt (links=Line, rechts=Presence).
+Die Card-Umrandung richtet sich nach dem Line-Status.
+
+**Achtung**: Bei mehreren Endgeräten pro Extension kann `presence` "offline" sein, obwohl der User erreichbar ist. Das ist eine NFON-Eigenheit.
 
 ## Wichtige Einschränkungen
 

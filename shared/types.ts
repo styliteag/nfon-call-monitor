@@ -31,7 +31,8 @@ export interface ExtensionInfo {
   uuid: string;
   extensionNumber: string;
   name: string;
-  presence: string;
+  presence: string;   // "available" | "offline"
+  line: string;        // "idle" | "offline" | "busy" | "ringing"
   currentCallId?: string;
 }
 

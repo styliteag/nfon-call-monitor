@@ -132,3 +132,26 @@ npm run monitor
 - CTI API: https://github.com/NFON-AG/CTI-API
 - API Explorer: https://nfon-ag.github.io/Service-Portal-API-Specification/net/nfon/portal/api/Api.html
 - Service Portal API: https://github.com/NFON-AG/Service-Portal-API
+
+
+## NFON Einschränkungen
+
+  Weder die CTI API noch die Service Portal API bieten Endpunkte für historische Anrufdaten (CDR/Call Logs).
+
+  CTI API - Einschränkungen
+
+  - GET /extensions/phone/calls ist ein reiner Echtzeit-SSE-Stream — keine vergangenen Events
+  - Gruppenanrufe sind explizit nicht unterstützt:
+  "Functions such as group calls, skill-based calls or queues are currently not supported."
+  - Es gibt kein Gruppen-Feld im Event-Schema — nur eine einzelne Extension-Nummer
+
+  Service Portal API - Nur Konfiguration
+
+  - Hat volle CRUD-Endpoints für group-services, queue-services, skill-services und frontdesk-services
+  - Man kann Gruppen, ihre Mitglieder und ihre Inbound-Rufnummern auslesen
+  - Aber: Null Call-History/CDR-Endpoints (in allen 380 Postman-Requests nichts gefunden)
+
+  Zur Zentrale (Extension 0)
+
+  Die "Zentrale" ist vermutlich als frontdesk-service konfiguriert (eigener Endpoint in der Service Portal API). Wenn sie kein reguläres Phone-Extension mit einem einzelnen Gerät ist, tauchen ihre Anrufe wahrscheinlich nicht im CTI
+  SSE-Stream auf.

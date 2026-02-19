@@ -17,8 +17,8 @@ export function CallHistoryTable({ calls, total, page, loading, onPageChange }: 
   return (
     <div className="flex-1 overflow-auto">
       <table className="w-full text-sm">
-        <thead className="bg-gray-50 sticky top-0">
-          <tr className="text-left text-gray-500 text-xs uppercase">
+        <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
+          <tr className="text-left text-gray-500 dark:text-gray-400 text-xs uppercase">
             <th className="px-4 py-2">Zeit</th>
             <th className="px-4 py-2">Richtung</th>
             <th className="px-4 py-2">Anrufer</th>
@@ -28,7 +28,7 @@ export function CallHistoryTable({ calls, total, page, loading, onPageChange }: 
             <th className="px-4 py-2">Dauer</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-100">
+        <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
           {loading && calls.length === 0 ? (
             <tr>
               <td colSpan={7} className="text-center py-8 text-gray-400">
@@ -45,31 +45,31 @@ export function CallHistoryTable({ calls, total, page, loading, onPageChange }: 
             calls.map((call) => (
               <tr
                 key={`${call.id}-${call.extension}`}
-                className={`hover:bg-gray-50 ${
-                  call.status === "ringing" ? "bg-yellow-50 animate-pulse" : ""
+                className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${
+                  call.status === "ringing" ? "bg-yellow-50 dark:bg-yellow-900/20 animate-pulse" : ""
                 }`}
               >
                 <td className="px-4 py-2 whitespace-nowrap">
-                  <div>{formatTime(call.startTime)}</div>
+                  <div className="dark:text-gray-200">{formatTime(call.startTime)}</div>
                   <div className="text-xs text-gray-400">{formatDate(call.startTime)}</div>
                 </td>
                 <td className="px-4 py-2">
                   {call.direction === "inbound" ? (
-                    <span className="text-blue-600" title="Eingehend">&#8592;</span>
+                    <span className="text-blue-600 dark:text-blue-400" title="Eingehend">&#8592;</span>
                   ) : (
-                    <span className="text-green-600" title="Ausgehend">&#8594;</span>
+                    <span className="text-green-600 dark:text-green-400" title="Ausgehend">&#8594;</span>
                   )}
                 </td>
-                <td className="px-4 py-2 font-mono text-xs">{formatPhone(call.caller)}</td>
-                <td className="px-4 py-2 font-mono text-xs">{formatPhone(call.callee)}</td>
+                <td className="px-4 py-2 font-mono text-xs dark:text-gray-300">{formatPhone(call.caller)}</td>
+                <td className="px-4 py-2 font-mono text-xs dark:text-gray-300">{formatPhone(call.callee)}</td>
                 <td className="px-4 py-2">
-                  <div className="font-medium">{call.extensionName || call.extension}</div>
+                  <div className="font-medium dark:text-gray-200">{call.extensionName || call.extension}</div>
                   <div className="text-xs text-gray-400">{call.extension}</div>
                 </td>
                 <td className="px-4 py-2">
                   <CallStatusBadge status={call.status} />
                 </td>
-                <td className="px-4 py-2 font-mono">{formatDuration(call.duration)}</td>
+                <td className="px-4 py-2 font-mono dark:text-gray-300">{formatDuration(call.duration)}</td>
               </tr>
             ))
           )}
@@ -77,25 +77,25 @@ export function CallHistoryTable({ calls, total, page, loading, onPageChange }: 
       </table>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t bg-gray-50">
-          <span className="text-sm text-gray-500">
+        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             {total} Anrufe gesamt
           </span>
           <div className="flex gap-2">
             <button
               onClick={() => onPageChange(page - 1)}
               disabled={page <= 1}
-              className="px-3 py-1 text-sm rounded border border-gray-300 bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600"
             >
               Zurück
             </button>
-            <span className="px-3 py-1 text-sm text-gray-600">
+            <span className="px-3 py-1 text-sm text-gray-600 dark:text-gray-400">
               Seite {page} / {totalPages}
             </span>
             <button
               onClick={() => onPageChange(page + 1)}
               disabled={page >= totalPages}
-              className="px-3 py-1 text-sm rounded border border-gray-300 bg-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-3 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600"
             >
               Weiter
             </button>

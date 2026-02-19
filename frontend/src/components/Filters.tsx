@@ -7,13 +7,15 @@ interface Props {
   onFilterChange: (filters: Partial<CallsQuery>) => void;
 }
 
+const selectClass = "rounded border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 dark:text-gray-200";
+
 export function Filters({ filters, extensions, onFilterChange }: Props) {
   return (
-    <div className="flex flex-wrap gap-3 px-4 py-3 bg-gray-50 border-b">
+    <div className="flex flex-wrap gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
       <select
         value={filters.extension || ""}
         onChange={(e) => onFilterChange({ extension: e.target.value || undefined })}
-        className="rounded border border-gray-300 px-2 py-1 text-sm bg-white"
+        className={selectClass}
       >
         <option value="">Alle Extensions</option>
         {extensions.map((ext) => (
@@ -26,7 +28,7 @@ export function Filters({ filters, extensions, onFilterChange }: Props) {
       <select
         value={filters.status || ""}
         onChange={(e) => onFilterChange({ status: e.target.value || undefined })}
-        className="rounded border border-gray-300 px-2 py-1 text-sm bg-white"
+        className={selectClass}
       >
         <option value="">Alle Status</option>
         <option value="answered">Angenommen</option>
@@ -38,7 +40,7 @@ export function Filters({ filters, extensions, onFilterChange }: Props) {
       <select
         value={filters.direction || ""}
         onChange={(e) => onFilterChange({ direction: e.target.value || undefined })}
-        className="rounded border border-gray-300 px-2 py-1 text-sm bg-white"
+        className={selectClass}
       >
         <option value="">Alle Richtungen</option>
         <option value="inbound">Eingehend</option>
@@ -51,7 +53,7 @@ export function Filters({ filters, extensions, onFilterChange }: Props) {
         onChange={(e) =>
           onFilterChange({ dateFrom: e.target.value ? `${e.target.value}T00:00:00` : undefined })
         }
-        className="rounded border border-gray-300 px-2 py-1 text-sm bg-white"
+        className={selectClass}
         placeholder="Von"
       />
 
@@ -61,7 +63,7 @@ export function Filters({ filters, extensions, onFilterChange }: Props) {
         onChange={(e) =>
           onFilterChange({ dateTo: e.target.value ? `${e.target.value}T23:59:59` : undefined })
         }
-        className="rounded border border-gray-300 px-2 py-1 text-sm bg-white"
+        className={selectClass}
         placeholder="Bis"
       />
     </div>

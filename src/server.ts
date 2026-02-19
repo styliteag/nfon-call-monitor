@@ -7,7 +7,7 @@ import path from "path";
 
 import { initDatabase } from "./db.js";
 import { callEvents, getActiveCallsList } from "./call-aggregator.js";
-import { connectorEvents, start as startConnector, stop as stopConnector, getExtensionList } from "./nfon-connector.js";
+import { connectorEvents, start as startConnector, stop as stopConnector, getExtensionList, isNfonConnected } from "./nfon-connector.js";
 import callsRouter from "./routes/calls.js";
 import extensionsRouter from "./routes/extensions.js";
 
@@ -48,6 +48,9 @@ io.on("connection", (socket) => {
   // Send current state on connect
   socket.emit("active-calls", getActiveCallsList());
   socket.emit("extensions", getExtensionList());
+  if (isNfonConnected()) {
+    socket.emit("nfon:connected");
+  }
 
   socket.on("disconnect", () => {
     console.log(`[Socket.IO] Client getrennt: ${socket.id}`);

@@ -5,6 +5,7 @@ import { Filters } from "./components/Filters";
 import { CallHistoryTable } from "./components/CallHistoryTable";
 import { useCalls } from "./hooks/useCalls";
 import { useExtensions } from "./hooks/useExtensions";
+import { useDarkMode } from "./hooks/useDarkMode";
 
 export default function App() {
   const {
@@ -21,9 +22,10 @@ export default function App() {
   } = useCalls();
 
   const { extensions } = useExtensions();
+  const { dark, toggle } = useDarkMode();
 
   return (
-    <Layout isConnected={isConnected} nfonConnected={nfonConnected}>
+    <Layout isConnected={isConnected} nfonConnected={nfonConnected} dark={dark} onToggleDark={toggle}>
       <ActiveCallBanner calls={activeCalls} />
       <ExtensionCards extensions={extensions} />
       <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} />
