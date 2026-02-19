@@ -34,6 +34,12 @@ export interface ExtensionInfo {
   presence: string;   // "available" | "offline"
   line: string;        // "idle" | "offline" | "busy" | "ringing"
   currentCallId?: string;
+  currentCaller?: string;
+  currentCallee?: string;
+  currentCallDirection?: "inbound" | "outbound";
+  currentCallStartTime?: string;  // ISO 8601
+  currentCallStatus?: CallStatus;
+  lastStateChange?: string;       // ISO 8601 - from NFON states updated field
 }
 
 export interface CallsResponse {

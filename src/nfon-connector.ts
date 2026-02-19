@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
 import { login, startAutoRefresh, stopAutoRefresh } from "./auth.js";
 import { getExtensions, getLineStates, getCallEventStream } from "./api.js";
-import { processEvent, setExtensionNames } from "./call-aggregator.js";
+import { processEvent, setExtensionNames, getActiveCallForExtension } from "./call-aggregator.js";
 import type { NfonCallEvent, ExtensionInfo } from "../shared/types.js";
 
 const RECONNECT_DELAY = 5000;
@@ -34,7 +34,21 @@ export function stop(): void {
 }
 
 export function getExtensionList(): ExtensionInfo[] {
-  return extensions;
+  return extensions.map((ext) => {
+    const call = getActiveCallForExtension(ext.extensionNumber);
+    if (call) {
+      return {
+        ...ext,
+        currentCallId: call.id,
+        currentCaller: call.caller,
+        currentCallee: call.callee,
+        currentCallDirection: call.direction,
+        currentCallStartTime: call.answerTime || call.startTime,
+        currentCallStatus: call.status,
+      };
+    }
+    return ext;
+  });
 }
 
 export function isNfonConnected(): boolean {
@@ -46,9 +60,9 @@ async function loadExtensions(): Promise<void> {
     const exts = await getExtensions();
     const states = await getLineStates();
 
-    const stateMap = new Map<string, { presence: string; line: string }>();
+    const stateMap = new Map<string, { presence: string; line: string; updated: string }>();
     for (const s of states) {
-      stateMap.set(s.extension, { presence: s.presence, line: s.line });
+      stateMap.set(s.extension, { presence: s.presence, line: s.line, updated: s.updated });
     }
 
     const nameMap = new Map<string, string>();
@@ -62,6 +76,7 @@ async function loadExtensions(): Promise<void> {
         name: ext.name,
         presence: state?.presence || "offline",
         line: state?.line || "offline",
+        lastStateChange: state?.updated,
       };
     });
 
@@ -77,9 +92,9 @@ function startPresencePolling(): void {
   presenceTimer = setInterval(async () => {
     try {
       const states = await getLineStates();
-      const stateMap = new Map<string, { presence: string; line: string }>();
+      const stateMap = new Map<string, { presence: string; line: string; updated: string }>();
       for (const s of states) {
-        stateMap.set(s.extension, { presence: s.presence, line: s.line });
+        stateMap.set(s.extension, { presence: s.presence, line: s.line, updated: s.updated });
       }
 
       let changed = false;
@@ -87,9 +102,11 @@ function startPresencePolling(): void {
         const state = stateMap.get(ext.extensionNumber);
         const newPresence = state?.presence || "offline";
         const newLine = state?.line || "offline";
-        if (ext.presence !== newPresence || ext.line !== newLine) {
+        const newUpdated = state?.updated;
+        if (ext.presence !== newPresence || ext.line !== newLine || ext.lastStateChange !== newUpdated) {
           ext.presence = newPresence;
           ext.line = newLine;
+          ext.lastStateChange = newUpdated;
           changed = true;
         }
       }

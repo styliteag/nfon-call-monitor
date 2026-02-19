@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Extension cards show active call details: caller/callee number, direction arrow (↙/↗), and live duration timer
+- Last state change timestamp displayed as relative time ("gerade", "5 Min", "2 Std") on idle extensions
+- Extensions sorted numerically by extension number
+
+### Fixed
+- `currentCallId` field in ExtensionInfo was never populated — active calls now correctly merge into extension list
+
 ## [1.0.1] - 2026-02-19
 
 ### Changed

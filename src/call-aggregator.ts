@@ -154,3 +154,10 @@ export function cleanStaleCalls(): void {
 export function getActiveCallsList(): CallRecord[] {
   return Array.from(activeCalls.values());
 }
+
+export function getActiveCallForExtension(extensionNumber: string): CallRecord | undefined {
+  for (const record of activeCalls.values()) {
+    if (record.extension === extensionNumber) return record;
+  }
+  return undefined;
+}
