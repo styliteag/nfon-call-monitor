@@ -52,7 +52,14 @@ export function CallHistoryTable({ calls, total, page, loading, onPageChange, ko
                 }`}
               >
                 <td className="px-4 py-2 whitespace-nowrap">
-                  <div className="dark:text-gray-200">{formatTime(call.startTime)}</div>
+                  <div className="dark:text-gray-200">
+                    {formatTime(call.startTime)}
+                    {call.answerTime && (
+                      <span className="text-[10px] text-gray-400 ml-1" title={`Angenommen: ${formatTime(call.answerTime)}`}>
+                        &#128222;+{Math.round((new Date(call.answerTime).getTime() - new Date(call.startTime).getTime()) / 1000)}s
+                      </span>
+                    )}
+                  </div>
                   <div className="text-xs text-gray-400">{formatDate(call.startTime)}</div>
                 </td>
                 <td className="px-4 py-2">
@@ -70,6 +77,9 @@ export function CallHistoryTable({ calls, total, page, loading, onPageChange, ko
                 </td>
                 <td className="px-4 py-2">
                   <CallStatusBadge status={call.status} />
+                  {call.endReason && (
+                    <span className="text-[10px] text-gray-400 ml-1">{call.endReason}</span>
+                  )}
                 </td>
                 <td className="px-4 py-2 font-mono dark:text-gray-300">{formatDuration(call.duration)}</td>
               </tr>

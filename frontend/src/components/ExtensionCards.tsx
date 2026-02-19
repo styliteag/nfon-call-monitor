@@ -23,8 +23,9 @@ function presenceDotColor(presence: string): string {
 function lineDotColor(line: string): string {
   switch (line) {
     case "busy":
-    case "ringing":
       return "bg-red-500";
+    case "ringing":
+      return "bg-yellow-500";
     case "idle":
       return "bg-green-500";
     default:
