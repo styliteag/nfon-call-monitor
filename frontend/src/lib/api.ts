@@ -38,6 +38,7 @@ export async function fetchCalls(query: CallsQuery = {}): Promise<CallsResponse>
   if (query.direction) params.set("direction", query.direction);
   if (query.dateFrom) params.set("dateFrom", query.dateFrom);
   if (query.dateTo) params.set("dateTo", query.dateTo);
+  if (query.search) params.set("search", query.search);
 
   const res = await authFetch(`${BASE}/calls?${params}`);
   if (!res.ok) throw new Error(`Fehler: ${res.status}`);

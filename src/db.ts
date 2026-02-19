@@ -102,6 +102,10 @@ export function getCalls(query: CallsQuery): CallsResponse {
     conditions.push("start_time <= :dateTo");
     params.dateTo = query.dateTo;
   }
+  if (query.search) {
+    conditions.push("(caller LIKE :search OR callee LIKE :search OR extension_name LIKE :search)");
+    params.search = `%${query.search}%`;
+  }
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 

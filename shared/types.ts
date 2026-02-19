@@ -57,4 +57,5 @@ export interface CallsQuery {
   direction?: string;
   dateFrom?: string;
   dateTo?: string;
+  search?: string;
 }

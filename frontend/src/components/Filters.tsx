@@ -12,6 +12,14 @@ const selectClass = "rounded border border-gray-300 dark:border-gray-600 px-2 py
 export function Filters({ filters, extensions, onFilterChange }: Props) {
   return (
     <div className="flex flex-wrap gap-3 px-4 py-3 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+      <input
+        type="search"
+        value={filters.search || ""}
+        onChange={(e) => onFilterChange({ search: e.target.value || undefined })}
+        placeholder="Nummer suchen…"
+        className={selectClass + " min-w-[180px]"}
+      />
+
       <select
         value={filters.extension || ""}
         onChange={(e) => onFilterChange({ extension: e.target.value || undefined })}

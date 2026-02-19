@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-02-19
+
+### Added
+- Search field in call history filters to search by phone number (caller, callee) or extension name
+- Server-side LIKE search across caller, callee, and extension_name columns
+
 ## [1.2.0] - 2026-02-19
 
 ### Changed

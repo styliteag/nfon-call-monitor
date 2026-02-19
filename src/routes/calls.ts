@@ -13,6 +13,7 @@ router.get("/", (req, res) => {
     direction: req.query.direction as string | undefined,
     dateFrom: req.query.dateFrom as string | undefined,
     dateTo: req.query.dateTo as string | undefined,
+    search: req.query.search as string | undefined,
   };
 
   const result = getCalls(query);
