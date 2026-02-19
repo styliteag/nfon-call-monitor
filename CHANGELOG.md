@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Reorganized call history table columns: Zeit, Extension, Status, Verbindung, Dauer
+- Merged Richtung, Anrufer, and Angerufen into single "Verbindung" column showing `Anrufer → Angerufen` with colored direction arrow
+
 ## [1.1.0] - 2026-02-19
 
 ### Added

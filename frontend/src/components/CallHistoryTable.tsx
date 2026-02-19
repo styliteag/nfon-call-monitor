@@ -62,24 +62,22 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
         <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
           <tr className="text-left text-gray-500 dark:text-gray-400 text-xs uppercase">
             <th className="px-4 py-2">Zeit</th>
-            <th className="px-4 py-2">Richtung</th>
-            <th className="px-4 py-2">Anrufer</th>
-            <th className="px-4 py-2">Angerufen</th>
             <th className="px-4 py-2">Extension</th>
             <th className="px-4 py-2">Status</th>
+            <th className="px-4 py-2">Verbindung</th>
             <th className="px-4 py-2">Dauer</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
           {loading && calls.length === 0 ? (
             <tr>
-              <td colSpan={7} className="text-center py-8 text-gray-400">
+              <td colSpan={5} className="text-center py-8 text-gray-400">
                 Lade...
               </td>
             </tr>
           ) : calls.length === 0 ? (
             <tr>
-              <td colSpan={7} className="text-center py-8 text-gray-400">
+              <td colSpan={5} className="text-center py-8 text-gray-400">
                 Keine Anrufe gefunden
               </td>
             </tr>
@@ -103,15 +101,6 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
                   <div className="text-xs text-gray-400">{formatDate(call.startTime)}</div>
                 </td>
                 <td className="px-4 py-2">
-                  {call.direction === "inbound" ? (
-                    <span className="text-blue-600 dark:text-blue-400" title="Eingehend">&#8592;</span>
-                  ) : (
-                    <span className="text-green-600 dark:text-green-400" title="Ausgehend">&#8594;</span>
-                  )}
-                </td>
-                <td className="px-4 py-2 font-mono text-xs dark:text-gray-300" title={call.caller}>{formatPhone(call.caller, kopfnummern, kopfnummernMap)}</td>
-                <td className="px-4 py-2 font-mono text-xs dark:text-gray-300" title={call.callee}>{formatPhone(call.callee, kopfnummern, kopfnummernMap)}</td>
-                <td className="px-4 py-2">
                   <div className="font-medium dark:text-gray-200">{call.extensionName || call.extension}</div>
                   <div className="text-xs text-gray-400">{call.extension}</div>
                 </td>
@@ -120,6 +109,15 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
                   {call.endReason && (
                     <span className="text-[10px] text-gray-400 ml-1">{call.endReason}</span>
                   )}
+                </td>
+                <td className="px-4 py-2 font-mono text-xs dark:text-gray-300 whitespace-nowrap">
+                  <span title={call.caller}>{formatPhone(call.caller, kopfnummern, kopfnummernMap)}</span>
+                  {call.direction === "inbound" ? (
+                    <span className="text-blue-600 dark:text-blue-400 mx-2" title="Eingehend">&#8592;</span>
+                  ) : (
+                    <span className="text-green-600 dark:text-green-400 mx-2" title="Ausgehend">&#8594;</span>
+                  )}
+                  <span title={call.callee}>{formatPhone(call.callee, kopfnummern, kopfnummernMap)}</span>
                 </td>
                 <td className="px-4 py-2 font-mono dark:text-gray-300">{formatDuration(call.duration)}</td>
               </tr>
