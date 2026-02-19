@@ -1,6 +1,6 @@
 import type { CallRecord } from "../../../shared/types";
 import { CallStatusBadge } from "./CallStatusBadge";
-import { formatTime, formatDate, formatDuration, formatPhone, getStandort, type KopfnummerEntry } from "../lib/formatters";
+import { formatTime, formatDate, formatDuration, formatPhone, type KopfnummerEntry } from "../lib/formatters";
 
 interface Props {
   calls: CallRecord[];
@@ -23,7 +23,6 @@ export function CallHistoryTable({ calls, total, page, loading, onPageChange, ko
           <tr className="text-left text-gray-500 dark:text-gray-400 text-xs uppercase">
             <th className="px-4 py-2">Zeit</th>
             <th className="px-4 py-2">Richtung</th>
-            <th className="px-4 py-2">Standort</th>
             <th className="px-4 py-2">Anrufer</th>
             <th className="px-4 py-2">Angerufen</th>
             <th className="px-4 py-2">Extension</th>
@@ -34,13 +33,13 @@ export function CallHistoryTable({ calls, total, page, loading, onPageChange, ko
         <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
           {loading && calls.length === 0 ? (
             <tr>
-              <td colSpan={8} className="text-center py-8 text-gray-400">
+              <td colSpan={7} className="text-center py-8 text-gray-400">
                 Lade...
               </td>
             </tr>
           ) : calls.length === 0 ? (
             <tr>
-              <td colSpan={8} className="text-center py-8 text-gray-400">
+              <td colSpan={7} className="text-center py-8 text-gray-400">
                 Keine Anrufe gefunden
               </td>
             </tr>
@@ -63,11 +62,8 @@ export function CallHistoryTable({ calls, total, page, loading, onPageChange, ko
                     <span className="text-green-600 dark:text-green-400" title="Ausgehend">&#8594;</span>
                   )}
                 </td>
-                <td className="px-4 py-2 text-xs dark:text-gray-300">
-                  {getStandort(call.direction === "inbound" ? call.callee : call.caller, kopfnummernMap) || "-"}
-                </td>
-                <td className="px-4 py-2 font-mono text-xs dark:text-gray-300" title={call.caller}>{formatPhone(call.caller, kopfnummern)}</td>
-                <td className="px-4 py-2 font-mono text-xs dark:text-gray-300" title={call.callee}>{formatPhone(call.callee, kopfnummern)}</td>
+                <td className="px-4 py-2 font-mono text-xs dark:text-gray-300" title={call.caller}>{formatPhone(call.caller, kopfnummern, kopfnummernMap)}</td>
+                <td className="px-4 py-2 font-mono text-xs dark:text-gray-300" title={call.callee}>{formatPhone(call.callee, kopfnummern, kopfnummernMap)}</td>
                 <td className="px-4 py-2">
                   <div className="font-medium dark:text-gray-200">{call.extensionName || call.extension}</div>
                   <div className="text-xs text-gray-400">{call.extension}</div>
