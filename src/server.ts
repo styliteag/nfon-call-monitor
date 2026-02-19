@@ -4,6 +4,7 @@ import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import path from "path";
+import { readFileSync } from "fs";
 
 import { initDatabase } from "./db.js";
 import { callEvents, getActiveCallsList, cleanStaleCalls } from "./call-aggregator.js";
@@ -14,6 +15,15 @@ import authRouter from "./routes/auth.js";
 import { requireAuth, validateToken } from "./dashboard-auth.js";
 
 const PORT = Number(process.env.PORT) || 3001;
+
+// Read version from VERSION file, fall back to APP_VERSION env, then "unknown"
+function getVersion(): string {
+  for (const p of [path.join(process.cwd(), "VERSION"), "/app/VERSION"]) {
+    try { return readFileSync(p, "utf-8").trim(); } catch {}
+  }
+  return process.env.APP_VERSION || "unknown";
+}
+const APP_VERSION = getVersion();
 
 const app = express();
 const httpServer = createServer(app);
@@ -28,8 +38,9 @@ const io = new Server(httpServer, {
 app.use(cors({ origin: ["http://localhost:5173"] }));
 app.use(express.json());
 
-// Auth routes (before middleware — login is public)
+// Public endpoints (before auth middleware)
 app.use("/api/auth", authRouter);
+app.get("/api/version", (_req, res) => res.json({ version: APP_VERSION }));
 
 // Auth middleware for all other /api/* routes
 app.use("/api", requireAuth);
@@ -105,7 +116,7 @@ connectorEvents.on("sse:disconnected", () => {
 
 // Start
 async function main() {
-  console.log("NFON Call Monitor - Server");
+  console.log(`NFON Call Monitor v${APP_VERSION}`);
   console.log("=========================\n");
 
   initDatabase();

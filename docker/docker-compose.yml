@@ -9,6 +9,7 @@ services:
       - ../.env
     volumes:
       - nfon-data:/app/data
+      - ../VERSION:/app/VERSION:ro
     environment:
       - PORT=3001
       - DB_PATH=/app/data/calls.db
