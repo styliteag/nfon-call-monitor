@@ -9,8 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] - 2026-02-19
 
-## [0.1.0] - 2026-02-19
-
 ### Added
 - Real-time call monitoring via NFON SSE API
 - Dashboard with login and session-based authentication
