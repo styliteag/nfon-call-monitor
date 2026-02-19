@@ -7,7 +7,8 @@
     "dev:backend": "npx tsx --watch src/server.ts",
     "dev:frontend": "cd frontend && npm run dev",
     "dev": "npm run dev:backend & npm run dev:frontend",
-    "start": "npx tsx src/server.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/src/server.js",
     "monitor": "npx tsx src/monitor.ts",
     "hash-password": "node -e \"const p=process.argv[1];console.log(require('crypto').createHash('sha256').update(p).digest('hex'))\" --"
   },
@@ -19,12 +20,12 @@
     "cors": "^2.8.5",
     "dotenv": "^17.3.1",
     "express": "^4.21.2",
-    "socket.io": "^4.8.1",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.0"
+    "@types/express": "^5.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }
