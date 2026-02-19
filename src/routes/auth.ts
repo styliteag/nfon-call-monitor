@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { verifyLogin, createSession, validateToken, removeSession } from "../dashboard-auth.js";
+import { verifyLogin, createSession, validateToken } from "../dashboard-auth.js";
 
 const router = Router();
 
@@ -16,18 +16,13 @@ router.post("/login", (req, res) => {
     return;
   }
 
-  const token = createSession();
+  const token = createSession(username);
   console.log(`[Auth] Login erfolgreich: ${username}`);
   res.json({ token });
 });
 
-router.post("/logout", (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (authHeader?.startsWith("Bearer ")) {
-    const token = authHeader.slice(7);
-    removeSession(token);
-    console.log("[Auth] Logout");
-  }
+router.post("/logout", (_req, res) => {
+  console.log("[Auth] Logout");
   res.json({ ok: true });
 });
 
