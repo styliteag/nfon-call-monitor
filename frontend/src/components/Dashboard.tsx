@@ -6,15 +6,16 @@ import { Filters } from "./Filters";
 import { CallHistoryTable } from "./CallHistoryTable";
 import { useCalls } from "../hooks/useCalls";
 import { useExtensions } from "../hooks/useExtensions";
-import { fetchConfig } from "../lib/api";
+import { fetchConfig, type KopfnummerEntry } from "../lib/api";
 
 interface Props {
+  appTitle: string;
   dark: boolean;
   onToggleDark: () => void;
   onLogout: () => void;
 }
 
-export function Dashboard({ dark, onToggleDark, onLogout }: Props) {
+export function Dashboard({ appTitle, dark, onToggleDark, onLogout }: Props) {
   const {
     calls,
     activeCalls,
@@ -31,13 +32,17 @@ export function Dashboard({ dark, onToggleDark, onLogout }: Props) {
   const { extensions } = useExtensions();
 
   const [kopfnummern, setKopfnummern] = useState<string[]>([]);
+  const [kopfnummernMap, setKopfnummernMap] = useState<KopfnummerEntry[]>([]);
   useEffect(() => {
-    fetchConfig().then((c) => setKopfnummern(c.kopfnummern)).catch(() => {});
+    fetchConfig().then((c) => {
+      setKopfnummern(c.kopfnummern);
+      setKopfnummernMap(c.kopfnummernMap || []);
+    }).catch(() => {});
   }, []);
 
   return (
-    <Layout isConnected={isConnected} nfonConnected={nfonConnected} dark={dark} onToggleDark={onToggleDark} onLogout={onLogout}>
-      <ActiveCallBanner calls={activeCalls} kopfnummern={kopfnummern} />
+    <Layout appTitle={appTitle} isConnected={isConnected} nfonConnected={nfonConnected} dark={dark} onToggleDark={onToggleDark} onLogout={onLogout}>
+      <ActiveCallBanner calls={activeCalls} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} />
       <ExtensionCards extensions={extensions} />
       <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} />
       <CallHistoryTable
@@ -47,6 +52,7 @@ export function Dashboard({ dark, onToggleDark, onLogout }: Props) {
         loading={loading}
         onPageChange={setPage}
         kopfnummern={kopfnummern}
+        kopfnummernMap={kopfnummernMap}
       />
     </Layout>
   );

@@ -1,12 +1,13 @@
 import type { CallRecord } from "../../../shared/types";
-import { formatPhone } from "../lib/formatters";
+import { formatPhone, getStandort, type KopfnummerEntry } from "../lib/formatters";
 
 interface Props {
   calls: CallRecord[];
   kopfnummern?: string[];
+  kopfnummernMap?: KopfnummerEntry[];
 }
 
-export function ActiveCallBanner({ calls, kopfnummern }: Props) {
+export function ActiveCallBanner({ calls, kopfnummern, kopfnummernMap }: Props) {
   const ringing = calls.filter((c) => c.status === "ringing");
 
   if (ringing.length === 0) return null;
@@ -19,6 +20,10 @@ export function ActiveCallBanner({ calls, kopfnummern }: Props) {
           <span className="text-yellow-800 dark:text-yellow-200 font-medium">
             {call.direction === "inbound" ? "Eingehender" : "Ausgehender"} Anruf:{" "}
             {formatPhone(call.caller, kopfnummern)} &rarr; {call.extensionName || call.extension}
+            {(() => {
+              const standort = getStandort(call.direction === "inbound" ? call.callee : call.caller, kopfnummernMap);
+              return standort ? <span className="ml-2 text-yellow-600 dark:text-yellow-400 text-sm">({standort})</span> : null;
+            })()}
           </span>
         </div>
       ))}

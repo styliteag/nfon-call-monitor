@@ -28,6 +28,11 @@ export function formatDateTime(iso?: string): string {
   return `${formatDate(iso)} ${formatTime(iso)}`;
 }
 
+export interface KopfnummerEntry {
+  nr: string;
+  name: string;
+}
+
 export function formatPhone(number: string, kopfnummern?: string[]): string {
   if (!number) return "-";
   if (kopfnummern) {
@@ -40,4 +45,12 @@ export function formatPhone(number: string, kopfnummern?: string[]): string {
     }
   }
   return number;
+}
+
+export function getStandort(number: string, kopfnummernMap?: KopfnummerEntry[]): string | null {
+  if (!number || !kopfnummernMap) return null;
+  for (const entry of kopfnummernMap) {
+    if (number.startsWith(entry.nr)) return entry.name;
+  }
+  return null;
 }

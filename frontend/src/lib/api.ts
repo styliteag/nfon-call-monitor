@@ -3,6 +3,13 @@ import { getToken, clearToken } from "../hooks/useAuth";
 
 const BASE = "/api";
 
+/** Public endpoint, no auth */
+export async function fetchVersion(): Promise<{ version: string; appTitle: string }> {
+  const res = await fetch(`${BASE}/version`);
+  if (!res.ok) throw new Error(`Fehler: ${res.status}`);
+  return res.json();
+}
+
 async function authFetch(url: string, init?: RequestInit): Promise<Response> {
   const token = getToken();
   const headers: Record<string, string> = {
@@ -43,7 +50,12 @@ export async function fetchExtensions(): Promise<ExtensionInfo[]> {
   return res.json();
 }
 
-export async function fetchConfig(): Promise<{ kopfnummern: string[] }> {
+export interface KopfnummerEntry {
+  nr: string;
+  name: string;
+}
+
+export async function fetchConfig(): Promise<{ kopfnummern: string[]; kopfnummernMap: KopfnummerEntry[] }> {
   const res = await authFetch(`${BASE}/config`);
   if (!res.ok) throw new Error(`Fehler: ${res.status}`);
   return res.json();

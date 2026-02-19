@@ -1,11 +1,23 @@
+import { useEffect, useState } from "react";
 import { LoginForm } from "./components/LoginForm";
 import { Dashboard } from "./components/Dashboard";
 import { useDarkMode } from "./hooks/useDarkMode";
 import { useAuth } from "./hooks/useAuth";
+import { fetchVersion } from "./lib/api";
+
+const DEFAULT_TITLE = "NFON Call Monitor";
 
 export default function App() {
   const { isAuthenticated, checking, error, login, logout } = useAuth();
   const { dark, toggle } = useDarkMode();
+  const [appTitle, setAppTitle] = useState(DEFAULT_TITLE);
+
+  useEffect(() => {
+    fetchVersion().then(({ appTitle: t }) => {
+      setAppTitle(t || DEFAULT_TITLE);
+      document.title = t || DEFAULT_TITLE;
+    }).catch(() => {});
+  }, []);
 
   if (checking) {
     return (
@@ -16,8 +28,8 @@ export default function App() {
   }
 
   if (!isAuthenticated) {
-    return <LoginForm onLogin={login} error={error} />;
+    return <LoginForm appTitle={appTitle} onLogin={login} error={error} />;
   }
 
-  return <Dashboard dark={dark} onToggleDark={toggle} onLogout={logout} />;
+  return <Dashboard appTitle={appTitle} dark={dark} onToggleDark={toggle} onLogout={logout} />;
 }

@@ -24,6 +24,7 @@ function getVersion(): string {
   return process.env.APP_VERSION || "unknown";
 }
 const APP_VERSION = getVersion();
+const APP_TITLE = process.env.APP_TITLE || "NFON Call Monitor";
 
 const app = express();
 const httpServer = createServer(app);
@@ -40,7 +41,7 @@ app.use(express.json());
 
 // Public endpoints (before auth middleware)
 app.use("/api/auth", authRouter);
-app.get("/api/version", (_req, res) => res.json({ version: APP_VERSION }));
+app.get("/api/version", (_req, res) => res.json({ version: APP_VERSION, appTitle: APP_TITLE }));
 
 // Auth middleware for all other /api/* routes
 app.use("/api", requireAuth);
@@ -48,8 +49,11 @@ app.use("/api", requireAuth);
 // Config endpoint (returns kopfnummern for Durchwahl extraction)
 app.get("/api/config", (_req, res) => {
   const raw = process.env.KOPFNUMMERN || "";
+  const rawNames = process.env.KOPFNUMMERN_NAME || "";
   const kopfnummern = raw.split(",").map((s) => s.trim()).filter(Boolean);
-  res.json({ kopfnummern });
+  const namen = rawNames.split(",").map((s) => s.trim());
+  const kopfnummernMap = kopfnummern.map((nr, i) => ({ nr, name: namen[i] || nr }));
+  res.json({ kopfnummern, kopfnummernMap });
 });
 
 // REST routes
@@ -116,7 +120,7 @@ connectorEvents.on("sse:disconnected", () => {
 
 // Start
 async function main() {
-  console.log(`NFON Call Monitor v${APP_VERSION}`);
+  console.log(`${APP_TITLE} v${APP_VERSION}`);
   console.log("=========================\n");
 
   initDatabase();

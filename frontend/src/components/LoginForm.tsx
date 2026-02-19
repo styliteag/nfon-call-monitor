@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from "react";
 
 interface Props {
+  appTitle: string;
   onLogin: (username: string, password: string) => Promise<boolean>;
   error: string | null;
 }
 
-export function LoginForm({ onLogin, error }: Props) {
+export function LoginForm({ appTitle, onLogin, error }: Props) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,7 @@ export function LoginForm({ onLogin, error }: Props) {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
       <div className="w-full max-w-sm">
         <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-gray-100 mb-8">
-          NFON Call Monitor
+          {appTitle}
         </h1>
         <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 space-y-4">
           <div>
