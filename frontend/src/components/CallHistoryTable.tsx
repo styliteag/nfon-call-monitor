@@ -95,8 +95,8 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
                   <div className="dark:text-gray-200">
                     {formatTime(call.startTime)}
                     {call.answerTime && (
-                      <span className="text-[10px] text-gray-400 ml-1" title={`Angenommen: ${formatTime(call.answerTime)}`}>
-                        &#128222;+{Math.round((new Date(call.answerTime).getTime() - new Date(call.startTime).getTime()) / 1000)}s
+                      <span className="text-xs text-gray-400 ml-1" title={`Angenommen: ${formatTime(call.answerTime)}`}>
+                        +{Math.round((new Date(call.answerTime).getTime() - new Date(call.startTime).getTime()) / 1000)}s
                       </span>
                     )}
                   </div>
