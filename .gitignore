@@ -4,3 +4,5 @@ dist/
 *.db
 frontend/dist/
 frontend/node_modules/
+calls.db-shm
+calls.db-wal
