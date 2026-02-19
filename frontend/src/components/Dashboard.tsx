@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Layout } from "./Layout";
 import { ActiveCallBanner } from "./ActiveCallBanner";
 import { ExtensionCards } from "./ExtensionCards";
@@ -6,6 +6,7 @@ import { Filters } from "./Filters";
 import { CallHistoryTable } from "./CallHistoryTable";
 import { useCalls } from "../hooks/useCalls";
 import { useExtensions } from "../hooks/useExtensions";
+import { useCrmContacts } from "../hooks/useCrmContacts";
 import { fetchConfig, type KopfnummerEntry } from "../lib/api";
 
 interface Props {
@@ -31,6 +32,25 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout }: Props) {
 
   const { extensions } = useExtensions();
 
+  const allPhoneNumbers = useMemo(() => {
+    const nums = new Set<string>();
+    for (const c of calls) {
+      if (c.caller) nums.add(c.caller);
+      if (c.callee) nums.add(c.callee);
+    }
+    for (const c of activeCalls) {
+      if (c.caller) nums.add(c.caller);
+      if (c.callee) nums.add(c.callee);
+    }
+    for (const e of extensions) {
+      if (e.currentCaller) nums.add(e.currentCaller);
+      if (e.currentCallee) nums.add(e.currentCallee);
+    }
+    return Array.from(nums);
+  }, [calls, activeCalls, extensions]);
+
+  const crmContacts = useCrmContacts(allPhoneNumbers);
+
   const [kopfnummern, setKopfnummern] = useState<string[]>([]);
   const [kopfnummernMap, setKopfnummernMap] = useState<KopfnummerEntry[]>([]);
   useEffect(() => {
@@ -42,8 +62,8 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout }: Props) {
 
   return (
     <Layout appTitle={appTitle} isConnected={isConnected} nfonConnected={nfonConnected} dark={dark} onToggleDark={onToggleDark} onLogout={onLogout}>
-      <ActiveCallBanner calls={activeCalls} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} />
-      <ExtensionCards extensions={extensions} />
+      <ActiveCallBanner calls={activeCalls} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} crmContacts={crmContacts} />
+      <ExtensionCards extensions={extensions} crmContacts={crmContacts} />
       <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} />
       <CallHistoryTable
         calls={calls}
@@ -55,6 +75,7 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout }: Props) {
         onPageSizeChange={(size) => updateFilters({ pageSize: size })}
         kopfnummern={kopfnummern}
         kopfnummernMap={kopfnummernMap}
+        crmContacts={crmContacts}
       />
     </Layout>
   );

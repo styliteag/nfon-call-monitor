@@ -1,4 +1,4 @@
-import type { CallRecord, CallStatus } from "../../../shared/types";
+import type { CallRecord, CallStatus, CrmContact } from "../../../shared/types";
 import { CallStatusBadge } from "./CallStatusBadge";
 import { formatTime, formatDate, formatDuration, formatPhone, type KopfnummerEntry } from "../lib/formatters";
 
@@ -21,11 +21,35 @@ interface Props {
   onPageSizeChange: (size: number) => void;
   kopfnummern?: string[];
   kopfnummernMap?: KopfnummerEntry[];
+  crmContacts?: Record<string, CrmContact>;
+}
+
+function PhoneWithCrm({ number, kopfnummern, kopfnummernMap, crmContacts, className }: {
+  number: string;
+  kopfnummern?: string[];
+  kopfnummernMap?: KopfnummerEntry[];
+  crmContacts?: Record<string, CrmContact>;
+  className?: string;
+}) {
+  const formatted = formatPhone(number, kopfnummern, kopfnummernMap);
+  const contact = crmContacts?.[number];
+  const isExternal = formatted === number; // not matched by kopfnummern
+
+  if (contact?.name && isExternal) {
+    return (
+      <span className={`whitespace-nowrap ${className ?? ""}`} title={number}>
+        <span className="text-blue-600 dark:text-blue-400 font-sans font-medium">{contact.name}</span>
+        <span className="text-gray-400 ml-1">{number}</span>
+      </span>
+    );
+  }
+
+  return <span className={`whitespace-nowrap ${className ?? ""}`} title={number}>{formatted}</span>;
 }
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 30, 50, 100];
 
-export function CallHistoryTable({ calls, total, page, pageSize, loading, onPageChange, onPageSizeChange, kopfnummern, kopfnummernMap }: Props) {
+export function CallHistoryTable({ calls, total, page, pageSize, loading, onPageChange, onPageSizeChange, kopfnummern, kopfnummernMap, crmContacts }: Props) {
   const totalPages = Math.ceil(total / pageSize);
 
   return (
@@ -127,11 +151,11 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
                   )}
                 </td>
                 <td className="px-3 py-1.5 font-mono dark:text-gray-300">{formatDuration(call.duration)}</td>
-                <td className="px-3 py-1.5 font-mono text-xs dark:text-gray-300">
-                  <div className="grid grid-cols-[16ch_auto_1fr] items-center gap-1">
-                    <span className="whitespace-nowrap text-right" title={call.caller}>{formatPhone(call.caller, kopfnummern, kopfnummernMap)}</span>
+                <td className="px-3 py-1.5 font-mono dark:text-gray-300">
+                  <div className="grid grid-cols-[200px_auto_1fr] items-center gap-1">
+                    <PhoneWithCrm number={call.caller} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} crmContacts={crmContacts} className="truncate text-right" />
                     <span className={`${arrowColor[call.status] ?? "text-gray-800 dark:text-gray-300"} text-2xl font-black leading-none`} title={call.direction === "inbound" ? "Eingehend" : "Ausgehend"}>&#8594;</span>
-                    <span className="truncate" title={call.callee}>{formatPhone(call.callee, kopfnummern, kopfnummernMap)}</span>
+                    <PhoneWithCrm number={call.callee} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} crmContacts={crmContacts} className="truncate" />
                   </div>
                 </td>
               </tr>

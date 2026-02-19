@@ -59,3 +59,8 @@ export interface CallsQuery {
   dateTo?: string;
   search?: string;
 }
+
+export interface CrmContact {
+  name: string;
+  contactId: number;
+}
