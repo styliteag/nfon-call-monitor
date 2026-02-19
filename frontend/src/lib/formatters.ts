@@ -1,0 +1,35 @@
+export function formatDuration(seconds?: number): string {
+  if (seconds == null) return "-";
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+export function formatTime(iso?: string): string {
+  if (!iso) return "-";
+  return new Date(iso).toLocaleTimeString("de-DE", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+export function formatDate(iso?: string): string {
+  if (!iso) return "-";
+  return new Date(iso).toLocaleDateString("de-DE", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
+export function formatDateTime(iso?: string): string {
+  if (!iso) return "-";
+  return `${formatDate(iso)} ${formatTime(iso)}`;
+}
+
+export function formatPhone(number: string): string {
+  if (!number) return "-";
+  // Keep as-is for now, NFON already formats
+  return number;
+}
