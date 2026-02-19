@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
+import { getToken } from "./useAuth";
 
 export function useSocket() {
   const socketRef = useRef<Socket | null>(null);
@@ -7,7 +8,11 @@ export function useSocket() {
   const [nfonConnected, setNfonConnected] = useState(false);
 
   useEffect(() => {
-    const socket = io({ transports: ["websocket", "polling"] });
+    const token = getToken();
+    const socket = io({
+      transports: ["websocket", "polling"],
+      auth: { token },
+    });
     socketRef.current = socket;
 
     socket.on("connect", () => setIsConnected(true));

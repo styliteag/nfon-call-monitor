@@ -10,6 +10,10 @@ export default defineConfig({
       "/socket.io": {
         target: "http://localhost:3001",
         ws: true,
+        // Suppress EPIPE from React StrictMode double-mount in dev
+        configure: (proxy) => {
+          proxy.on("error", () => {});
+        },
       },
     },
   },

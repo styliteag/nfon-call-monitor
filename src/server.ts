@@ -10,6 +10,8 @@ import { callEvents, getActiveCallsList } from "./call-aggregator.js";
 import { connectorEvents, start as startConnector, stop as stopConnector, getExtensionList, isNfonConnected } from "./nfon-connector.js";
 import callsRouter from "./routes/calls.js";
 import extensionsRouter from "./routes/extensions.js";
+import authRouter from "./routes/auth.js";
+import { requireAuth, validateToken } from "./dashboard-auth.js";
 
 const PORT = Number(process.env.PORT) || 3001;
 
@@ -26,6 +28,12 @@ const io = new Server(httpServer, {
 app.use(cors({ origin: ["http://localhost:5173"] }));
 app.use(express.json());
 
+// Auth routes (before middleware — login is public)
+app.use("/api/auth", authRouter);
+
+// Auth middleware for all other /api/* routes
+app.use("/api", requireAuth);
+
 // REST routes
 app.use("/api/calls", callsRouter);
 app.use("/api/extensions", extensionsRouter);
@@ -39,6 +47,16 @@ app.get("*", (_req, res, next) => {
   res.sendFile(path.join(frontendDist, "index.html"), (err) => {
     if (err) next();
   });
+});
+
+// Socket.IO auth middleware
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (token && validateToken(token)) {
+    next();
+  } else {
+    next(new Error("Nicht autorisiert"));
+  }
 });
 
 // Socket.IO

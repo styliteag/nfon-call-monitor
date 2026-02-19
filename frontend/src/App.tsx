@@ -1,41 +1,23 @@
-import { Layout } from "./components/Layout";
-import { ActiveCallBanner } from "./components/ActiveCallBanner";
-import { ExtensionCards } from "./components/ExtensionCards";
-import { Filters } from "./components/Filters";
-import { CallHistoryTable } from "./components/CallHistoryTable";
-import { useCalls } from "./hooks/useCalls";
-import { useExtensions } from "./hooks/useExtensions";
+import { LoginForm } from "./components/LoginForm";
+import { Dashboard } from "./components/Dashboard";
 import { useDarkMode } from "./hooks/useDarkMode";
+import { useAuth } from "./hooks/useAuth";
 
 export default function App() {
-  const {
-    calls,
-    activeCalls,
-    total,
-    page,
-    setPage,
-    filters,
-    updateFilters,
-    loading,
-    isConnected,
-    nfonConnected,
-  } = useCalls();
-
-  const { extensions } = useExtensions();
+  const { isAuthenticated, checking, error, login, logout } = useAuth();
   const { dark, toggle } = useDarkMode();
 
-  return (
-    <Layout isConnected={isConnected} nfonConnected={nfonConnected} dark={dark} onToggleDark={toggle}>
-      <ActiveCallBanner calls={activeCalls} />
-      <ExtensionCards extensions={extensions} />
-      <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} />
-      <CallHistoryTable
-        calls={calls}
-        total={total}
-        page={page}
-        loading={loading}
-        onPageChange={setPage}
-      />
-    </Layout>
-  );
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <p className="text-gray-500 dark:text-gray-400">Laden...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginForm onLogin={login} error={error} />;
+  }
+
+  return <Dashboard dark={dark} onToggleDark={toggle} onLogout={logout} />;
 }
