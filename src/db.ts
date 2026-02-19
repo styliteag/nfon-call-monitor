@@ -5,7 +5,7 @@ import type { CallRecord, CallsQuery, CallsResponse } from "../shared/types.js";
 let db: DatabaseSync;
 
 export function initDatabase(): void {
-  const dbPath = path.join(process.cwd(), "calls.db");
+  const dbPath = process.env.DB_PATH || path.join(process.cwd(), "calls.db");
   db = new DatabaseSync(dbPath);
   db.exec("PRAGMA journal_mode = WAL");
 
