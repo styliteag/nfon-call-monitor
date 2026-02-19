@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Extension cards show active call details: caller/callee number, direction arrow (↙/↗), and live duration timer
 - Last state change timestamp displayed as relative time ("gerade", "5 Min", "2 Std") on idle extensions
 - Extensions sorted numerically by extension number
+- Inline answer delay (+Ns) shown next to start time in call history
+- Inline end reason shown next to status badge in call history
+- Configurable page size selector (5, 10, 20, 30, 50, 100) above call history table
+- Pagination controls moved above table for easier access
+
+### Changed
+- Extension card line dot uses yellow for ringing, red for busy (previously both red)
 
 ### Fixed
 - `currentCallId` field in ExtensionInfo was never populated — active calls now correctly merge into extension list

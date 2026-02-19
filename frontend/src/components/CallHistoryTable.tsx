@@ -6,18 +6,58 @@ interface Props {
   calls: CallRecord[];
   total: number;
   page: number;
+  pageSize: number;
   loading: boolean;
   onPageChange: (page: number) => void;
+  onPageSizeChange: (size: number) => void;
   kopfnummern?: string[];
   kopfnummernMap?: KopfnummerEntry[];
 }
 
-export function CallHistoryTable({ calls, total, page, loading, onPageChange, kopfnummern, kopfnummernMap }: Props) {
-  const pageSize = 20;
+const PAGE_SIZE_OPTIONS = [5, 10, 20, 30, 50, 100];
+
+export function CallHistoryTable({ calls, total, page, pageSize, loading, onPageChange, onPageSizeChange, kopfnummern, kopfnummernMap }: Props) {
   const totalPages = Math.ceil(total / pageSize);
 
   return (
     <div className="flex-1 overflow-auto">
+      <div className="flex items-center justify-between px-4 py-2">
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          {total} Anrufe gesamt
+        </span>
+        <div className="flex items-center gap-2">
+          <select
+            value={pageSize}
+            onChange={(e) => onPageSizeChange(Number(e.target.value))}
+            className="text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 px-2 py-1"
+          >
+            {PAGE_SIZE_OPTIONS.map((n) => (
+              <option key={n} value={n}>{n} pro Seite</option>
+            ))}
+          </select>
+          {totalPages > 1 && (
+            <>
+              <button
+                onClick={() => onPageChange(page - 1)}
+                disabled={page <= 1}
+                className="px-3 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600"
+              >
+                Zurück
+              </button>
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                {page} / {totalPages}
+              </span>
+              <button
+                onClick={() => onPageChange(page + 1)}
+                disabled={page >= totalPages}
+                className="px-3 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600"
+              >
+                Weiter
+              </button>
+            </>
+          )}
+        </div>
+      </div>
       <table className="w-full text-sm">
         <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
           <tr className="text-left text-gray-500 dark:text-gray-400 text-xs uppercase">
@@ -88,32 +128,6 @@ export function CallHistoryTable({ calls, total, page, loading, onPageChange, ko
         </tbody>
       </table>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            {total} Anrufe gesamt
-          </span>
-          <div className="flex gap-2">
-            <button
-              onClick={() => onPageChange(page - 1)}
-              disabled={page <= 1}
-              className="px-3 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600"
-            >
-              Zurück
-            </button>
-            <span className="px-3 py-1 text-sm text-gray-600 dark:text-gray-400">
-              Seite {page} / {totalPages}
-            </span>
-            <button
-              onClick={() => onPageChange(page + 1)}
-              disabled={page >= totalPages}
-              className="px-3 py-1 text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-600"
-            >
-              Weiter
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

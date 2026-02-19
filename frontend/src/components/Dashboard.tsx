@@ -49,8 +49,10 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout }: Props) {
         calls={calls}
         total={total}
         page={page}
+        pageSize={filters.pageSize ?? 20}
         loading={loading}
         onPageChange={setPage}
+        onPageSizeChange={(size) => updateFilters({ pageSize: size })}
         kopfnummern={kopfnummern}
         kopfnummernMap={kopfnummernMap}
       />
