@@ -30,6 +30,15 @@ export function initDatabase(): void {
   db.exec("CREATE INDEX IF NOT EXISTS idx_calls_extension ON calls(extension)");
   db.exec("CREATE INDEX IF NOT EXISTS idx_calls_status ON calls(status)");
 
+  // Fix stale calls left as ringing/active from previous runs
+  const staleFixed = db.prepare(`
+    UPDATE calls SET status = 'missed', end_reason = 'stale'
+    WHERE status IN ('ringing', 'active') AND end_time IS NULL
+  `).run();
+  if (staleFixed.changes > 0) {
+    console.log(`[DB] ${staleFixed.changes} stale ringing/active Einträge auf 'missed' gesetzt.`);
+  }
+
   console.log("[DB] SQLite initialisiert:", dbPath);
 }
 

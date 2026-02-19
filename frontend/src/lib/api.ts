@@ -42,3 +42,9 @@ export async function fetchExtensions(): Promise<ExtensionInfo[]> {
   if (!res.ok) throw new Error(`Fehler: ${res.status}`);
   return res.json();
 }
+
+export async function fetchConfig(): Promise<{ kopfnummern: string[] }> {
+  const res = await authFetch(`${BASE}/config`);
+  if (!res.ok) throw new Error(`Fehler: ${res.status}`);
+  return res.json();
+}

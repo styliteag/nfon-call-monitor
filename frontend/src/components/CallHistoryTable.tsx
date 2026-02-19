@@ -8,10 +8,11 @@ interface Props {
   page: number;
   loading: boolean;
   onPageChange: (page: number) => void;
+  kopfnummern?: string[];
 }
 
-export function CallHistoryTable({ calls, total, page, loading, onPageChange }: Props) {
-  const pageSize = 50;
+export function CallHistoryTable({ calls, total, page, loading, onPageChange, kopfnummern }: Props) {
+  const pageSize = 20;
   const totalPages = Math.ceil(total / pageSize);
 
   return (
@@ -60,8 +61,8 @@ export function CallHistoryTable({ calls, total, page, loading, onPageChange }: 
                     <span className="text-green-600 dark:text-green-400" title="Ausgehend">&#8594;</span>
                   )}
                 </td>
-                <td className="px-4 py-2 font-mono text-xs dark:text-gray-300">{formatPhone(call.caller)}</td>
-                <td className="px-4 py-2 font-mono text-xs dark:text-gray-300">{formatPhone(call.callee)}</td>
+                <td className="px-4 py-2 font-mono text-xs dark:text-gray-300" title={call.caller}>{formatPhone(call.caller, kopfnummern)}</td>
+                <td className="px-4 py-2 font-mono text-xs dark:text-gray-300" title={call.callee}>{formatPhone(call.callee, kopfnummern)}</td>
                 <td className="px-4 py-2">
                   <div className="font-medium dark:text-gray-200">{call.extensionName || call.extension}</div>
                   <div className="text-xs text-gray-400">{call.extension}</div>

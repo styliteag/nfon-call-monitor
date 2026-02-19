@@ -140,9 +140,11 @@ async function connectSSE(): Promise<void> {
 
           try {
             const event = JSON.parse(jsonStr) as NfonCallEvent;
+            console.log(`[SSE] uuid=${event.uuid} state=${event.state} ext=${event.extension} dir=${event.direction} caller=${event.caller} callee=${event.callee}${event.error ? ` error=${event.error}` : ""}`);
             processEvent(event);
           } catch {
             // Non-JSON line, skip
+            if (jsonStr) console.log(`[SSE] non-JSON: ${jsonStr.substring(0, 200)}`);
           }
         }
       }

@@ -3,13 +3,18 @@ import type { CallRecord, CallsQuery } from "../../../shared/types";
 import { fetchCalls } from "../lib/api";
 import { useSocket } from "./useSocket";
 
+// Sort calls by startTime descending (newest first)
+function sortByTime(calls: CallRecord[]): CallRecord[] {
+  return calls.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+}
+
 export function useCalls() {
   const { on, isConnected, nfonConnected } = useSocket();
   const [calls, setCalls] = useState<CallRecord[]>([]);
   const [activeCalls, setActiveCalls] = useState<CallRecord[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<CallsQuery>({ pageSize: 50 });
+  const [filters, setFilters] = useState<CallsQuery>({ pageSize: 20 });
   const [loading, setLoading] = useState(true);
 
   const loadCalls = useCallback(async (query?: CallsQuery) => {
@@ -38,9 +43,9 @@ export function useCalls() {
       if (c.status === "ringing" || c.status === "active") {
         setActiveCalls((prev) => [...prev.filter((p) => !(p.id === c.id && p.extension === c.extension)), c]);
       }
-      // Add to top of calls list if on first page
+      // Add to calls list if on first page, sorted by time
       if (page === 1) {
-        setCalls((prev) => [c, ...prev.slice(0, (filters.pageSize ?? 50) - 1)]);
+        setCalls((prev) => sortByTime([c, ...prev]).slice(0, filters.pageSize ?? 20));
         setTotal((t) => t + 1);
       }
     });
@@ -61,7 +66,7 @@ export function useCalls() {
     });
 
     const offActive = on("active-calls", (calls: unknown) => {
-      setActiveCalls(calls as CallRecord[]);
+      setActiveCalls(sortByTime(calls as CallRecord[]));
     });
 
     return () => {

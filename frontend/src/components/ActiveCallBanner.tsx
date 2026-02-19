@@ -3,9 +3,10 @@ import { formatPhone } from "../lib/formatters";
 
 interface Props {
   calls: CallRecord[];
+  kopfnummern?: string[];
 }
 
-export function ActiveCallBanner({ calls }: Props) {
+export function ActiveCallBanner({ calls, kopfnummern }: Props) {
   const ringing = calls.filter((c) => c.status === "ringing");
 
   if (ringing.length === 0) return null;
@@ -17,7 +18,7 @@ export function ActiveCallBanner({ calls }: Props) {
           <span className="text-yellow-600 dark:text-yellow-400 text-lg">&#9889;</span>
           <span className="text-yellow-800 dark:text-yellow-200 font-medium">
             {call.direction === "inbound" ? "Eingehender" : "Ausgehender"} Anruf:{" "}
-            {formatPhone(call.caller)} &rarr; {call.extensionName || call.extension}
+            {formatPhone(call.caller, kopfnummern)} &rarr; {call.extensionName || call.extension}
           </span>
         </div>
       ))}

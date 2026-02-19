@@ -6,7 +6,7 @@ import { Server } from "socket.io";
 import path from "path";
 
 import { initDatabase } from "./db.js";
-import { callEvents, getActiveCallsList } from "./call-aggregator.js";
+import { callEvents, getActiveCallsList, cleanStaleCalls } from "./call-aggregator.js";
 import { connectorEvents, start as startConnector, stop as stopConnector, getExtensionList, isNfonConnected } from "./nfon-connector.js";
 import callsRouter from "./routes/calls.js";
 import extensionsRouter from "./routes/extensions.js";
@@ -33,6 +33,13 @@ app.use("/api/auth", authRouter);
 
 // Auth middleware for all other /api/* routes
 app.use("/api", requireAuth);
+
+// Config endpoint (returns kopfnummern for Durchwahl extraction)
+app.get("/api/config", (_req, res) => {
+  const raw = process.env.KOPFNUMMERN || "";
+  const kopfnummern = raw.split(",").map((s) => s.trim()).filter(Boolean);
+  res.json({ kopfnummern });
+});
 
 // REST routes
 app.use("/api/calls", callsRouter);
@@ -108,6 +115,9 @@ async function main() {
   });
 
   await startConnector();
+
+  // Periodically clean up stale calls (every 60s)
+  setInterval(cleanStaleCalls, 60_000);
 }
 
 process.on("SIGINT", () => {

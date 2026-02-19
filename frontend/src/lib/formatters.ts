@@ -28,8 +28,16 @@ export function formatDateTime(iso?: string): string {
   return `${formatDate(iso)} ${formatTime(iso)}`;
 }
 
-export function formatPhone(number: string): string {
+export function formatPhone(number: string, kopfnummern?: string[]): string {
   if (!number) return "-";
-  // Keep as-is for now, NFON already formats
+  if (kopfnummern) {
+    for (const prefix of kopfnummern) {
+      if (number.startsWith(prefix)) {
+        const durchwahl = number.slice(prefix.length);
+        if (durchwahl === "0") return "Zentrale";
+        if (durchwahl) return durchwahl;
+      }
+    }
+  }
   return number;
 }
