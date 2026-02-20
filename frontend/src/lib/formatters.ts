@@ -33,16 +33,12 @@ export interface KopfnummerEntry {
   name: string;
 }
 
-export function formatPhone(number: string, kopfnummern?: string[], kopfnummernMap?: KopfnummerEntry[]): string {
+export function formatPhone(number: string, kopfnummern?: string[]): string {
   if (!number) return "-";
   if (kopfnummern) {
     for (const prefix of kopfnummern) {
       if (number.startsWith(prefix)) {
         const durchwahl = number.slice(prefix.length);
-        if (durchwahl === "0") {
-          const entry = kopfnummernMap?.find((e) => e.nr === prefix);
-          return entry?.name || "Zentrale";
-        }
         if (durchwahl) return durchwahl;
       }
     }

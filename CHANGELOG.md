@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Ring group calls: cancel ringing on all extensions when one answers, even across different NFON UUIDs (cascaded ring groups)
 - Call history: deduplicate entries by (id, extension) when NFON re-rings the same extension, preventing duplicate React keys and stale "Klingelt" display
+- Zentrale calls now show "Z-0" instead of "Z-Z" (Durchwahl "0" no longer replaced with Standort name)
 
 ## [1.4.6] - 2026-02-20
 

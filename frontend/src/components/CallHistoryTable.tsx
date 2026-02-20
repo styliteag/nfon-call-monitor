@@ -64,7 +64,7 @@ function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, extensio
   specialNumbers?: Record<string, string>;
   className?: string;
 }) {
-  const formatted = formatPhone(number, kopfnummern, kopfnummernMap);
+  const formatted = formatPhone(number, kopfnummern);
   const contact = pfContacts?.[number];
   const isExternal = formatted === number; // not matched by kopfnummern
   const standort = getStandort(number, kopfnummernMap);
