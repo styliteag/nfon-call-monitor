@@ -20,7 +20,7 @@ WORKDIR /app
 COPY package.json package-lock.json tsconfig.json tsconfig.build.json ./
 COPY shared/ shared/
 COPY src/ src/
-RUN npm ci && npm run build
+RUN npm ci && npm run build && cp src/*.json dist/src/
 
 # Stage 3: Production
 FROM node:22-alpine

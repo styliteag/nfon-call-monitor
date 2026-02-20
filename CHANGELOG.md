@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Docker build failure: replaced ESM-only `import.meta.url` with CommonJS `__dirname` in phone-utils.ts
+- Runtime crash: copy german-area-codes.json to dist/ during Docker build (tsc doesn't copy non-TS files)
 
 ## [1.3.0] - 2026-02-20
 
