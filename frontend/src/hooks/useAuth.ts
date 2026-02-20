@@ -31,8 +31,9 @@ export function useAuth() {
         if (!res.ok) clearToken();
       })
       .catch(() => {
+        // Network error (e.g. backend restarting) — keep the token,
+        // it will be validated on the next successful request.
         setIsAuthenticated(false);
-        clearToken();
       })
       .finally(() => setChecking(false));
   }, []);
