@@ -92,6 +92,20 @@ Die Card-Umrandung richtet sich nach dem Line-Status.
 
 **Achtung**: Bei mehreren Endgeräten pro Extension kann `presence` "offline" sein, obwohl der User erreichbar ist. Das ist eine NFON-Eigenheit.
 
+## NFON CTI API Referenz
+
+Die vollständige API-Dokumentation (Endpoints, Schemas, Beispiele) liegt in:
+[CTI-API.md](CTI-API.md) — Quelle: https://github.com/NFON-AG/CTI-API
+
+Kurzübersicht der Endpoints:
+- `POST /v1/login` — Access Token erstellen
+- `PUT /v1/login` — Access Token refreshen
+- `GET /v1/extensions/phone/data` — Extension-Konfiguration
+- `GET /v1/extensions/phone/states` — Leitungsstatus (SSE oder JSON-Snapshot)
+- `GET /v1/extensions/phone/calls` — Call-Events streamen (SSE)
+- `POST /v1/extensions/phone/calls` — Anruf starten (Click-to-Dial)
+- `DELETE /v1/extensions/phone/calls/{uuid}` — Anruf beenden
+
 ## Wichtige Einschränkungen
 
 - NFON hat **keinen Call-History-Endpoint** — Historie wird nur aus dem Live-Stream aufgebaut
