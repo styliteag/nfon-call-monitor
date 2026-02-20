@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.4] - 2026-02-20
+
 ### Added
 - Internal extension numbers in call history show extension name with "(intern)" label (e.g. "Michael Seifert (intern) 52")
 - **Configurable special numbers** — `SPECIAL_NUMBERS` env var maps short codes to labels (e.g. `*55:Primär,*87:Agent On,**87:Agent Off`)
