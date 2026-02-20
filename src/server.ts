@@ -58,7 +58,13 @@ app.get("/api/config", (_req, res) => {
   const namen = rawNames.split(",").map((s) => s.trim());
   const kopfnummernMap = kopfnummern.map((nr, i) => ({ nr, name: namen[i] || nr }));
 
-  // Special numbers: "SPECIAL_NUMBERS=*55:Primär,*87:Agent On,**87:Agent Off"
+  // NFON Funktionscodes — see https://www.nfon.com/de/service/dokumentation/uebersichten/produktuebersichten/funktionscodes-der-nfon-telefonanlage/
+  // *1:Aufnahme, *10+N:Rufuml.Profil, *11+TN:Rufuml.fest, **11:aus, *12+TN:Rufuml.unerr., **12:aus,
+  // *13+TN:Rufuml.besetzt, **13:aus, *14+TN:Rufuml.unreg., **14:aus, *2+N:Kurzwahl, *3:Pickup,
+  // *490:Anklopfen, **490:aus, *5:Rückruf, **5:aus, *55:Primärgerät, *791:Mailbox, *8:Call Pull,
+  // *80:Durchsage, **80:aus, *84+N*1:Queue join, **84+N*1:Queue leave, *85:Echo,
+  // *86:CLIR, *860:Kopfnr-CLIP, *863:DND, **86:CLIP, *87:Agent On, **87:Agent Off, *9+N:Projekt
+  // Example: "SPECIAL_NUMBERS=*55:Primär,*87:Agent On,**87:Agent Off"
   const specialNumbers: Record<string, string> = {};
   for (const entry of (process.env.SPECIAL_NUMBERS || "").split(",").filter(Boolean)) {
     const [num, label] = entry.split(":").map((s) => s.trim());

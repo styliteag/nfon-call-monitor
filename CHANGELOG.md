@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- NFON function codes reference added to `server.ts` and `.env.example` (link to NFON docs)
+- `SPECIAL_NUMBERS` example in `.env.example` now lists all fixed NFON dial codes
+
 ## [1.4.8] - 2026-02-20
 
 ### Added
