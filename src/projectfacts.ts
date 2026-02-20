@@ -192,6 +192,29 @@ export function lookupPhone(rawNumber: string): PfContact | null {
   return null;
 }
 
+/** Search contacts by name substring, return matching phone numbers in all known formats */
+export function searchContactsByName(query: string): string[] {
+  if (!cacheReady || !query) return [];
+  const lower = query.toLowerCase();
+  const seen = new Set<string>();
+  for (const entry of phoneCache) {
+    if (entry.contact.name.toLowerCase().includes(lower)) {
+      // Add normalized (0xxx), raw from PF, and NFON format (49xxx)
+      seen.add(entry.normalized);
+      seen.add(entry.raw);
+      // Derive NFON format: 0xxx → 49xxx
+      if (entry.normalized.startsWith("0")) {
+        seen.add("49" + entry.normalized.slice(1));
+      }
+    }
+  }
+  return [...seen];
+}
+
+export function isPfActive(): boolean {
+  return cacheReady;
+}
+
 export function lookupPhones(numbers: string[]): Record<string, PfContact> {
   const result: Record<string, PfContact> = {};
   for (const num of numbers) {

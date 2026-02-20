@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Name search**: When projectfacts is active, the search field also matches PF contact names (not just phone numbers and extension names)
+- **Copy to clipboard**: Small copy icon on each phone number (appears on hover), copies formatted number with green checkmark confirmation
+
+### Changed
+- Search placeholder updated to "Nummer oder Name suchen…"
+
 ## [1.4.0] - 2026-02-20
 
 ### Fixed

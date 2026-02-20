@@ -16,7 +16,7 @@ export function Filters({ filters, extensions, onFilterChange }: Props) {
         type="search"
         value={filters.search || ""}
         onChange={(e) => onFilterChange({ search: e.target.value || undefined })}
-        placeholder="Nummer suchen…"
+        placeholder="Nummer oder Name suchen…"
         className={selectClass + " min-w-[180px]"}
       />
 

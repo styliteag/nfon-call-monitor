@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { CallRecord, CallStatus, PfContact } from "../../../shared/types";
 import { CallStatusBadge } from "./CallStatusBadge";
 import { formatTime, formatDate, formatDuration, formatPhone, getStandort, type KopfnummerEntry } from "../lib/formatters";
@@ -29,6 +30,29 @@ function displayNumber(num: string): string {
   return num;
 }
 
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      className="inline-flex items-center ml-1 text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
+      title="Nummer kopieren"
+      onClick={(e) => {
+        e.stopPropagation();
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+    >
+      {copied ? (
+        <svg className="w-3.5 h-3.5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+      ) : (
+        <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+      )}
+    </button>
+  );
+}
+
 function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, className }: {
   number: string;
   kopfnummern?: string[];
@@ -54,8 +78,9 @@ function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, classNam
   // Internal number matched by kopfnummer: show "ZBens 20" instead of just "20"
   if (!isExternal && standort) {
     return (
-      <span className={`whitespace-nowrap cursor-grab ${className ?? ""}`} title={displayNum} {...dragProps}>
+      <span className={`group whitespace-nowrap cursor-grab ${className ?? ""}`} title={displayNum} {...dragProps}>
         <span className="text-green-600 dark:text-green-400 font-sans">{standort}</span>-{formatted}
+        <CopyButton text={displayNum} />
       </span>
     );
   }
@@ -70,15 +95,21 @@ function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, classNam
     const showCity = hasPfName && contact.city && contact.name !== contact.city;
 
     return (
-      <span className={`whitespace-nowrap cursor-grab ${className ?? ""}`} title={displayNum} {...dragProps}>
+      <span className={`group whitespace-nowrap cursor-grab ${className ?? ""}`} title={displayNum} {...dragProps}>
         <span className={nameColor}>{contact.name}{fuzzyMarker}</span>
         {showCity && <span className="text-amber-600 dark:text-amber-400 font-sans italic ml-1">({contact.city})</span>}
         <span className="text-gray-400 ml-1">{displayNum}</span>
+        <CopyButton text={displayNum} />
       </span>
     );
   }
 
-  return <span className={`whitespace-nowrap cursor-grab ${className ?? ""}`} title={displayNum} {...dragProps}>{formatted === number ? displayNum : formatted}</span>;
+  return (
+    <span className={`group whitespace-nowrap cursor-grab ${className ?? ""}`} title={displayNum} {...dragProps}>
+      {formatted === number ? displayNum : formatted}
+      <CopyButton text={displayNum} />
+    </span>
+  );
 }
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 30, 50, 100];

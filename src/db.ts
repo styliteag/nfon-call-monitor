@@ -1,6 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import path from "path";
 import type { CallRecord, CallsQuery, CallsResponse } from "../shared/types.js";
+import { isPfActive, searchContactsByName } from "./projectfacts.js";
 
 let db: DatabaseSync;
 
@@ -103,8 +104,25 @@ export function getCalls(query: CallsQuery): CallsResponse {
     params.dateTo = query.dateTo;
   }
   if (query.search) {
-    conditions.push("(caller LIKE :search OR callee LIKE :search OR extension_name LIKE :search)");
+    const searchParts = ["caller LIKE :search", "callee LIKE :search", "extension_name LIKE :search"];
     params.search = `%${query.search}%`;
+
+    // When PF is active, also search by contact name
+    if (isPfActive()) {
+      const matchingNumbers = searchContactsByName(query.search);
+      if (matchingNumbers.length > 0) {
+        const placeholders = matchingNumbers.map((num, i) => {
+          const key = `pfnum${i}`;
+          params[key] = num;
+          return `:${key}`;
+        });
+        const inList = placeholders.join(", ");
+        searchParts.push(`caller IN (${inList})`);
+        searchParts.push(`callee IN (${inList})`);
+      }
+    }
+
+    conditions.push(`(${searchParts.join(" OR ")})`);
   }
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
