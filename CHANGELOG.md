@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Idle → every 60s
 - **projectfacts cache refresh** — address book reload interval changed from 15 minutes to 1 hour
 
+### Fixed
+- Extension cards now update immediately when a call starts, changes, or ends (previously only updated on next presence poll)
+
 ### Removed
 - `PRESENCE_POLL_INTERVAL` environment variable (replaced by adaptive polling)
 

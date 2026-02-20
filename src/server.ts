@@ -105,10 +105,12 @@ io.on("connection", (socket) => {
 // Forward aggregator events to all Socket.IO clients
 callEvents.on("call:new", (call) => {
   io.emit("call:new", call);
+  io.emit("extensions", getExtensionList());
 });
 
 callEvents.on("call:updated", (call) => {
   io.emit("call:updated", call);
+  io.emit("extensions", getExtensionList());
 });
 
 connectorEvents.on("extensions:updated", (exts) => {
