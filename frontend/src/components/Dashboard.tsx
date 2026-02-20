@@ -76,6 +76,7 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout }: Props) {
         kopfnummern={kopfnummern}
         kopfnummernMap={kopfnummernMap}
         pfContacts={pfContacts}
+        extensions={extensions}
       />
     </Layout>
   );

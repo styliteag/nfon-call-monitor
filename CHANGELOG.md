@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Internal extension numbers in call history show extension name with "(intern)" label (e.g. "Michael Seifert (intern) 52")
+
 ## [1.4.3] - 2026-02-20
 
 ### Changed
