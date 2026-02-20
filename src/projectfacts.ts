@@ -1,5 +1,6 @@
 import { normalizePhone, phonesMatch, isGermanLandline, classifyPhone, lookupCity, formatPhoneNice } from "./phone-utils.js";
 import type { PfContact } from "../shared/types.js";
+import * as log from "./log.js";
 
 interface PhoneEntry {
   normalized: string;
@@ -95,7 +96,7 @@ async function loadPhoneCache(): Promise<void> {
       const items = await fetchListItems(type);
       allItems.push(...items);
     }
-    console.log(`[pf] Found ${allItems.length} phone entries, fetching details...`);
+    log.debug("pf", `${allItems.length} Telefon-Einträge gefunden, lade Details...`);
 
     // Step 2: Fetch details with concurrency limit to get contact info
     const entries = await pMap(allItems, async (item): Promise<PhoneEntry | null> => {
@@ -113,9 +114,9 @@ async function loadPhoneCache(): Promise<void> {
 
     phoneCache = entries.filter((e): e is PhoneEntry => e !== null);
     cacheReady = true;
-    console.log(`[pf] Loaded ${phoneCache.length} phone entries from projectfacts`);
+    log.info("pf", `${phoneCache.length} Telefon-Einträge aus projectfacts geladen.`);
   } catch (err) {
-    console.warn("[pf] Failed to load phone cache:", err);
+    log.warn("pf", "Fehler beim Laden des Phone-Cache:", err);
   }
 }
 
@@ -243,10 +244,10 @@ export function _testClearCache(): void {
 
 export async function initPfCache(): Promise<void> {
   if (!isConfigured()) {
-    console.log("[pf] projectfacts not configured, skipping");
+    log.debug("pf", "projectfacts nicht konfiguriert, übersprungen.");
     return;
   }
-  console.log("[pf] Loading phone cache from projectfacts...");
+  log.info("pf", "Lade Phone-Cache aus projectfacts...");
   await loadPhoneCache();
   setInterval(loadPhoneCache, REFRESH_INTERVAL);
 }

@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import type { Request, Response, NextFunction } from "express";
+import * as log from "./log.js";
 
 const JWT_EXPIRY_SECONDS = 7 * 24 * 60 * 60; // 7 days
 
@@ -10,9 +11,7 @@ if (envSecret) {
   jwtSecret = envSecret;
 } else {
   jwtSecret = crypto.randomBytes(32).toString("hex");
-  console.warn(
-    "[Auth] DASHBOARD_JWT_SECRET nicht in .env gesetzt — generiertes Secret wird bei Neustart ungültig"
-  );
+  log.warn("Auth", "DASHBOARD_JWT_SECRET nicht gesetzt — generiertes Secret wird bei Neustart ungültig");
 }
 
 // --- JWT helpers (HMAC-SHA256, no npm dependency) ---
@@ -64,7 +63,7 @@ export function verifyLogin(username: string, password: string): boolean {
   const expectedHash = process.env.DASHBOARD_PASSWORD_HASH;
 
   if (!expectedUser || !expectedHash) {
-    console.error("[Auth] DASHBOARD_USER oder DASHBOARD_PASSWORD_HASH nicht in .env gesetzt");
+    log.error("Auth", "DASHBOARD_USER oder DASHBOARD_PASSWORD_HASH nicht in .env gesetzt");
     return false;
   }
 

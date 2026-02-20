@@ -3,9 +3,9 @@ import { login, startAutoRefresh, stopAutoRefresh } from "./auth.js";
 import { getExtensions, getLineStates, getCallEventStream } from "./api.js";
 import { processEvent, setExtensionNames, getActiveCallForExtension } from "./call-aggregator.js";
 import type { NfonCallEvent, ExtensionInfo } from "../shared/types.js";
+import * as log from "./log.js";
 
 const RECONNECT_DELAY = 5000;
-const debug = () => (process.env.LOG || "").toLowerCase() === "debug";
 
 // Adaptive polling tiers based on time since last event
 const POLL_TIER_HOT     =  3_000;  // event < 30s ago  → poll every 3s
@@ -89,9 +89,9 @@ async function loadExtensions(): Promise<void> {
 
     setExtensionNames(nameMap);
     connectorEvents.emit("extensions:updated", extensions);
-    console.log(`[Connector] ${extensions.length} Extensions geladen.`);
+    log.info("Connector", `${extensions.length} Extensions geladen.`);
   } catch (err) {
-    console.error("[Connector] Fehler beim Laden der Extensions:", err);
+    log.error("Connector", "Fehler beim Laden der Extensions:", err);
   }
 }
 
@@ -106,7 +106,7 @@ function getAdaptiveInterval(): number {
 function scheduleNextPoll(): void {
   if (!running) return;
   const interval = getAdaptiveInterval();
-  if (debug()) console.log(`[Presence] Next poll in ${interval / 1000}s`);
+  log.debug("Presence", `Next poll in ${interval / 1000}s`);
   presenceTimer = setTimeout(pollPresence, interval);
 }
 
@@ -126,7 +126,7 @@ async function pollPresence(): Promise<void> {
       const newUpdated = state?.updated;
       const presenceChanged = ext.presence !== newPresence || ext.line !== newLine;
       if (presenceChanged) {
-        if (debug()) console.log(`[Presence] ${ext.extensionNumber} (${ext.name}): presence=${ext.presence}→${newPresence} line=${ext.line}→${newLine}`);
+        log.debug("Presence", `${ext.extensionNumber} (${ext.name}): presence=${ext.presence}→${newPresence} line=${ext.line}→${newLine}`);
         ext.presence = newPresence;
         ext.line = newLine;
         changed = true;
@@ -139,11 +139,11 @@ async function pollPresence(): Promise<void> {
     if (changed) {
       lastEventTime = Date.now();
       connectorEvents.emit("extensions:updated", extensions);
-    } else if (debug()) {
-      console.log("[Presence] Poll: keine Änderungen");
+    } else {
+      log.debug("Presence", "Poll: keine Änderungen");
     }
   } catch (err) {
-    console.error("[Connector] Fehler beim Presence-Poll:", err);
+    log.error("Connector", "Fehler beim Presence-Poll:", err);
   }
 
   scheduleNextPoll();
@@ -156,7 +156,7 @@ function startPresencePolling(): void {
 async function connectSSE(): Promise<void> {
   while (running) {
     try {
-      console.log("[Connector] Verbinde SSE-Stream...");
+      log.info("SSE", "Verbinde...");
       const res = await getCallEventStream();
 
       if (!res.body) {
@@ -165,7 +165,7 @@ async function connectSSE(): Promise<void> {
 
       sseConnected = true;
       connectorEvents.emit("sse:connected");
-      console.log("[Connector] SSE-Stream verbunden.");
+      log.info("SSE", "Stream verbunden.");
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
@@ -190,28 +190,26 @@ async function connectSSE(): Promise<void> {
 
           try {
             const event = JSON.parse(jsonStr) as NfonCallEvent;
-            if (debug()) {
-              console.log(`[SSE] RAW:`, JSON.stringify(event));
-            }
-            console.log(`[SSE] uuid=${event.uuid} state=${event.state} ext=${event.extension} dir=${event.direction} caller=${event.caller} callee=${event.callee}${event.error ? ` error=${event.error}` : ""}`);
+            log.debug("SSE", `RAW: ${JSON.stringify(event)}`);
+            log.debug("SSE", `uuid=${event.uuid.substring(0, 8)}.. state=${event.state} ext=${event.extension} dir=${event.direction} caller=${event.caller} callee=${event.callee}${event.error ? ` error=${event.error}` : ""}`);
             lastEventTime = Date.now();
             processEvent(event);
           } catch {
             // Non-JSON line, skip
-            if (jsonStr) console.log(`[SSE] non-JSON: ${jsonStr.substring(0, 200)}`);
+            if (jsonStr) log.debug("SSE", `non-JSON: ${jsonStr.substring(0, 200)}`);
           }
         }
       }
 
-      console.log("[Connector] SSE-Stream geschlossen.");
+      log.warn("SSE", "Stream geschlossen.");
     } catch (err) {
       sseConnected = false;
-      console.error("[Connector] SSE-Fehler:", err);
+      log.error("SSE", "Fehler:", err);
       connectorEvents.emit("sse:disconnected");
     }
 
     if (running) {
-      console.log(`[Connector] Reconnect in ${RECONNECT_DELAY / 1000}s...`);
+      log.info("SSE", `Reconnect in ${RECONNECT_DELAY / 1000}s...`);
       await new Promise((resolve) => setTimeout(resolve, RECONNECT_DELAY));
     }
   }

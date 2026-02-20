@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { apiPost, apiDelete } from "../api.js";
+import * as log from "../log.js";
 
 const router = Router();
-const debug = () => (process.env.LOG || "").toLowerCase() === "debug";
 
 function getKAccount(): string {
   const username = process.env.CTI_API_USERNAME || "";
@@ -10,7 +10,7 @@ function getKAccount(): string {
   // Username may be just the K-Account (e.g. "KCR53") or "KCR53/user" format
   const slash = username.indexOf("/");
   const kAccount = slash > 0 ? username.substring(0, slash) : username;
-  if (debug()) console.log("[Click-to-Dial] K-Account:", kAccount, "(aus Username:", username, ")");
+  log.debug("Click-to-Dial", `K-Account: ${kAccount} (aus Username: ${username})`);
   return kAccount;
 }
 
@@ -27,7 +27,7 @@ interface NfonCallResponse {
 router.post("/", async (req, res) => {
   const { extension, target } = req.body as InitiateCallBody;
 
-  if (debug()) console.log("[Click-to-Dial] POST erhalten:", { extension, target });
+  log.debug("Click-to-Dial", `POST: ext=${extension} target=${target}`);
 
   if (!extension || !target) {
     return res.status(400).json({ error: "extension und target sind erforderlich" });
@@ -37,11 +37,11 @@ router.post("/", async (req, res) => {
     const kAccount = getKAccount();
     // Bereinigen: Leerzeichen, Bindestriche, Klammern, Schrägstriche entfernen
     const cleaned = target.replace(/[\s\-()\/]/g, "");
-    if (debug()) console.log("[Click-to-Dial] Bereinigt:", JSON.stringify(target), "→", JSON.stringify(cleaned));
+    log.debug("Click-to-Dial", `Bereinigt: ${JSON.stringify(target)} → ${JSON.stringify(cleaned)}`);
 
     // Nur Ziffern und optional führendes + erlaubt
     if (!/^\+?\d+$/.test(cleaned)) {
-      console.warn("[Click-to-Dial] Ungültige Rufnummer:", JSON.stringify(target), "→", JSON.stringify(cleaned));
+      log.warn("Click-to-Dial", `Ungültige Rufnummer: ${JSON.stringify(target)} → ${JSON.stringify(cleaned)}`);
       return res.status(400).json({ error: `Ungültige Rufnummer: ${target}` });
     }
     // 0170xxx → 49170xxx, +49170xxx → 49170xxx
@@ -55,29 +55,29 @@ router.post("/", async (req, res) => {
       extension: extension,
     };
 
-    if (debug()) console.log("[Click-to-Dial] NFON Request:", JSON.stringify(payload, null, 2));
+    log.debug("Click-to-Dial", `NFON Request: ${JSON.stringify(payload)}`);
 
     const result = await apiPost<NfonCallResponse>("/v1/extensions/phone/calls", payload);
 
-    if (debug()) console.log("[Click-to-Dial] NFON Response:", JSON.stringify(result));
+    log.debug("Click-to-Dial", `NFON Response: ${JSON.stringify(result)}`);
 
     res.status(202).json(result);
   } catch (err: any) {
-    console.error("[Click-to-Dial] Anruf fehlgeschlagen:", err.message);
-    if (debug()) console.error("[Click-to-Dial] Fehler-Details:", err.stack || err);
+    log.error("Click-to-Dial", `Anruf fehlgeschlagen: ${err.message}`);
+    log.debug("Click-to-Dial", "Stack:", err.stack || err);
     res.status(502).json({ error: err.message });
   }
 });
 
 router.delete("/:uuid", async (req, res) => {
-  if (debug()) console.log("[Click-to-Dial] DELETE:", req.params.uuid);
+  log.debug("Click-to-Dial", `DELETE: ${req.params.uuid}`);
   try {
     await apiDelete(`/v1/extensions/phone/calls/${req.params.uuid}`);
-    if (debug()) console.log("[Click-to-Dial] Abbruch erfolgreich:", req.params.uuid);
+    log.debug("Click-to-Dial", `Abbruch erfolgreich: ${req.params.uuid}`);
     res.status(204).end();
   } catch (err: any) {
-    console.error("[Click-to-Dial] Abbruch fehlgeschlagen:", err.message);
-    if (debug()) console.error("[Click-to-Dial] Fehler-Details:", err.stack || err);
+    log.error("Click-to-Dial", `Abbruch fehlgeschlagen: ${err.message}`);
+    log.debug("Click-to-Dial", "Stack:", err.stack || err);
     res.status(502).json({ error: err.message });
   }
 });

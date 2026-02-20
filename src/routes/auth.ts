@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { verifyLogin, createSession, validateToken } from "../dashboard-auth.js";
+import * as log from "../log.js";
 
 const router = Router();
 
@@ -17,12 +18,12 @@ router.post("/login", (req, res) => {
   }
 
   const token = createSession(username);
-  console.log(`[Auth] Login erfolgreich: ${username}`);
+  log.debug("Auth", `Dashboard-Login: ${username}`);
   res.json({ token });
 });
 
 router.post("/logout", (_req, res) => {
-  console.log("[Auth] Logout");
+  log.debug("Auth", "Dashboard-Logout");
   res.json({ ok: true });
 });
 

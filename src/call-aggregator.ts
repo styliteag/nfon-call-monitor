@@ -1,6 +1,7 @@
 import { EventEmitter } from "events";
 import type { NfonCallEvent, CallRecord, CallStatus } from "../shared/types.js";
 import { upsertCall } from "./db.js";
+import * as log from "./log.js";
 
 // In-memory map of active calls: key = "uuid:extension"
 const activeCalls = new Map<string, CallRecord>();
@@ -94,7 +95,7 @@ export function processEvent(event: NfonCallEvent): void {
             && Math.abs(new Date(otherRecord.startTime).getTime() - answeredStart) < 60_000;
 
           if (sameUuid || sameCaller) {
-            console.log(`[Calls] Group cancel: ${otherRecord.extensionName}(${otherRecord.extension}) was ringing, now missed (answered by ${event.extension})${!sameUuid ? " [cross-uuid]" : ""}`);
+            log.debug("Calls", `Group cancel: ${otherRecord.extensionName}(${otherRecord.extension}) was ringing, now missed (answered by ${event.extension})${!sameUuid ? " [cross-uuid]" : ""}`);
             otherRecord.status = "missed";
             otherRecord.endTime = now;
             otherRecord.endReason = "cancel";
@@ -126,7 +127,7 @@ export function processEvent(event: NfonCallEvent): void {
     activeCalls.set(key, record);
   }
 
-  console.log(`[Calls] ${isNew ? "NEW" : "UPD"} ${record.extensionName}(${record.extension}) uuid=${record.id.substring(0, 8)}.. ${prevStatus || "-"} → ${record.status} [active=${activeCalls.size}]`);
+  log.debug("Calls", `${isNew ? "NEW" : "UPD"} ${record.extensionName}(${record.extension}) uuid=${record.id.substring(0, 8)}.. ${prevStatus || "-"} → ${record.status} [active=${activeCalls.size}]`);
 
   // Persist to database
   upsertCall(record);
@@ -149,7 +150,7 @@ export function cleanStaleCalls(): void {
   for (const [key, record] of activeCalls) {
     const age = now - new Date(record.startTime).getTime();
     if (age > STALE_TIMEOUT_MS) {
-      console.log(`[Calls] STALE cleanup: ${record.extensionName}(${record.extension}) uuid=${record.id.substring(0, 8)}.. status=${record.status} age=${Math.round(age / 1000)}s`);
+      log.debug("Calls", `STALE cleanup: ${record.extensionName}(${record.extension}) uuid=${record.id.substring(0, 8)}.. status=${record.status} age=${Math.round(age / 1000)}s`);
       record.endTime = new Date().toISOString();
       if (record.answerTime) {
         record.status = "answered";
@@ -168,7 +169,7 @@ export function cleanStaleCalls(): void {
   }
 
   if (cleaned > 0) {
-    console.log(`[Calls] Cleaned ${cleaned} stale call(s). Active: ${activeCalls.size}`);
+    log.warn("Calls", `${cleaned} stale call(s) bereinigt. Active: ${activeCalls.size}`);
   }
 }
 

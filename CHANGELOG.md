@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Structured logging: new `src/log.ts` module with `info`/`warn`/`error`/`debug` levels and timestamps
+- Default output reduced to startup, errors, and warnings only — set `LOG=debug` for full event details
+- All SSE events, call state transitions, presence polling, and Socket.IO activity now behind `LOG=debug`
+
 ### Fixed
 - Ring group calls: cancel ringing on all extensions when one answers, even across different NFON UUIDs (cascaded ring groups)
 - Call history: deduplicate entries by (id, extension) when NFON re-rings the same extension, preventing duplicate React keys and stale "Klingelt" display

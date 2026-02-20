@@ -1,4 +1,5 @@
 import "dotenv/config";
+import * as log from "./log.js";
 
 const BASE_URL = process.env.CTI_API_BASE_URL || "https://providersupportdata.cloud-cfg.com";
 
@@ -45,7 +46,7 @@ export async function login(): Promise<Tokens> {
     accessToken: data["access-token"],
     refreshToken: data["refresh-token"],
   };
-  console.log("[Auth] Login erfolgreich. Access Token erhalten.");
+  log.info("Auth", "NFON Login erfolgreich.");
   return currentTokens;
 }
 
@@ -64,8 +65,8 @@ export async function refreshTokens(): Promise<Tokens> {
 
   if (!res.ok) {
     const body = await res.text();
-    console.error(`[Auth] Token-Refresh fehlgeschlagen (${res.status}): ${body}`);
-    console.log("[Auth] Versuche erneuten Login...");
+    log.warn("Auth", `Token-Refresh fehlgeschlagen (${res.status}): ${body}`);
+    log.info("Auth", "Versuche erneuten Login...");
     return login();
   }
 
@@ -74,7 +75,7 @@ export async function refreshTokens(): Promise<Tokens> {
     accessToken: data["access-token"],
     refreshToken: data["refresh-token"],
   };
-  console.log("[Auth] Token erfolgreich erneuert.");
+  log.debug("Auth", "Token erneuert.");
   return currentTokens;
 }
 
@@ -84,10 +85,10 @@ export function startAutoRefresh(intervalMs = 4 * 60 * 1000): void {
     try {
       await refreshTokens();
     } catch (err) {
-      console.error("[Auth] Auto-Refresh fehlgeschlagen:", err);
+      log.error("Auth", "Auto-Refresh fehlgeschlagen:", err);
     }
   }, intervalMs);
-  console.log(`[Auth] Auto-Refresh alle ${intervalMs / 1000}s aktiviert.`);
+  log.debug("Auth", `Auto-Refresh alle ${intervalMs / 1000}s aktiviert.`);
 }
 
 export function stopAutoRefresh(): void {

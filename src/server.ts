@@ -16,6 +16,7 @@ import pfRouter from "./routes/pf.js";
 import clickToDialRouter from "./routes/click-to-dial.js";
 import { requireAuth, validateToken } from "./dashboard-auth.js";
 import { initPfCache } from "./projectfacts.js";
+import * as log from "./log.js";
 
 const PORT = Number(process.env.PORT) || 3001;
 
@@ -96,7 +97,7 @@ io.use((socket, next) => {
 
 // Socket.IO
 io.on("connection", (socket) => {
-  console.log(`[Socket.IO] Client verbunden: ${socket.id}`);
+  log.debug("Socket.IO", `Client verbunden: ${socket.id}`);
 
   // Send current state on connect
   socket.emit("active-calls", getActiveCallsList());
@@ -106,7 +107,7 @@ io.on("connection", (socket) => {
   }
 
   socket.on("disconnect", () => {
-    console.log(`[Socket.IO] Client getrennt: ${socket.id}`);
+    log.debug("Socket.IO", `Client getrennt: ${socket.id}`);
   });
 });
 
@@ -135,14 +136,14 @@ connectorEvents.on("sse:disconnected", () => {
 
 // Start
 async function main() {
-  console.log(`${APP_TITLE} v${APP_VERSION}`);
+  console.log(`\n${APP_TITLE} v${APP_VERSION}`);
   console.log("=========================\n");
 
   initDatabase();
   await initPfCache();
 
   httpServer.listen(PORT, () => {
-    console.log(`[Server] Läuft auf http://localhost:${PORT}`);
+    log.info("Server", `Läuft auf http://localhost:${PORT}`);
   });
 
   await startConnector();
@@ -152,13 +153,13 @@ async function main() {
 }
 
 process.on("SIGINT", () => {
-  console.log("\nServer wird beendet...");
+  log.info("Server", "Wird beendet...");
   stopConnector();
   httpServer.close();
   process.exit(0);
 });
 
 main().catch((err) => {
-  console.error("Fataler Fehler:", err);
+  log.error("Server", "Fataler Fehler:", err);
   process.exit(1);
 });

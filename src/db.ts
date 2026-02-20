@@ -2,6 +2,7 @@ import { DatabaseSync } from "node:sqlite";
 import path from "path";
 import type { CallRecord, CallsQuery, CallsResponse } from "../shared/types.js";
 import { isPfActive, searchContactsByName } from "./projectfacts.js";
+import * as log from "./log.js";
 
 let db: DatabaseSync;
 
@@ -37,10 +38,10 @@ export function initDatabase(): void {
     WHERE status IN ('ringing', 'active') AND end_time IS NULL
   `).run();
   if (staleFixed.changes > 0) {
-    console.log(`[DB] ${staleFixed.changes} stale ringing/active Einträge auf 'missed' gesetzt.`);
+    log.warn("DB", `${staleFixed.changes} stale ringing/active Einträge auf 'missed' gesetzt.`);
   }
 
-  console.log("[DB] SQLite initialisiert:", dbPath);
+  log.info("DB", `SQLite initialisiert: ${dbPath}`);
 }
 
 export function upsertCall(call: CallRecord): void {
