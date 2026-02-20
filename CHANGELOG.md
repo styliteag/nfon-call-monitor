@@ -10,8 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Status column too narrow — widened from 120px to 180px to fit badge + end reason without overflow
 
-## [1.4.0] - 2026-02-20
-
 ### Added
 - **Click-to-Dial** — Initiate outgoing calls directly from the dashboard
   - Drag & drop any phone number onto an extension card to call
