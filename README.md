@@ -4,19 +4,45 @@
 
 Echtzeit-Anrufüberwachung für NFON-Telefonanlagen. Zeigt eingehende/ausgehende Anrufe als Live-Dashboard mit persistenter Historie und optionaler ProjectFacts-CRM-Integration.
 
+![NFON Call Monitor Dashboard](docs/screenshot.png)
+
 ---
 
 ## Features
 
-- **Live Call Dashboard** — Eingehende & ausgehende Anrufe in Echtzeit via WebSocket
-- **Click-to-Dial** — Anrufe direkt aus dem Dashboard starten: Rufnummer per Drag & Drop auf Extension-Card ziehen oder Zwischenablage-Button nutzen
-- **Extension-Status** — Presence-Anzeige aller Nebenstellen
-- **Call-Historie** — Persistente Anrufhistorie mit Filter, Suche & Pagination
-- **ProjectFacts CRM** — Automatische Kontaktzuordnung per Rufnummer (optional)
-- **Phone Number Formatting** — Intelligente Formatierung & Ortsnetzerkennung (5.200+ deutsche Vorwahlen)
-- **Dark Mode** — Automatisch oder manuell umschaltbar
-- **Docker-ready** — Multi-Stage Build, Production-ready
-- **Dashboard Auth** — JWT-basierte Authentifizierung
+### Live-Monitoring
+
+- **Echtzeit-Dashboard** — Alle eingehenden und ausgehenden Anrufe erscheinen sofort via WebSocket, ohne Seite neu zu laden. Status-Updates (klingelt, aktiv, angenommen, verpasst) werden live gepusht.
+- **Extension-Karten** — Jede Nebenstelle als Karte mit Live-Presence (online/offline), aktuellem Anruf-Status, Gesprächspartner, Gesprächsdauer und Idle-Zeit seit letzter Aktivität.
+- **Verbindungs-Indikator** — Zeigt jederzeit an, ob die SSE-Verbindung zur NFON API steht oder unterbrochen ist.
+
+### Anrufsteuerung
+
+- **Click-to-Dial** — Anrufe direkt aus dem Dashboard starten. Rufnummer per Drag & Drop auf eine Extension-Karte ziehen oder den Zwischenablage-Button nutzen. Bestätigungsdialog direkt auf der Karte mit Erfolgs-/Fehler-Feedback.
+
+### Anrufhistorie
+
+- **Persistente Call-Historie** — NFON bietet keinen History-Endpoint. Das Backend bleibt 24/7 am SSE-Stream und speichert jeden Anruf in SQLite. Beim Öffnen des Dashboards ist die komplette Historie sofort verfügbar.
+- **Umfangreiche Filter** — Nach Extension, Status (angenommen/verpasst/besetzt/abgelehnt), Richtung (ein-/ausgehend) und Zeitraum filtern. Alle Filter kombinierbar.
+- **Volltextsuche** — Suche nach Telefonnummer, Extension-Name oder (bei aktiver ProjectFacts-Integration) Kontaktname. Ein Suchfeld, alle Treffer.
+- **Pagination** — Konfigurierbare Seitengröße (5 bis 100 Einträge), server-seitig paginiert für schnelle Ladezeiten auch bei tausenden Anrufen.
+- **Copy to Clipboard** — Jede Telefonnummer hat ein dezentes Copy-Icon (erscheint bei Hover), ein Klick kopiert die formatierte Nummer mit grünem Häkchen als Bestätigung.
+
+### Kontakterkennung
+
+- **ProjectFacts CRM-Integration** — Optionale Anbindung an [ProjectFacts](https://www.projectfacts.de/). Kontaktnamen werden automatisch neben Telefonnummern angezeigt. Cache mit Auto-Refresh alle 15 Minuten.
+- **Dreistufige Zuordnung** — Exakter Match (Name in Blau), Fuzzy Match für deutsche Festnetznummern mit bis zu 3 abweichenden Endziffern (Name + `?`-Indikator), Fallback auf Ortsname.
+- **5.200+ deutsche Vorwahlen** — Automatische Ortserkennung aus der Bundesnetzagentur-Datenbank. Festnetznummern zeigen den Stadtnamen (z.B. *Bensheim*, *Frankfurt am Main*), Mobilnummern werden als *Mobil* gekennzeichnet.
+- **Intelligente Formatierung** — Rohe Nummern wie `49625182755` werden als `+49 6251 82755` dargestellt, mit korrekter Vorwahl-Trennung.
+- **Standort-Anzeige** — Interne Nummern zeigen den Standortnamen, z.B. `ZBens-20` statt nur `20`.
+
+### Betrieb & Sicherheit
+
+- **Dashboard-Login** — JWT-basierte Authentifizierung mit SHA-256-gehashten Passwörtern. Kein ungeschützter Zugriff auf Anrufdaten.
+- **Docker-ready** — Multi-Stage Build (3 Stufen) auf Alpine-Basis, Multi-Platform (amd64/arm64). Produktionsimage ohne Dev-Dependencies.
+- **Dark Mode** — Komplettes Dark/Light-Theme, automatisch oder manuell umschaltbar.
+- **Debug-Logging** — Optional aktivierbar (`LOG=debug`) für Click-to-Dial-Requests, SSE-Events und Presence-Changes.
+- **Auto-Reconnect** — SSE-Verbindung zur NFON API wird bei Abbruch automatisch wiederhergestellt. Verpasste Events während der Unterbrechung werden als `stale` markiert.
 
 ---
 
