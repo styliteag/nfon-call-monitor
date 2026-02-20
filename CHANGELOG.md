@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.8] - 2026-02-20
+
 ### Added
 - **Agent queue status tracking** — third status dot (blue) on extension cards shows whether an agent is logged into the queue
   - Tracks `*87` (Agent On) and `**87` (Agent Off) dial codes from SSE events
