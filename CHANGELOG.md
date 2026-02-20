@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.7] - 2026-02-20
+
 ### Changed
 - Structured logging: new `src/log.ts` module with `info`/`warn`/`error`/`debug` levels and timestamps
 - Default output reduced to startup, errors, and warnings only — set `LOG=debug` for full event details
