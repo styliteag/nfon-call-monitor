@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-02-20
+
 ### Added
 - **projectfacts Integration**: Optional [projectfacts](https://www.projectfacts.de/) phone number lookup — contact names shown in blue next to phone numbers
 - **City lookup**: German landline numbers display the city name (e.g. "Bensheim") based on 5,200+ area codes from Bundesnetzagentur
