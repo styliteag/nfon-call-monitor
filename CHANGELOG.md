@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.2] - 2026-02-20
+
 ### Changed
 - **Adaptive presence polling** — polling rate adjusts automatically based on activity:
   - Event in last 30s → every 3s
