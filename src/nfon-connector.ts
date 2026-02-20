@@ -212,7 +212,6 @@ async function connectSSE(): Promise<void> {
                   connectorEvents.emit("extensions:updated", extensions);
                 }
               }
-              continue; // don't create a CallRecord for agent codes
             }
 
             processEvent(event);
