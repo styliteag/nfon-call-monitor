@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-02-20
+
 ### Fixed
 - Docker build failure: replaced ESM-only `import.meta.url` with CommonJS `__dirname` in phone-utils.ts
 
