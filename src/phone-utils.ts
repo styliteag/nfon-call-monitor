@@ -1,8 +1,5 @@
 import { readFileSync } from "fs";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { join } from "path";
 const AREA_CODES: Record<string, string> = JSON.parse(
   readFileSync(join(__dirname, "german-area-codes.json"), "utf-8")
 );
