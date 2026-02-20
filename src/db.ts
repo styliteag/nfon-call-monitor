@@ -32,6 +32,14 @@ export function initDatabase(): void {
   db.exec("CREATE INDEX IF NOT EXISTS idx_calls_extension ON calls(extension)");
   db.exec("CREATE INDEX IF NOT EXISTS idx_calls_status ON calls(status)");
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS agent_status (
+      extension TEXT PRIMARY KEY,
+      logged_in INTEGER NOT NULL DEFAULT 0,
+      updated TEXT NOT NULL
+    )
+  `);
+
   // Fix stale calls left as ringing/active from previous runs
   const staleFixed = db.prepare(`
     UPDATE calls SET status = 'missed', end_reason = 'stale'
@@ -145,6 +153,29 @@ export function getActiveCalls(): CallRecord[] {
   ).all() as Array<Record<string, unknown>>;
 
   return rows.map(rowToCallRecord);
+}
+
+export function upsertAgentStatus(extension: string, loggedIn: boolean): void {
+  db.prepare(`
+    INSERT INTO agent_status (extension, logged_in, updated)
+    VALUES (:extension, :loggedIn, :updated)
+    ON CONFLICT(extension) DO UPDATE SET
+      logged_in = :loggedIn,
+      updated = :updated
+  `).run({
+    extension,
+    loggedIn: loggedIn ? 1 : 0,
+    updated: new Date().toISOString(),
+  });
+}
+
+export function getAgentStatuses(): Map<string, boolean> {
+  const rows = db.prepare("SELECT extension, logged_in FROM agent_status").all() as Array<{ extension: string; logged_in: number }>;
+  const map = new Map<string, boolean>();
+  for (const row of rows) {
+    map.set(row.extension, row.logged_in === 1);
+  }
+  return map;
 }
 
 function rowToCallRecord(row: Record<string, unknown>): CallRecord {

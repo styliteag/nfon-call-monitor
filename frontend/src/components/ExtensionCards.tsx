@@ -163,6 +163,10 @@ function ExtensionCard({ ext, now, pfContacts }: { ext: ExtensionInfo; now: numb
             className={`inline-block w-2 h-2 rounded-full ${presenceDotColor(ext.presence)}`}
             title={`Presence: ${presenceLabel(ext.presence)}`}
           />
+          <span
+            className={`inline-block w-2 h-2 rounded-full ${ext.agentLoggedIn ? "bg-blue-500" : "bg-gray-400"}`}
+            title={`Agent: ${ext.agentLoggedIn ? "Angemeldet" : "Abgemeldet"}`}
+          />
         </div>
       </div>
       <div className="text-xs text-gray-600 dark:text-gray-400 truncate text-left">{ext.name}</div>

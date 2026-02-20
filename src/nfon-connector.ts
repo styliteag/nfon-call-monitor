@@ -2,10 +2,13 @@ import { EventEmitter } from "events";
 import { login, startAutoRefresh, stopAutoRefresh } from "./auth.js";
 import { getExtensions, getLineStates, getCallEventStream } from "./api.js";
 import { processEvent, setExtensionNames, getActiveCallForExtension } from "./call-aggregator.js";
+import { upsertAgentStatus, getAgentStatuses } from "./db.js";
 import type { NfonCallEvent, ExtensionInfo } from "../shared/types.js";
 import * as log from "./log.js";
 
 const RECONNECT_DELAY = 5000;
+const AGENT_ON_CODE  = process.env.AGENT_ON_CODE  || "*87";
+const AGENT_OFF_CODE = process.env.AGENT_OFF_CODE || "**87";
 
 // Adaptive polling tiers based on time since last event
 const POLL_TIER_HOT     =  3_000;  // event < 30s ago  → poll every 3s
@@ -74,6 +77,8 @@ async function loadExtensions(): Promise<void> {
 
     const nameMap = new Map<string, string>();
 
+    const agentStatuses = getAgentStatuses();
+
     extensions = exts.map((ext) => {
       nameMap.set(ext.extension_number, ext.name);
       const state = stateMap.get(ext.extension_number);
@@ -84,6 +89,7 @@ async function loadExtensions(): Promise<void> {
         presence: state?.presence || "offline",
         line: state?.line || "offline",
         lastStateChange: state?.updated,
+        agentLoggedIn: agentStatuses.get(ext.extension_number),
       };
     });
 
@@ -193,6 +199,22 @@ async function connectSSE(): Promise<void> {
             log.debug("SSE", `RAW: ${JSON.stringify(event)}`);
             log.debug("SSE", `uuid=${event.uuid.substring(0, 8)}.. state=${event.state} ext=${event.extension} dir=${event.direction} caller=${event.caller} callee=${event.callee}${event.error ? ` error=${event.error}` : ""}`);
             lastEventTime = Date.now();
+
+            // Track agent login/logout via special dial codes
+            if (event.callee === AGENT_ON_CODE || event.callee === AGENT_OFF_CODE) {
+              if (event.state === "answer") {
+                const loggedIn = event.callee === AGENT_ON_CODE;
+                const ext = extensions.find((e) => e.extensionNumber === event.extension);
+                if (ext) {
+                  ext.agentLoggedIn = loggedIn;
+                  upsertAgentStatus(event.extension, loggedIn);
+                  log.info("Agent", `${event.extension} (${ext.name}): ${loggedIn ? "angemeldet" : "abgemeldet"}`);
+                  connectorEvents.emit("extensions:updated", extensions);
+                }
+              }
+              continue; // don't create a CallRecord for agent codes
+            }
+
             processEvent(event);
           } catch {
             // Non-JSON line, skip

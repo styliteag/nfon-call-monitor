@@ -40,6 +40,7 @@ export interface ExtensionInfo {
   currentCallStartTime?: string;  // ISO 8601
   currentCallStatus?: CallStatus;
   lastStateChange?: string;       // ISO 8601 - from NFON states updated field
+  agentLoggedIn?: boolean;         // tracked via *87/*87 SSE events
 }
 
 export interface CallsResponse {
