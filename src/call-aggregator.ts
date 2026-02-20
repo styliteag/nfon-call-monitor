@@ -64,7 +64,11 @@ export function processEvent(event: NfonCallEvent): void {
     case "ring":
     case "caller-dial":
     case "caller-ring":
-      record.status = "ringing";
+      // Don't regress from "active" back to "ringing" — NFON sends
+      // dial/ring after caller-answer for outbound calls
+      if (record.status !== "active") {
+        record.status = "ringing";
+      }
       break;
 
     case "answer":

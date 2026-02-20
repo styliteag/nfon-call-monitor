@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Extension cards show formatted phone number alongside CRM contact name
+
+### Fixed
+- Presence polling overwrote active call data on extension cards (cards went gray during calls)
+- Outbound calls regressed from "active" back to "ringing" because NFON sends `dial`/`ring` after `caller-answer`
+
 ## [1.4.2] - 2026-02-20
 
 ### Changed

@@ -173,10 +173,13 @@ function ExtensionCard({ ext, now, pfContacts }: { ext: ExtensionInfo; now: numb
             <span title={ext.currentCallDirection === "inbound" ? "Eingehend" : "Ausgehend"}>
               {ext.currentCallDirection === "inbound" ? "\u2199" : "\u2197"}
             </span>
-            <span className="font-mono truncate" title={partner}>
-              {pfContacts?.[partner]?.name ? (
-                <span className="text-blue-600 dark:text-blue-400 font-sans">{pfContacts[partner].name}</span>
-              ) : partner}
+            <span className="truncate" title={partner}>
+              {pfContacts?.[partner]?.name ? (<>
+                <span className="text-blue-600 dark:text-blue-400">{pfContacts[partner].name}</span>
+                {pfContacts[partner].formatted && (
+                  <span className="font-mono text-gray-400 dark:text-gray-500 text-[10px]"> {pfContacts[partner].formatted}</span>
+                )}
+              </>) : <span className="font-mono">{partner}</span>}
             </span>
           </div>
           {ext.currentCallStartTime && (

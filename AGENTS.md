@@ -51,6 +51,11 @@ frontend/                    # React + Vite + Tailwind
   src/lib/                   # API-Client, Formatter
 ```
 
+## Workflow-Regeln
+
+- **Immer CHANGELOG.md updaten vor dem Commit** — Einträge in die `[Unreleased]` Section schreiben
+- **Commit mit `--no-gpg-sign`** — 1Password Signing Agent macht Probleme
+
 ## Konventionen
 
 - **Sprache**: Code auf Englisch, UI-Texte auf Deutsch
@@ -94,4 +99,4 @@ Die Card-Umrandung richtet sich nach dem Line-Status.
 - Gruppenanrufe werden noch nicht unterstützt
 - Token-Refresh läuft alle 4 Minuten automatisch (`auth.ts`)
 - SSE-Reconnect bei Verbindungsabbruch nach 5 Sekunden
-- Extension-Presence wird alle 30 Sekunden gepollt
+- Extension-Presence wird adaptiv gepollt (3s/15s/30s/60s je nach Aktivität)

@@ -113,8 +113,8 @@ callEvents.on("call:updated", (call) => {
   io.emit("extensions", getExtensionList());
 });
 
-connectorEvents.on("extensions:updated", (exts) => {
-  io.emit("extensions", exts);
+connectorEvents.on("extensions:updated", () => {
+  io.emit("extensions", getExtensionList());
 });
 
 connectorEvents.on("sse:connected", () => {
