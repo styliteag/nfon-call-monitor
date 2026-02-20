@@ -1,7 +1,7 @@
 ARG VERSION=unknown
 
-# Stage 1: Build frontend
-FROM node:22-alpine AS frontend-build
+# Stage 1: Build frontend (run on host platform to avoid QEMU arm64 issues)
+FROM --platform=$BUILDPLATFORM node:22-alpine AS frontend-build
 ARG VERSION
 WORKDIR /app
 
@@ -13,8 +13,8 @@ COPY frontend/ frontend/
 ENV VITE_APP_VERSION=$VERSION
 RUN cd frontend && npm run build
 
-# Stage 2: Build backend
-FROM node:22-alpine AS backend-build
+# Stage 2: Build backend (run on host platform to avoid QEMU arm64 issues)
+FROM --platform=$BUILDPLATFORM node:22-alpine AS backend-build
 WORKDIR /app
 
 COPY package.json package-lock.json tsconfig.json tsconfig.build.json ./

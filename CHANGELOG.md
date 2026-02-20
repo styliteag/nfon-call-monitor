@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.5] - 2026-02-20
+
+### Fixed
+- Docker multi-platform build: use host platform for build stages to avoid QEMU arm64 crashes
+
 ## [1.4.4] - 2026-02-20
 
 ### Added
