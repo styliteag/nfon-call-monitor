@@ -43,9 +43,13 @@ export function useCalls() {
       if (c.status === "ringing" || c.status === "active") {
         setActiveCalls((prev) => [...prev.filter((p) => !(p.id === c.id && p.extension === c.extension)), c]);
       }
-      // Add to calls list if on first page, sorted by time
+      // Add to calls list if on first page, deduplicate by (id, extension) to
+      // avoid duplicate React keys when NFON re-rings the same extension
       if (page === 1) {
-        setCalls((prev) => sortByTime([c, ...prev]).slice(0, filters.pageSize ?? 20));
+        setCalls((prev) => {
+          const without = prev.filter((p) => !(p.id === c.id && p.extension === c.extension));
+          return sortByTime([c, ...without]).slice(0, filters.pageSize ?? 20);
+        });
         setTotal((t) => t + 1);
       }
     });

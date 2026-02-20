@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Ring group calls: cancel ringing on all extensions when one answers, even across different NFON UUIDs (cascaded ring groups)
+- Call history: deduplicate entries by (id, extension) when NFON re-rings the same extension, preventing duplicate React keys and stale "Klingelt" display
 
 ## [1.4.6] - 2026-02-20
 
