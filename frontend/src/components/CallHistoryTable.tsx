@@ -129,7 +129,7 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
         <colgroup>
           <col className="w-[120px]" />
           <col className="w-[140px]" />
-          <col className="w-[120px]" />
+          <col className="w-[180px]" />
           <col className="w-[80px]" />
           <col />
         </colgroup>
