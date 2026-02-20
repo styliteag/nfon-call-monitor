@@ -13,6 +13,7 @@ import callsRouter from "./routes/calls.js";
 import extensionsRouter from "./routes/extensions.js";
 import authRouter from "./routes/auth.js";
 import pfRouter from "./routes/pf.js";
+import clickToDialRouter from "./routes/click-to-dial.js";
 import { requireAuth, validateToken } from "./dashboard-auth.js";
 import { initPfCache } from "./projectfacts.js";
 
@@ -62,6 +63,7 @@ app.get("/api/config", (_req, res) => {
 app.use("/api/calls", callsRouter);
 app.use("/api/extensions", extensionsRouter);
 app.use("/api/pf", pfRouter);
+app.use("/api/click-to-dial", clickToDialRouter);
 
 // Serve frontend in production
 const frontendDist = path.join(process.cwd(), "frontend", "dist");

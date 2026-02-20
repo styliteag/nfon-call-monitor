@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-02-20
+
+### Added
+- **Click-to-Dial** — Initiate outgoing calls directly from the dashboard
+  - Drag & drop any phone number onto an extension card to call
+  - Clipboard button on each extension card — reads clipboard and initiates call
+  - Inline confirmation dialog on the card (replaces browser `confirm()`)
+  - Success/error feedback overlay on the card
+- **Backend API**: `POST /api/click-to-dial` (initiate call), `DELETE /api/click-to-dial/:uuid` (cancel call)
+- **Debug logging** — Set `LOG=debug` in `.env` to enable verbose logging for Click-to-Dial requests, SSE raw events, and presence changes
+- **Configurable presence polling** — `PRESENCE_POLL_INTERVAL` in `.env` (in ms, default: 15s, was 30s)
+- Generic `apiPost` and `apiDelete` functions in backend API layer
+
+### Fixed
+- Call aggregator now recognizes NFON-specific SSE states: `caller-dial`, `caller-ring` → ringing; `caller-answer` → active. Outgoing calls no longer stuck on "ringing"
+- Presence polling only logs and emits on actual presence/line changes (ignores timestamp-only updates)
+- Phone number sanitization for Click-to-Dial: strips spaces, dashes, parentheses; validates digits-only; normalizes `0...` → `49...` and `+49...` → `49...`
+
 ## [1.3.2] - 2026-02-20
 
 ## [1.3.1] - 2026-02-20

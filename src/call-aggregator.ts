@@ -62,11 +62,14 @@ export function processEvent(event: NfonCallEvent): void {
     case "start":
     case "dial":
     case "ring":
+    case "caller-dial":
+    case "caller-ring":
       record.status = "ringing";
       break;
 
     case "answer":
     case "bridge":
+    case "caller-answer":
       record.status = "active";
       if (!record.answerTime) {
         record.answerTime = now;

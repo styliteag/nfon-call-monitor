@@ -5,7 +5,8 @@ import { processEvent, setExtensionNames, getActiveCallForExtension } from "./ca
 import type { NfonCallEvent, ExtensionInfo } from "../shared/types.js";
 
 const RECONNECT_DELAY = 5000;
-const PRESENCE_POLL_INTERVAL = 30000;
+const PRESENCE_POLL_INTERVAL = Number(process.env.PRESENCE_POLL_INTERVAL) || 15000;
+const debug = () => (process.env.LOG || "").toLowerCase() === "debug";
 
 export const connectorEvents = new EventEmitter();
 
@@ -103,16 +104,22 @@ function startPresencePolling(): void {
         const newPresence = state?.presence || "offline";
         const newLine = state?.line || "offline";
         const newUpdated = state?.updated;
-        if (ext.presence !== newPresence || ext.line !== newLine || ext.lastStateChange !== newUpdated) {
+        const presenceChanged = ext.presence !== newPresence || ext.line !== newLine;
+        if (presenceChanged) {
+          if (debug()) console.log(`[Presence] ${ext.extensionNumber} (${ext.name}): presence=${ext.presence}→${newPresence} line=${ext.line}→${newLine}`);
           ext.presence = newPresence;
           ext.line = newLine;
-          ext.lastStateChange = newUpdated;
           changed = true;
+        }
+        if (ext.lastStateChange !== newUpdated) {
+          ext.lastStateChange = newUpdated;
         }
       }
 
       if (changed) {
         connectorEvents.emit("extensions:updated", extensions);
+      } else if (debug()) {
+        console.log("[Presence] Poll: keine Änderungen");
       }
     } catch (err) {
       console.error("[Connector] Fehler beim Presence-Poll:", err);
@@ -157,6 +164,9 @@ async function connectSSE(): Promise<void> {
 
           try {
             const event = JSON.parse(jsonStr) as NfonCallEvent;
+            if (debug()) {
+              console.log(`[SSE] RAW:`, JSON.stringify(event));
+            }
             console.log(`[SSE] uuid=${event.uuid} state=${event.state} ext=${event.extension} dir=${event.direction} caller=${event.caller} callee=${event.callee}${event.error ? ` error=${event.error}` : ""}`);
             processEvent(event);
           } catch {

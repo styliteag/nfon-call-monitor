@@ -43,10 +43,18 @@ function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, classNam
 
   const displayNum = contact?.formatted || displayNumber(number);
 
+  const dragProps = {
+    draggable: true,
+    onDragStart: (e: React.DragEvent) => {
+      e.dataTransfer.setData("text/plain", number);
+      e.dataTransfer.effectAllowed = "copy";
+    },
+  };
+
   // Internal number matched by kopfnummer: show "ZBens 20" instead of just "20"
   if (!isExternal && standort) {
     return (
-      <span className={`whitespace-nowrap ${className ?? ""}`} title={displayNum}>
+      <span className={`whitespace-nowrap cursor-grab ${className ?? ""}`} title={displayNum} {...dragProps}>
         <span className="text-green-600 dark:text-green-400 font-sans">{standort}</span>-{formatted}
       </span>
     );
@@ -62,7 +70,7 @@ function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, classNam
     const showCity = hasPfName && contact.city && contact.name !== contact.city;
 
     return (
-      <span className={`whitespace-nowrap ${className ?? ""}`} title={displayNum}>
+      <span className={`whitespace-nowrap cursor-grab ${className ?? ""}`} title={displayNum} {...dragProps}>
         <span className={nameColor}>{contact.name}{fuzzyMarker}</span>
         {showCity && <span className="text-amber-600 dark:text-amber-400 font-sans italic ml-1">({contact.city})</span>}
         <span className="text-gray-400 ml-1">{displayNum}</span>
@@ -70,7 +78,7 @@ function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, classNam
     );
   }
 
-  return <span className={`whitespace-nowrap ${className ?? ""}`} title={displayNum}>{formatted === number ? displayNum : formatted}</span>;
+  return <span className={`whitespace-nowrap cursor-grab ${className ?? ""}`} title={displayNum} {...dragProps}>{formatted === number ? displayNum : formatted}</span>;
 }
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 30, 50, 100];

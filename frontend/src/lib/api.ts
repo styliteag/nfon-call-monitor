@@ -62,6 +62,19 @@ export async function fetchConfig(): Promise<{ kopfnummern: string[]; kopfnummer
   return res.json();
 }
 
+export async function initiateCall(extension: string, target: string): Promise<{ uuid: string }> {
+  const res = await authFetch(`${BASE}/click-to-dial`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ extension, target }),
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({ error: `Fehler: ${res.status}` }));
+    throw new Error(data.error || `Fehler: ${res.status}`);
+  }
+  return res.json();
+}
+
 export async function lookupPfContacts(numbers: string[]): Promise<Record<string, PfContact>> {
   if (numbers.length === 0) return {};
   const res = await authFetch(`${BASE}/pf/lookup-batch`, {

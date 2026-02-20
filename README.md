@@ -9,6 +9,7 @@ Echtzeit-Anrufüberwachung für NFON-Telefonanlagen. Zeigt eingehende/ausgehende
 ## Features
 
 - **Live Call Dashboard** — Eingehende & ausgehende Anrufe in Echtzeit via WebSocket
+- **Click-to-Dial** — Anrufe direkt aus dem Dashboard starten: Rufnummer per Drag & Drop auf Extension-Card ziehen oder Zwischenablage-Button nutzen
 - **Extension-Status** — Presence-Anzeige aller Nebenstellen
 - **Call-Historie** — Persistente Anrufhistorie mit Filter, Suche & Pagination
 - **ProjectFacts CRM** — Automatische Kontaktzuordnung per Rufnummer (optional)
@@ -95,6 +96,8 @@ DASHBOARD_PASSWORD_HASH=   # sha256: echo -n 'password' | shasum -a 256
 
 # === App ===
 # APP_TITLE=NFON Call Monitor
+# LOG=debug                   # Verbose logging (Click-to-Dial, SSE, Presence)
+# PRESENCE_POLL_INTERVAL=15000  # Presence-Polling in ms (Default: 15000)
 
 # === ProjectFacts CRM (optional) ===
 # PF_API_BASE_URL=https://team.stylite.de
@@ -191,7 +194,8 @@ Die ProjectFacts-Integration ist **optional** — ohne Konfiguration funktionier
 │       ├── calls.ts              # GET /api/calls
 │       ├── extensions.ts         # GET /api/extensions
 │       ├── auth.ts               # POST /api/auth/login
-│       └── pf.ts                 # GET/POST /api/pf/lookup
+│       ├── pf.ts                 # GET/POST /api/pf/lookup
+│       └── click-to-dial.ts     # POST/DELETE /api/click-to-dial
 └── frontend/
     └── src/
         ├── App.tsx
@@ -214,6 +218,8 @@ Die ProjectFacts-Integration ist **optional** — ohne Konfiguration funktionier
 | `GET /api/extensions` | Extension-Liste mit Presence |
 | `GET /api/pf/lookup?number=...` | Einzelner Kontakt-Lookup |
 | `POST /api/pf/lookup-batch` | Batch-Lookup (`{ numbers: [...] }`) |
+| `POST /api/click-to-dial` | Click-to-Dial (`{ extension, target }`) → 202 |
+| `DELETE /api/click-to-dial/:uuid` | Laufenden Anruf abbrechen → 204 |
 
 ### Socket.IO Events
 

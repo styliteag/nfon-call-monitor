@@ -20,11 +20,17 @@ export function ActiveCallBanner({ calls, kopfnummern, kopfnummernMap, pfContact
           <span className="text-yellow-600 dark:text-yellow-400 text-lg">&#9889;</span>
           <span className="text-yellow-800 dark:text-yellow-200 font-medium">
             {call.direction === "inbound" ? "Eingehender" : "Ausgehender"} Anruf:{" "}
-            {pfContacts?.[call.caller]?.name ? (
-              <span className="font-bold">{pfContacts[call.caller].name}</span>
-            ) : (
-              formatPhone(call.caller, kopfnummern)
-            )} &rarr; {call.extensionName || call.extension}
+            <span
+              draggable
+              onDragStart={(e) => { e.dataTransfer.setData("text/plain", call.caller); e.dataTransfer.effectAllowed = "copy"; }}
+              className="cursor-grab"
+            >
+              {pfContacts?.[call.caller]?.name ? (
+                <span className="font-bold">{pfContacts[call.caller].name}</span>
+              ) : (
+                formatPhone(call.caller, kopfnummern)
+              )}
+            </span> &rarr; {call.extensionName || call.extension}
             {(() => {
               const standort = getStandort(call.direction === "inbound" ? call.callee : call.caller, kopfnummernMap);
               return standort ? <span className="ml-2 text-yellow-600 dark:text-yellow-400 text-sm">({standort})</span> : null;
