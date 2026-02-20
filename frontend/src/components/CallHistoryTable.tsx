@@ -24,6 +24,7 @@ interface Props {
   kopfnummernMap?: KopfnummerEntry[];
   pfContacts?: Record<string, PfContact>;
   extensions?: ExtensionInfo[];
+  specialNumbers?: Record<string, string>;
 }
 
 function displayNumber(num: string): string {
@@ -54,12 +55,13 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, extensions, className }: {
+function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, extensions, specialNumbers, className }: {
   number: string;
   kopfnummern?: string[];
   kopfnummernMap?: KopfnummerEntry[];
   pfContacts?: Record<string, PfContact>;
   extensions?: ExtensionInfo[];
+  specialNumbers?: Record<string, string>;
   className?: string;
 }) {
   const formatted = formatPhone(number, kopfnummern, kopfnummernMap);
@@ -79,6 +81,17 @@ function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, extensio
       e.dataTransfer.effectAllowed = "copy";
     },
   };
+
+  // Special number from config: show "Primär *55", "Agent On *87", etc.
+  const specialLabel = specialNumbers?.[number];
+  if (specialLabel) {
+    return (
+      <span className={`group whitespace-nowrap ${className ?? ""}`}>
+        <span className="text-purple-600 dark:text-purple-400 font-sans">{specialLabel}</span>
+        <span className="text-gray-400 ml-1">{number}</span>
+      </span>
+    );
+  }
 
   // Internal extension number: show "Name (intern)" e.g. "Michael Seifert (intern)"
   if (extMatch) {
@@ -130,7 +143,7 @@ function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, extensio
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 30, 50, 100];
 
-export function CallHistoryTable({ calls, total, page, pageSize, loading, onPageChange, onPageSizeChange, kopfnummern, kopfnummernMap, pfContacts, extensions }: Props) {
+export function CallHistoryTable({ calls, total, page, pageSize, loading, onPageChange, onPageSizeChange, kopfnummern, kopfnummernMap, pfContacts, extensions, specialNumbers }: Props) {
   const totalPages = Math.ceil(total / pageSize);
 
   return (
@@ -234,9 +247,9 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
                 <td className="px-3 py-1.5 font-mono dark:text-gray-300">{formatDuration(call.duration)}</td>
                 <td className="px-3 py-1.5 font-mono dark:text-gray-300">
                   <div className="grid grid-cols-[320px_auto_1fr] items-center gap-1">
-                    <PhoneWithPf number={call.caller} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} className="truncate text-right" />
+                    <PhoneWithPf number={call.caller} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="truncate text-right" />
                     <span className={`${arrowColor[call.status] ?? "text-gray-800 dark:text-gray-300"} text-2xl font-black leading-none`} title={call.direction === "inbound" ? "Eingehend" : "Ausgehend"}>&#8594;</span>
-                    <PhoneWithPf number={call.callee} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} className="truncate" />
+                    <PhoneWithPf number={call.callee} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="truncate" />
                   </div>
                 </td>
               </tr>

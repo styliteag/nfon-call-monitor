@@ -56,7 +56,15 @@ app.get("/api/config", (_req, res) => {
   const kopfnummern = raw.split(",").map((s) => s.trim()).filter(Boolean);
   const namen = rawNames.split(",").map((s) => s.trim());
   const kopfnummernMap = kopfnummern.map((nr, i) => ({ nr, name: namen[i] || nr }));
-  res.json({ kopfnummern, kopfnummernMap });
+
+  // Special numbers: "SPECIAL_NUMBERS=*55:Primär,*87:Agent On,**87:Agent Off"
+  const specialNumbers: Record<string, string> = {};
+  for (const entry of (process.env.SPECIAL_NUMBERS || "").split(",").filter(Boolean)) {
+    const [num, label] = entry.split(":").map((s) => s.trim());
+    if (num && label) specialNumbers[num] = label;
+  }
+
+  res.json({ kopfnummern, kopfnummernMap, specialNumbers });
 });
 
 // REST routes

@@ -53,10 +53,12 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout }: Props) {
 
   const [kopfnummern, setKopfnummern] = useState<string[]>([]);
   const [kopfnummernMap, setKopfnummernMap] = useState<KopfnummerEntry[]>([]);
+  const [specialNumbers, setSpecialNumbers] = useState<Record<string, string>>({});
   useEffect(() => {
     fetchConfig().then((c) => {
       setKopfnummern(c.kopfnummern);
       setKopfnummernMap(c.kopfnummernMap || []);
+      setSpecialNumbers(c.specialNumbers || {});
     }).catch(() => {});
   }, []);
 
@@ -77,6 +79,7 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout }: Props) {
         kopfnummernMap={kopfnummernMap}
         pfContacts={pfContacts}
         extensions={extensions}
+        specialNumbers={specialNumbers}
       />
     </Layout>
   );

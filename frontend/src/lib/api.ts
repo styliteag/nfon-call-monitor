@@ -56,7 +56,7 @@ export interface KopfnummerEntry {
   name: string;
 }
 
-export async function fetchConfig(): Promise<{ kopfnummern: string[]; kopfnummernMap: KopfnummerEntry[] }> {
+export async function fetchConfig(): Promise<{ kopfnummern: string[]; kopfnummernMap: KopfnummerEntry[]; specialNumbers: Record<string, string> }> {
   const res = await authFetch(`${BASE}/config`);
   if (!res.ok) throw new Error(`Fehler: ${res.status}`);
   return res.json();
