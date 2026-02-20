@@ -9,7 +9,7 @@ interface PhoneEntry {
 
 let phoneCache: PhoneEntry[] = [];
 let cacheReady = false;
-const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutes
+const REFRESH_INTERVAL = 60 * 60 * 1000; // 1 hour
 const PHONE_TYPES = ["TEL", "TEL_VOICE", "TEL_MOBILE"];
 const PAGE_SIZE = 200;
 const CONCURRENCY = 10;

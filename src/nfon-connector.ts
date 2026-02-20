@@ -5,15 +5,21 @@ import { processEvent, setExtensionNames, getActiveCallForExtension } from "./ca
 import type { NfonCallEvent, ExtensionInfo } from "../shared/types.js";
 
 const RECONNECT_DELAY = 5000;
-const PRESENCE_POLL_INTERVAL = Number(process.env.PRESENCE_POLL_INTERVAL) || 15000;
 const debug = () => (process.env.LOG || "").toLowerCase() === "debug";
+
+// Adaptive polling tiers based on time since last event
+const POLL_TIER_HOT     =  3_000;  // event < 30s ago  → poll every 3s
+const POLL_TIER_WARM    = 15_000;  // event < 5min ago  → poll every 15s
+const POLL_TIER_COOL    = 30_000;  // event < 1hr ago   → poll every 30s
+const POLL_TIER_IDLE    = 60_000;  // no recent events  → poll every 60s
 
 export const connectorEvents = new EventEmitter();
 
 let extensions: ExtensionInfo[] = [];
 let running = false;
 let sseConnected = false;
-let presenceTimer: ReturnType<typeof setInterval> | null = null;
+let presenceTimer: ReturnType<typeof setTimeout> | null = null;
+let lastEventTime = 0;
 
 export async function start(): Promise<void> {
   running = true;
@@ -29,7 +35,7 @@ export function stop(): void {
   running = false;
   stopAutoRefresh();
   if (presenceTimer) {
-    clearInterval(presenceTimer);
+    clearTimeout(presenceTimer);
     presenceTimer = null;
   }
 }
@@ -89,42 +95,62 @@ async function loadExtensions(): Promise<void> {
   }
 }
 
-function startPresencePolling(): void {
-  presenceTimer = setInterval(async () => {
-    try {
-      const states = await getLineStates();
-      const stateMap = new Map<string, { presence: string; line: string; updated: string }>();
-      for (const s of states) {
-        stateMap.set(s.extension, { presence: s.presence, line: s.line, updated: s.updated });
-      }
+function getAdaptiveInterval(): number {
+  const elapsed = Date.now() - lastEventTime;
+  if (elapsed < 30_000)       return POLL_TIER_HOT;   // 3s
+  if (elapsed < 5 * 60_000)   return POLL_TIER_WARM;  // 15s
+  if (elapsed < 60 * 60_000)  return POLL_TIER_COOL;  // 30s
+  return POLL_TIER_IDLE;                               // 60s
+}
 
-      let changed = false;
-      for (const ext of extensions) {
-        const state = stateMap.get(ext.extensionNumber);
-        const newPresence = state?.presence || "offline";
-        const newLine = state?.line || "offline";
-        const newUpdated = state?.updated;
-        const presenceChanged = ext.presence !== newPresence || ext.line !== newLine;
-        if (presenceChanged) {
-          if (debug()) console.log(`[Presence] ${ext.extensionNumber} (${ext.name}): presence=${ext.presence}→${newPresence} line=${ext.line}→${newLine}`);
-          ext.presence = newPresence;
-          ext.line = newLine;
-          changed = true;
-        }
-        if (ext.lastStateChange !== newUpdated) {
-          ext.lastStateChange = newUpdated;
-        }
-      }
+function scheduleNextPoll(): void {
+  if (!running) return;
+  const interval = getAdaptiveInterval();
+  if (debug()) console.log(`[Presence] Next poll in ${interval / 1000}s`);
+  presenceTimer = setTimeout(pollPresence, interval);
+}
 
-      if (changed) {
-        connectorEvents.emit("extensions:updated", extensions);
-      } else if (debug()) {
-        console.log("[Presence] Poll: keine Änderungen");
-      }
-    } catch (err) {
-      console.error("[Connector] Fehler beim Presence-Poll:", err);
+async function pollPresence(): Promise<void> {
+  try {
+    const states = await getLineStates();
+    const stateMap = new Map<string, { presence: string; line: string; updated: string }>();
+    for (const s of states) {
+      stateMap.set(s.extension, { presence: s.presence, line: s.line, updated: s.updated });
     }
-  }, PRESENCE_POLL_INTERVAL);
+
+    let changed = false;
+    for (const ext of extensions) {
+      const state = stateMap.get(ext.extensionNumber);
+      const newPresence = state?.presence || "offline";
+      const newLine = state?.line || "offline";
+      const newUpdated = state?.updated;
+      const presenceChanged = ext.presence !== newPresence || ext.line !== newLine;
+      if (presenceChanged) {
+        if (debug()) console.log(`[Presence] ${ext.extensionNumber} (${ext.name}): presence=${ext.presence}→${newPresence} line=${ext.line}→${newLine}`);
+        ext.presence = newPresence;
+        ext.line = newLine;
+        changed = true;
+      }
+      if (ext.lastStateChange !== newUpdated) {
+        ext.lastStateChange = newUpdated;
+      }
+    }
+
+    if (changed) {
+      lastEventTime = Date.now();
+      connectorEvents.emit("extensions:updated", extensions);
+    } else if (debug()) {
+      console.log("[Presence] Poll: keine Änderungen");
+    }
+  } catch (err) {
+    console.error("[Connector] Fehler beim Presence-Poll:", err);
+  }
+
+  scheduleNextPoll();
+}
+
+function startPresencePolling(): void {
+  scheduleNextPoll();
 }
 
 async function connectSSE(): Promise<void> {
@@ -168,6 +194,7 @@ async function connectSSE(): Promise<void> {
               console.log(`[SSE] RAW:`, JSON.stringify(event));
             }
             console.log(`[SSE] uuid=${event.uuid} state=${event.state} ext=${event.extension} dir=${event.direction} caller=${event.caller} callee=${event.callee}${event.error ? ` error=${event.error}` : ""}`);
+            lastEventTime = Date.now();
             processEvent(event);
           } catch {
             // Non-JSON line, skip

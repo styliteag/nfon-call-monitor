@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Adaptive presence polling** — polling rate adjusts automatically based on activity:
+  - Event in last 30s → every 3s
+  - Event in last 5min → every 15s
+  - Event in last 1hr → every 30s
+  - Idle → every 60s
+- **projectfacts cache refresh** — address book reload interval changed from 15 minutes to 1 hour
+
+### Removed
+- `PRESENCE_POLL_INTERVAL` environment variable (replaced by adaptive polling)
+
 ## [1.4.1] - 2026-02-20
 
 ### Added
