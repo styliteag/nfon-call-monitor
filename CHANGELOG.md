@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.9] - 2026-02-20
+
 ### Fixed
 - Agent on/off dial code events (`*87`/`**87`) are no longer hidden from the call log
 
