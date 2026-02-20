@@ -12,9 +12,9 @@ import { connectorEvents, start as startConnector, stop as stopConnector, getExt
 import callsRouter from "./routes/calls.js";
 import extensionsRouter from "./routes/extensions.js";
 import authRouter from "./routes/auth.js";
-import crmRouter from "./routes/crm.js";
+import pfRouter from "./routes/pf.js";
 import { requireAuth, validateToken } from "./dashboard-auth.js";
-import { initCrmCache } from "./projectfacts.js";
+import { initPfCache } from "./projectfacts.js";
 
 const PORT = Number(process.env.PORT) || 3001;
 
@@ -61,7 +61,7 @@ app.get("/api/config", (_req, res) => {
 // REST routes
 app.use("/api/calls", callsRouter);
 app.use("/api/extensions", extensionsRouter);
-app.use("/api/crm", crmRouter);
+app.use("/api/pf", pfRouter);
 
 // Serve frontend in production
 const frontendDist = path.join(process.cwd(), "frontend", "dist");
@@ -127,7 +127,7 @@ async function main() {
   console.log("=========================\n");
 
   initDatabase();
-  await initCrmCache();
+  await initPfCache();
 
   httpServer.listen(PORT, () => {
     console.log(`[Server] Läuft auf http://localhost:${PORT}`);

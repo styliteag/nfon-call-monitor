@@ -1,14 +1,14 @@
-import type { CallRecord, CrmContact } from "../../../shared/types";
+import type { CallRecord, PfContact } from "../../../shared/types";
 import { formatPhone, getStandort, type KopfnummerEntry } from "../lib/formatters";
 
 interface Props {
   calls: CallRecord[];
   kopfnummern?: string[];
   kopfnummernMap?: KopfnummerEntry[];
-  crmContacts?: Record<string, CrmContact>;
+  pfContacts?: Record<string, PfContact>;
 }
 
-export function ActiveCallBanner({ calls, kopfnummern, kopfnummernMap, crmContacts }: Props) {
+export function ActiveCallBanner({ calls, kopfnummern, kopfnummernMap, pfContacts }: Props) {
   const ringing = calls.filter((c) => c.status === "ringing");
 
   if (ringing.length === 0) return null;
@@ -20,8 +20,8 @@ export function ActiveCallBanner({ calls, kopfnummern, kopfnummernMap, crmContac
           <span className="text-yellow-600 dark:text-yellow-400 text-lg">&#9889;</span>
           <span className="text-yellow-800 dark:text-yellow-200 font-medium">
             {call.direction === "inbound" ? "Eingehender" : "Ausgehender"} Anruf:{" "}
-            {crmContacts?.[call.caller]?.name ? (
-              <span className="font-bold">{crmContacts[call.caller].name}</span>
+            {pfContacts?.[call.caller]?.name ? (
+              <span className="font-bold">{pfContacts[call.caller].name}</span>
             ) : (
               formatPhone(call.caller, kopfnummern)
             )} &rarr; {call.extensionName || call.extension}

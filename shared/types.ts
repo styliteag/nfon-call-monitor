@@ -60,7 +60,10 @@ export interface CallsQuery {
   search?: string;
 }
 
-export interface CrmContact {
+export interface PfContact {
   name: string;
   contactId: number;
+  fuzzy?: number;      // number of digits removed for fuzzy match (1-3)
+  city?: string;       // city name from area code lookup (fallback)
+  formatted?: string;  // nicely formatted phone number e.g. "+49 6251 82755"
 }

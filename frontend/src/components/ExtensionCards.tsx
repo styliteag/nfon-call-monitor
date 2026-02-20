@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import type { ExtensionInfo, CrmContact } from "../../../shared/types";
+import type { ExtensionInfo, PfContact } from "../../../shared/types";
 
 interface Props {
   extensions: ExtensionInfo[];
-  crmContacts?: Record<string, CrmContact>;
+  pfContacts?: Record<string, PfContact>;
 }
 
 function isOnline(presence: string): boolean {
@@ -82,7 +82,7 @@ function useTimer(extensions: ExtensionInfo[]): number {
   return now;
 }
 
-export function ExtensionCards({ extensions, crmContacts }: Props) {
+export function ExtensionCards({ extensions, pfContacts }: Props) {
   const now = useTimer(extensions);
 
   if (extensions.length === 0) return null;
@@ -120,8 +120,8 @@ export function ExtensionCards({ extensions, crmContacts }: Props) {
                     {ext.currentCallDirection === "inbound" ? "↙" : "↗"}
                   </span>
                   <span className="font-mono truncate" title={partner}>
-                    {crmContacts?.[partner]?.name ? (
-                      <span className="text-blue-600 dark:text-blue-400 font-sans">{crmContacts[partner].name}</span>
+                    {pfContacts?.[partner]?.name ? (
+                      <span className="text-blue-600 dark:text-blue-400 font-sans">{pfContacts[partner].name}</span>
                     ) : partner}
                   </span>
                 </div>

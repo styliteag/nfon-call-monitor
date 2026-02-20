@@ -7,9 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.2.1] - 2026-02-19
+### Added
+- **projectfacts Integration**: Optional [projectfacts](https://www.projectfacts.de/) phone number lookup — contact names shown in blue next to phone numbers
+- **City lookup**: German landline numbers display the city name (e.g. "Bensheim") based on 5,200+ area codes from Bundesnetzagentur
+- **Phone type labels**: Mobile numbers labeled "Mobil", special numbers labeled "Sonderrufnummer" (amber italic)
+- **Fuzzy matching**: For German landline numbers, tries removing up to 3 trailing digits to find projectfacts matches (shown with "?" indicators)
+- **Phone formatting**: Numbers displayed as `+49 6251 555` with proper area code / mobile prefix spacing
+- **Standort display**: Called numbers show office name, e.g. `ZBens-20` instead of just `20`
+- Batch projectfacts lookup endpoint (`POST /api/pf/lookup-batch`) for efficient frontend resolution
+- Frontend `usePfContacts` hook with client-side caching
 
-## [1.3.0] - 2026-02-19
+### Changed
+- Verbindung column uses larger font size (matching Dauer column)
+- Caller column widened to 320px for better readability with contact names
+
+### Configuration
+- `PF_API_BASE_URL`, `PF_API_DEVICE_ID`, `PF_API_TOKEN` — projectfacts connection (optional, all features except contact names work without it)
+- `MOBILE_PREFIXES` — mobile prefixes excluded from fuzzy matching (sensible defaults built in)
+- `SPECIAL_PREFIXES` — special number prefixes excluded from fuzzy matching (sensible defaults built in)
+
+## [1.2.1] - 2026-02-19
 
 ### Added
 - Search field in call history filters to search by phone number (caller, callee) or extension name

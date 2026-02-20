@@ -1,4 +1,4 @@
-import type { CallsResponse, CallsQuery, ExtensionInfo, CrmContact } from "../../../shared/types";
+import type { CallsResponse, CallsQuery, ExtensionInfo, PfContact } from "../../../shared/types";
 import { getToken, clearToken } from "../hooks/useAuth";
 
 const BASE = "/api";
@@ -62,9 +62,9 @@ export async function fetchConfig(): Promise<{ kopfnummern: string[]; kopfnummer
   return res.json();
 }
 
-export async function lookupCrmContacts(numbers: string[]): Promise<Record<string, CrmContact>> {
+export async function lookupPfContacts(numbers: string[]): Promise<Record<string, PfContact>> {
   if (numbers.length === 0) return {};
-  const res = await authFetch(`${BASE}/crm/lookup-batch`, {
+  const res = await authFetch(`${BASE}/pf/lookup-batch`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ numbers }),

@@ -1,6 +1,6 @@
-import type { CallRecord, CallStatus, CrmContact } from "../../../shared/types";
+import type { CallRecord, CallStatus, PfContact } from "../../../shared/types";
 import { CallStatusBadge } from "./CallStatusBadge";
-import { formatTime, formatDate, formatDuration, formatPhone, type KopfnummerEntry } from "../lib/formatters";
+import { formatTime, formatDate, formatDuration, formatPhone, getStandort, type KopfnummerEntry } from "../lib/formatters";
 
 const arrowColor: Record<CallStatus, string> = {
   ringing: "text-yellow-800 dark:text-yellow-300",
@@ -21,35 +21,61 @@ interface Props {
   onPageSizeChange: (size: number) => void;
   kopfnummern?: string[];
   kopfnummernMap?: KopfnummerEntry[];
-  crmContacts?: Record<string, CrmContact>;
+  pfContacts?: Record<string, PfContact>;
 }
 
-function PhoneWithCrm({ number, kopfnummern, kopfnummernMap, crmContacts, className }: {
+function displayNumber(num: string): string {
+  if (num.length > 8 && !num.startsWith("0") && !num.startsWith("+")) return "+" + num;
+  return num;
+}
+
+function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, className }: {
   number: string;
   kopfnummern?: string[];
   kopfnummernMap?: KopfnummerEntry[];
-  crmContacts?: Record<string, CrmContact>;
+  pfContacts?: Record<string, PfContact>;
   className?: string;
 }) {
   const formatted = formatPhone(number, kopfnummern, kopfnummernMap);
-  const contact = crmContacts?.[number];
+  const contact = pfContacts?.[number];
   const isExternal = formatted === number; // not matched by kopfnummern
+  const standort = getStandort(number, kopfnummernMap);
 
-  if (contact?.name && isExternal) {
+  const displayNum = contact?.formatted || displayNumber(number);
+
+  // Internal number matched by kopfnummer: show "ZBens 20" instead of just "20"
+  if (!isExternal && standort) {
     return (
-      <span className={`whitespace-nowrap ${className ?? ""}`} title={number}>
-        <span className="text-blue-600 dark:text-blue-400 font-sans font-medium">{contact.name}</span>
-        <span className="text-gray-400 ml-1">{number}</span>
+      <span className={`whitespace-nowrap ${className ?? ""}`} title={displayNum}>
+        <span className="text-green-600 dark:text-green-400 font-sans">{standort}</span>-{formatted}
       </span>
     );
   }
 
-  return <span className={`whitespace-nowrap ${className ?? ""}`} title={number}>{formatted}</span>;
+  if (contact?.name && isExternal) {
+    const fuzzyMarker = contact.fuzzy ? "?".repeat(contact.fuzzy) : "";
+    const isCityOnly = !!contact.city && contact.name === contact.city;
+    const hasPfName = contact.contactId > 0;
+    const nameColor = isCityOnly
+      ? "text-amber-600 dark:text-amber-400 font-sans italic"
+      : "text-blue-600 dark:text-blue-400 font-sans font-medium";
+    const showCity = hasPfName && contact.city && contact.name !== contact.city;
+
+    return (
+      <span className={`whitespace-nowrap ${className ?? ""}`} title={displayNum}>
+        <span className={nameColor}>{contact.name}{fuzzyMarker}</span>
+        {showCity && <span className="text-amber-600 dark:text-amber-400 font-sans italic ml-1">({contact.city})</span>}
+        <span className="text-gray-400 ml-1">{displayNum}</span>
+      </span>
+    );
+  }
+
+  return <span className={`whitespace-nowrap ${className ?? ""}`} title={displayNum}>{formatted === number ? displayNum : formatted}</span>;
 }
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20, 30, 50, 100];
 
-export function CallHistoryTable({ calls, total, page, pageSize, loading, onPageChange, onPageSizeChange, kopfnummern, kopfnummernMap, crmContacts }: Props) {
+export function CallHistoryTable({ calls, total, page, pageSize, loading, onPageChange, onPageSizeChange, kopfnummern, kopfnummernMap, pfContacts }: Props) {
   const totalPages = Math.ceil(total / pageSize);
 
   return (
@@ -152,10 +178,10 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
                 </td>
                 <td className="px-3 py-1.5 font-mono dark:text-gray-300">{formatDuration(call.duration)}</td>
                 <td className="px-3 py-1.5 font-mono dark:text-gray-300">
-                  <div className="grid grid-cols-[200px_auto_1fr] items-center gap-1">
-                    <PhoneWithCrm number={call.caller} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} crmContacts={crmContacts} className="truncate text-right" />
+                  <div className="grid grid-cols-[320px_auto_1fr] items-center gap-1">
+                    <PhoneWithPf number={call.caller} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} className="truncate text-right" />
                     <span className={`${arrowColor[call.status] ?? "text-gray-800 dark:text-gray-300"} text-2xl font-black leading-none`} title={call.direction === "inbound" ? "Eingehend" : "Ausgehend"}>&#8594;</span>
-                    <PhoneWithCrm number={call.callee} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} crmContacts={crmContacts} className="truncate" />
+                    <PhoneWithPf number={call.callee} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} className="truncate" />
                   </div>
                 </td>
               </tr>

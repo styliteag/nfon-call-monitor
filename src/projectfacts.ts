@@ -1,14 +1,10 @@
-import { normalizePhone, phonesMatch } from "./phone-utils.js";
-
-export interface CrmContact {
-  name: string;
-  contactId: number;
-}
+import { normalizePhone, phonesMatch, isGermanLandline, classifyPhone, lookupCity, formatPhoneNice } from "./phone-utils.js";
+import type { PfContact } from "../shared/types.js";
 
 interface PhoneEntry {
   normalized: string;
   raw: string;
-  contact: CrmContact;
+  contact: PfContact;
 }
 
 let phoneCache: PhoneEntry[] = [];
@@ -17,6 +13,7 @@ const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutes
 const PHONE_TYPES = ["TEL", "TEL_VOICE", "TEL_MOBILE"];
 const PAGE_SIZE = 200;
 const CONCURRENCY = 10;
+const MAX_FUZZY_DIGITS = 3;
 
 function isConfigured(): boolean {
   return !!(process.env.PF_API_BASE_URL && process.env.PF_API_DEVICE_ID && process.env.PF_API_TOKEN);
@@ -98,7 +95,7 @@ async function loadPhoneCache(): Promise<void> {
       const items = await fetchListItems(type);
       allItems.push(...items);
     }
-    console.log(`[CRM] Found ${allItems.length} phone entries, fetching details...`);
+    console.log(`[pf] Found ${allItems.length} phone entries, fetching details...`);
 
     // Step 2: Fetch details with concurrency limit to get contact info
     const entries = await pMap(allItems, async (item): Promise<PhoneEntry | null> => {
@@ -116,25 +113,87 @@ async function loadPhoneCache(): Promise<void> {
 
     phoneCache = entries.filter((e): e is PhoneEntry => e !== null);
     cacheReady = true;
-    console.log(`[CRM] Loaded ${phoneCache.length} phone entries from projectfacts`);
+    console.log(`[pf] Loaded ${phoneCache.length} phone entries from projectfacts`);
   } catch (err) {
-    console.warn("[CRM] Failed to load phone cache:", err);
+    console.warn("[pf] Failed to load phone cache:", err);
   }
 }
 
-export function lookupPhone(rawNumber: string): CrmContact | null {
-  if (!cacheReady || !rawNumber) return null;
+/** Try exact match against cache */
+function exactLookup(rawNumber: string): PfContact | null {
   for (const entry of phoneCache) {
     if (phonesMatch(rawNumber, entry.raw)) {
-      return entry.contact;
+      return { ...entry.contact };
     }
   }
   return null;
 }
 
-export function lookupPhones(numbers: string[]): Record<string, CrmContact> {
-  const result: Record<string, CrmContact> = {};
-  if (!cacheReady) return result;
+/**
+ * Fuzzy match: try removing 1-3 digits from the end of both the input number
+ * and the projectfacts entries to find a match. Only for German landline numbers.
+ */
+function fuzzyLookup(rawNumber: string): PfContact | null {
+  const normalized = normalizePhone(rawNumber);
+  if (!isGermanLandline(normalized)) return null;
+
+  for (let remove = 1; remove <= MAX_FUZZY_DIGITS; remove++) {
+    if (normalized.length <= remove + 6) continue; // keep at least 6 digits
+    const shortened = normalized.slice(0, -remove);
+
+    for (const entry of phoneCache) {
+      // Also shorten the pf number by up to `remove` digits
+      const entryNorm = entry.normalized;
+      if (!isGermanLandline(entryNorm)) continue;
+
+      // Check: shortened input matches full pf entry
+      if (phonesMatch(shortened, entryNorm)) {
+        return { ...entry.contact, fuzzy: remove };
+      }
+      // Check: full input matches shortened pf entry
+      if (entryNorm.length > remove + 6) {
+        const entryShortened = entryNorm.slice(0, -remove);
+        if (phonesMatch(normalized, entryShortened)) {
+          return { ...entry.contact, fuzzy: remove };
+        }
+      }
+    }
+  }
+  return null;
+}
+
+export function lookupPhone(rawNumber: string): PfContact | null {
+  if (!rawNumber) return null;
+
+  const formatted = formatPhoneNice(rawNumber) ?? undefined;
+  const normalized = normalizePhone(rawNumber);
+  const phoneType = classifyPhone(normalized);
+  const city = phoneType === "landline" ? lookupCity(normalized) ?? undefined
+    : phoneType === "mobile" ? "Mobil"
+    : phoneType === "special" ? "Sonderrufnummer"
+    : undefined;
+
+  // 1. Exact projectfacts match (only if cache loaded)
+  if (cacheReady) {
+    const exact = exactLookup(rawNumber);
+    if (exact) return { ...exact, formatted, city };
+
+    // 2. Fuzzy projectfacts match (German landline only)
+    const fuzzy = fuzzyLookup(rawNumber);
+    if (fuzzy) return { ...fuzzy, formatted, city };
+  }
+
+  // 3. Fallback label (always works)
+  if (city) return { name: city, contactId: 0, city, formatted };
+
+  // 4. At least return formatted number if we have one
+  if (formatted) return { name: "", contactId: 0, formatted };
+
+  return null;
+}
+
+export function lookupPhones(numbers: string[]): Record<string, PfContact> {
+  const result: Record<string, PfContact> = {};
   for (const num of numbers) {
     if (!num) continue;
     const contact = lookupPhone(num);
@@ -143,12 +202,12 @@ export function lookupPhones(numbers: string[]): Record<string, CrmContact> {
   return result;
 }
 
-export async function initCrmCache(): Promise<void> {
+export async function initPfCache(): Promise<void> {
   if (!isConfigured()) {
-    console.log("[CRM] projectfacts not configured, skipping");
+    console.log("[pf] projectfacts not configured, skipping");
     return;
   }
-  console.log("[CRM] Loading phone cache from projectfacts...");
+  console.log("[pf] Loading phone cache from projectfacts...");
   await loadPhoneCache();
   setInterval(loadPhoneCache, REFRESH_INTERVAL);
 }
