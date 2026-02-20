@@ -202,6 +202,22 @@ export function lookupPhones(numbers: string[]): Record<string, PfContact> {
   return result;
 }
 
+/** @internal Test helper — inject entries into the phone cache */
+export function _testSetCache(entries: { raw: string; contact: PfContact }[]): void {
+  phoneCache = entries.map((e) => ({
+    normalized: normalizePhone(e.raw),
+    raw: e.raw,
+    contact: e.contact,
+  }));
+  cacheReady = true;
+}
+
+/** @internal Test helper — clear the phone cache */
+export function _testClearCache(): void {
+  phoneCache = [];
+  cacheReady = false;
+}
+
 export async function initPfCache(): Promise<void> {
   if (!isConfigured()) {
     console.log("[pf] projectfacts not configured, skipping");
