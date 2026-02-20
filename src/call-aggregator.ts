@@ -78,16 +78,30 @@ export function processEvent(event: NfonCallEvent): void {
       if (!record.answerTime) {
         record.answerTime = now;
       }
-      // Cancel ringing on all other extensions for the same call (group call)
-      for (const [otherKey, otherRecord] of activeCalls) {
-        if (otherRecord.id === event.uuid && otherRecord.extension !== event.extension && otherRecord.status === "ringing") {
-          console.log(`[Calls] Group cancel: ${otherRecord.extensionName}(${otherRecord.extension}) was ringing, now missed (answered by ${event.extension})`);
-          otherRecord.status = "missed";
-          otherRecord.endTime = now;
-          otherRecord.endReason = "cancel";
-          activeCalls.delete(otherKey);
-          upsertCall(otherRecord);
-          callEvents.emit("call:updated", otherRecord);
+      // Cancel ringing on all other extensions for the same call (group call).
+      // Match by UUID first, but also by caller+direction+time window for
+      // cascaded ring groups where NFON assigns different UUIDs per ring attempt.
+      {
+        const answeredStart = new Date(record.startTime).getTime();
+        for (const [otherKey, otherRecord] of activeCalls) {
+          if (otherRecord.extension === event.extension) continue;
+          if (otherRecord.status !== "ringing") continue;
+
+          const sameUuid = otherRecord.id === event.uuid;
+          const sameCaller = record.direction === "inbound"
+            && otherRecord.direction === "inbound"
+            && otherRecord.caller === record.caller
+            && Math.abs(new Date(otherRecord.startTime).getTime() - answeredStart) < 60_000;
+
+          if (sameUuid || sameCaller) {
+            console.log(`[Calls] Group cancel: ${otherRecord.extensionName}(${otherRecord.extension}) was ringing, now missed (answered by ${event.extension})${!sameUuid ? " [cross-uuid]" : ""}`);
+            otherRecord.status = "missed";
+            otherRecord.endTime = now;
+            otherRecord.endReason = "cancel";
+            activeCalls.delete(otherKey);
+            upsertCall(otherRecord);
+            callEvents.emit("call:updated", otherRecord);
+          }
         }
       }
       break;

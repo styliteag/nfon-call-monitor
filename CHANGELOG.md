@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Ring group calls: cancel ringing on all extensions when one answers, even across different NFON UUIDs (cascaded ring groups)
+
 ## [1.4.6] - 2026-02-20
 
 ## [1.4.5] - 2026-02-20
