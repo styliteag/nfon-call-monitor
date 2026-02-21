@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- "Zeit" column now shows **Heute** / **Gestern** instead of the numeric date for today and yesterday
+
 ## [1.4.9] - 2026-02-20
 
 ### Fixed

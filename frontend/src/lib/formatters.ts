@@ -16,7 +16,14 @@ export function formatTime(iso?: string): string {
 
 export function formatDate(iso?: string): string {
   if (!iso) return "-";
-  return new Date(iso).toLocaleDateString("de-DE", {
+  const d = new Date(iso);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const dateOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diffDays = Math.round((today.getTime() - dateOnly.getTime()) / 86400000);
+  if (diffDays === 0) return "Heute";
+  if (diffDays === 1) return "Gestern";
+  return d.toLocaleDateString("de-DE", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
