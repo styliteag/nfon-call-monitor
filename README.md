@@ -14,7 +14,10 @@ Echtzeit-Anrufüberwachung für NFON-Telefonanlagen. Zeigt eingehende/ausgehende
 
 - **Echtzeit-Dashboard** — Alle eingehenden und ausgehenden Anrufe erscheinen sofort via WebSocket, ohne Seite neu zu laden. Status-Updates (klingelt, aktiv, angenommen, verpasst) werden live gepusht.
 - **Extension-Karten** — Jede Nebenstelle als Karte mit Live-Presence (online/offline), aktuellem Anruf-Status, Gesprächspartner, Gesprächsdauer und Idle-Zeit seit letzter Aktivität.
+- **Agent-Queue-Status** — Dritter Status-Punkt (blau) auf Extension-Karten zeigt an, ob ein Agent in der Warteschlange eingeloggt ist (`*87`/`**87`). Status wird in SQLite persistiert.
+- **Benutzer-Status (Präsenz)** — Jeder Benutzer kann seinen Status setzen (Online, Office, Homeoffice, Mittagspause, Offline) mit optionaler Freitext-Nachricht. Farbige Badges auf den Extension-Karten, Echtzeit-Broadcast an alle Clients.
 - **Verbindungs-Indikator** — Zeigt jederzeit an, ob die SSE-Verbindung zur NFON API steht oder unterbrochen ist.
+- **Auto-Update-Banner** — Informiert Benutzer mit offener Session wenn eine neue Version deployed wurde. Frontend pollt `/api/version` und zeigt ein blaues Banner mit "Jetzt aktualisieren"-Button.
 
 ### Anrufsteuerung
 
@@ -24,9 +27,12 @@ Echtzeit-Anrufüberwachung für NFON-Telefonanlagen. Zeigt eingehende/ausgehende
 
 - **Persistente Call-Historie** — NFON bietet keinen History-Endpoint. Das Backend bleibt 24/7 am SSE-Stream und speichert jeden Anruf in SQLite. Beim Öffnen des Dashboards ist die komplette Historie sofort verfügbar.
 - **Umfangreiche Filter** — Nach Extension, Status (angenommen/verpasst/besetzt/abgelehnt), Richtung (ein-/ausgehend) und Zeitraum filtern. Alle Filter kombinierbar.
+- **"Echt verpasst"-Filter** — Berücksichtigt Gruppenrufe: Bei Sammelruf gilt ein Anruf nur als verpasst wenn KEINE Nebenstelle angenommen hat.
 - **Volltextsuche** — Suche nach Telefonnummer, Extension-Name oder (bei aktiver ProjectFacts-Integration) Kontaktname. Ein Suchfeld, alle Treffer.
 - **Pagination** — Konfigurierbare Seitengröße (5 bis 100 Einträge), server-seitig paginiert für schnelle Ladezeiten auch bei tausenden Anrufen.
 - **Copy to Clipboard** — Jede Telefonnummer hat ein dezentes Copy-Icon (erscheint bei Hover), ein Klick kopiert die formatierte Nummer mit grünem Häkchen als Bestätigung.
+- **Relative Zeitanzeige** — "Heute" / "Gestern" statt numerischem Datum in der Zeit-Spalte.
+- **Server-Downtime-Erkennung** — Bei Neustart erkennt der Server wie lange er offline war und erstellt einen System-Eintrag in der Anrufliste mit Dauer der Lücke.
 
 ### Kontakterkennung
 
@@ -36,13 +42,23 @@ Echtzeit-Anrufüberwachung für NFON-Telefonanlagen. Zeigt eingehende/ausgehende
 - **Intelligente Formatierung** — Rohe Nummern wie `49625182755` werden als `+49 6251 82755` dargestellt, mit korrekter Vorwahl-Trennung.
 - **Standort-Anzeige** — Interne Nummern zeigen den Standortnamen, z.B. `ZBens-20` statt nur `20`.
 
+### Benachrichtigungen
+
+- **Browser-Push-Notifications** — Desktop-Benachrichtigungen für eingehende und verpasste Anrufe. Glocken-Icon im Header zum Ein-/Ausschalten. Einstellung wird in localStorage gespeichert.
+- **"Meine Extension"-Auswahl** — Benutzer kann seine eigene Nebenstelle im Header setzen. Notifications werden nur für die eigene Extension angezeigt.
+
 ### Betrieb & Sicherheit
 
 - **Dashboard-Login** — JWT-basierte Authentifizierung mit SHA-256-gehashten Passwörtern. Kein ungeschützter Zugriff auf Anrufdaten.
 - **Docker-ready** — Multi-Stage Build (3 Stufen) auf Alpine-Basis, Multi-Platform (amd64/arm64). Produktionsimage ohne Dev-Dependencies.
+- **Health-Check-Endpoint** — `GET /api/health` (ohne Auth) liefert Server-Status für Monitoring-Tools (Uptime Kuma, etc.). `200 ok` wenn NFON SSE verbunden, `503 degraded` wenn nicht.
+- **Prometheus-Metriken** — `GET /api/metrics` mit Basic Auth für Grafana-Integration. Metriken: `nfon_up`, `nfon_uptime_seconds`, `nfon_websocket_clients`, `nfon_active_calls`, `nfon_calls_total{status=...}`, etc.
+- **Tägliches DB-Backup** — Automatisches SQLite-Backup täglich um 02:00 Uhr. Alte Backups werden nach konfigurierbarer Anzahl Tage bereinigt (`BACKUP_KEEP_DAYS`).
+- **Daten-Retention** — Anrufe älter als X Tage werden täglich automatisch gelöscht (`RETENTION_DAYS`, Standard: 60).
 - **Dark Mode** — Komplettes Dark/Light-Theme, automatisch oder manuell umschaltbar.
-- **Debug-Logging** — Optional aktivierbar (`LOG=debug`) für Click-to-Dial-Requests, SSE-Events und Presence-Changes.
+- **Structured Logging** — Log-Levels mit Timestamps (`info`/`warn`/`error`/`debug`). Standard: nur Startup, Fehler und Warnungen. Verbose via `LOG=debug`.
 - **Auto-Reconnect** — SSE-Verbindung zur NFON API wird bei Abbruch automatisch wiederhergestellt. Verpasste Events während der Unterbrechung werden als `stale` markiert.
+- **Adaptive Presence-Polling** — Polling-Rate passt sich automatisch der Aktivität an (3s bei aktiven Calls bis 60s im Idle).
 
 ---
 
@@ -123,12 +139,24 @@ DASHBOARD_PASSWORD_HASH=   # sha256: echo -n 'password' | shasum -a 256
 # === App ===
 # APP_TITLE=NFON Call Monitor
 # LOG=debug                   # Verbose logging (Click-to-Dial, SSE, Presence)
-# PRESENCE_POLL_INTERVAL=15000  # Presence-Polling in ms (Default: 15000)
 
 # === ProjectFacts CRM (optional) ===
 # PF_API_BASE_URL=https://team.stylite.de
 # PF_API_DEVICE_ID=
 # PF_API_TOKEN=
+
+# === Sondernummern & Agent-Queue (optional) ===
+# SPECIAL_NUMBERS=*87:Agent On,**87:Agent Off,*55:Primärgerät,...
+# AGENT_ON_CODE=*87
+# AGENT_OFF_CODE=**87
+
+# === Monitoring (optional) ===
+# METRICS_USER=prometheus      # Prometheus-Endpoint aktivieren
+# METRICS_PASS=secret
+
+# === Datenbank (optional) ===
+# RETENTION_DAYS=60            # Anrufe älter als X Tage löschen
+# BACKUP_KEEP_DAYS=7           # Backups älter als X Tage löschen
 
 # === Phone-Klassifizierung (optional, sensible Defaults) ===
 # MOBILE_PREFIXES=150,151,152,...
@@ -240,8 +268,11 @@ Die ProjectFacts-Integration ist **optional** — ohne Konfiguration funktionier
 |---|---|
 | `POST /api/auth/login` | Dashboard-Login (JWT) |
 | `GET /api/version` | App-Version & Titel |
+| `GET /api/health` | Health-Check (ohne Auth) — `200 ok` / `503 degraded` |
+| `GET /api/metrics` | Prometheus-Metriken (Basic Auth via `METRICS_USER`/`METRICS_PASS`) |
 | `GET /api/calls?page=1&pageSize=50&extension=20&status=missed&direction=inbound&dateFrom=...&dateTo=...` | Anrufhistorie (paginiert, gefiltert) |
 | `GET /api/extensions` | Extension-Liste mit Presence |
+| `POST /api/extensions/status` | Benutzer-Status setzen (`{ extension, status, message }`) |
 | `GET /api/pf/lookup?number=...` | Einzelner Kontakt-Lookup |
 | `POST /api/pf/lookup-batch` | Batch-Lookup (`{ numbers: [...] }`) |
 | `POST /api/click-to-dial` | Click-to-Dial (`{ extension, target }`) → 202 |
@@ -257,6 +288,7 @@ Die ProjectFacts-Integration ist **optional** — ohne Konfiguration funktionier
 | `call:updated` | Server → Client | Anruf-Status geändert |
 | `nfon:connected` | Server → Client | SSE-Verbindung steht |
 | `nfon:disconnected` | Server → Client | SSE-Verbindung unterbrochen |
+| `user-status:changed` | Server → Client | Benutzer-Status geändert |
 
 ---
 
