@@ -105,7 +105,10 @@ export function getCalls(query: CallsQuery): CallsResponse {
     conditions.push("extension = :extension");
     params.extension = query.extension;
   }
-  if (query.status) {
+  if (query.status === "missedOnly") {
+    conditions.push("status = 'missed'");
+    conditions.push("id NOT IN (SELECT id FROM calls WHERE status = 'answered')");
+  } else if (query.status) {
     conditions.push("status = :status");
     params.status = query.status;
   }

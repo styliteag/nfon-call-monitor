@@ -7,7 +7,6 @@ Ideen und geplante Erweiterungen fuer den NFON Call Monitor.
 ## Anruf-Statistiken & Reporting
 
 - **Dashboard-Statistiken**: Widgets mit Tages-/Wochen-/Monatsstatistiken (Anzahl Anrufe, durchschnittliche Gespraechsdauer, Erreichbarkeitsquote pro Nebenstelle)
-- **Verpasste-Anrufe-Report**: Taeglicher/woechentlicher Report ueber verpasste Anrufe, optional per E-Mail
 - **Peak-Hours-Analyse**: Heatmap der Anruflast nach Wochentag und Uhrzeit
 - **CSV/Excel-Export**: Anrufhistorie als CSV oder XLSX exportieren (gefiltert oder komplett)
 

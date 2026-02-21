@@ -41,6 +41,7 @@ export function Filters({ filters, extensions, onFilterChange }: Props) {
         <option value="">Alle Status</option>
         <option value="answered">Angenommen</option>
         <option value="missed">Verpasst</option>
+        <option value="missedOnly">Echt verpasst</option>
         <option value="busy">Besetzt</option>
         <option value="rejected">Abgelehnt</option>
       </select>

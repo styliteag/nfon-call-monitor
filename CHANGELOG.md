@@ -18,6 +18,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Konfigurierbare Aufbewahrungsdauer** — Anrufe älter als X Tage werden täglich automatisch gelöscht
   - Standard: 60 Tage, konfigurierbar via `RETENTION_DAYS`
   - Purge läuft täglich um 02:00 nach dem Backup (Backup enthält noch alle Daten)
+- **"Echt verpasst"-Filter** — neuer Status-Filter der Gruppenrufe beruecksichtigt
+  - Bei Sammelruf (z.B. "Zentral") gilt ein Anruf nur als verpasst wenn KEINE Nebenstelle angenommen hat
+  - Korrelation ueber Call-ID (`id NOT IN (SELECT id FROM calls WHERE status = 'answered')`)
 - **PLANNED-FEATURES.md** — Roadmap-Dokument mit geplanten Features
 
 ## [1.4.11] - 2026-02-21
