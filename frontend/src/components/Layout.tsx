@@ -13,9 +13,10 @@ interface Props {
   notifications?: { enabled: boolean; toggle: () => void; supported: boolean };
   myExtension?: { value: string | null; select: (ext: string | null) => void };
   extensions?: ExtensionInfo[];
+  userStatus?: { status: string; message: string; update: (status: string, message: string) => void };
 }
 
-export function Layout({ children, appTitle, isConnected, nfonConnected, dark, onToggleDark, onLogout, notifications, myExtension, extensions }: Props) {
+export function Layout({ children, appTitle, isConnected, nfonConnected, dark, onToggleDark, onLogout, notifications, myExtension, extensions, userStatus }: Props) {
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
       <header className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
@@ -40,6 +41,30 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
                   </option>
                 ))}
               </select>
+            </div>
+          )}
+          {myExtension?.value && userStatus && (
+            <div className="flex items-center gap-1.5">
+              <select
+                value={userStatus.status}
+                onChange={(e) => userStatus.update(e.target.value, userStatus.message)}
+                className="rounded border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 dark:text-gray-200"
+                title="Mein Status"
+              >
+                <option value="online">Online</option>
+                <option value="office">Office</option>
+                <option value="homeoffice">Homeoffice</option>
+                <option value="mittagspause">Mittagspause</option>
+                <option value="offline">Offline</option>
+              </select>
+              <input
+                type="text"
+                value={userStatus.message}
+                onChange={(e) => userStatus.update(userStatus.status, e.target.value)}
+                placeholder="Statustext…"
+                maxLength={100}
+                className="rounded border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 w-32"
+              />
             </div>
           )}
           {notifications?.supported && (

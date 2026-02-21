@@ -75,6 +75,15 @@ export async function initiateCall(extension: string, target: string): Promise<{
   return res.json();
 }
 
+export async function setExtensionStatus(extension: string, status: string, message: string): Promise<void> {
+  const res = await authFetch(`${BASE}/extensions/status`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ extension, status, message }),
+  });
+  if (!res.ok) throw new Error(`Fehler: ${res.status}`);
+}
+
 export async function lookupPfContacts(numbers: string[]): Promise<Record<string, PfContact>> {
   if (numbers.length === 0) return {};
   const res = await authFetch(`${BASE}/pf/lookup-batch`, {

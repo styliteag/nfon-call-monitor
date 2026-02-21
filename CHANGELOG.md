@@ -31,6 +31,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **"Meine Extension"-Auswahl** — Benutzer kann seine eigene Nebenstelle im Header setzen
   - Notifications werden nur fuer die eigene Nebenstelle angezeigt
   - Auswahl wird in localStorage gespeichert (persistent ueber Sessions)
+- **Benutzer-Status (Praesenz)** — jeder Benutzer kann seinen Status setzen, sichtbar fuer alle
+  - Presets: Online, Office, Homeoffice, Mittagspause, Offline
+  - Freitext-Statusnachricht (max 100 Zeichen)
+  - Farbige Badges auf den ExtensionCards (gruen/blau/gelb/grau)
+  - Status wird in SQLite gespeichert (persistent ueber Neustarts)
+  - Echtzeit-Broadcast an alle Clients via Socket.IO
+  - `POST /api/extensions/status` Endpoint
 
 ### Changed
 - **ConnectionStatus** nach rechts verschoben und "Online" in "Verbunden" umbenannt

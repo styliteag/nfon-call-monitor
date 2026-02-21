@@ -43,6 +43,15 @@ export function initDatabase(): void {
   `);
 
   db.exec(`
+    CREATE TABLE IF NOT EXISTS user_status (
+      extension TEXT PRIMARY KEY,
+      status TEXT NOT NULL DEFAULT 'online',
+      message TEXT NOT NULL DEFAULT '',
+      updated TEXT NOT NULL
+    )
+  `);
+
+  db.exec(`
     CREATE TABLE IF NOT EXISTS server_heartbeat (
       id INTEGER PRIMARY KEY CHECK (id = 1),
       last_seen TEXT NOT NULL
@@ -200,6 +209,31 @@ export function updateHeartbeat(): void {
 export function getLastHeartbeat(): string | null {
   const row = db.prepare("SELECT last_seen FROM server_heartbeat WHERE id = 1").get() as { last_seen: string } | undefined;
   return row?.last_seen ?? null;
+}
+
+export function setUserStatus(extension: string, status: string, message: string): void {
+  db.prepare(`
+    INSERT INTO user_status (extension, status, message, updated)
+    VALUES (:extension, :status, :message, :updated)
+    ON CONFLICT(extension) DO UPDATE SET
+      status = :status,
+      message = :message,
+      updated = :updated
+  `).run({
+    extension,
+    status,
+    message,
+    updated: new Date().toISOString(),
+  });
+}
+
+export function getUserStatuses(): Map<string, { status: string; message: string }> {
+  const rows = db.prepare("SELECT extension, status, message FROM user_status").all() as Array<{ extension: string; status: string; message: string }>;
+  const map = new Map<string, { status: string; message: string }>();
+  for (const row of rows) {
+    map.set(row.extension, { status: row.status, message: row.message });
+  }
+  return map;
 }
 
 export function getCallCounts(): Record<string, number> {

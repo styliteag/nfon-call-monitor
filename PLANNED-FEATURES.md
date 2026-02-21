@@ -42,7 +42,6 @@ Ideen und geplante Erweiterungen fuer den NFON Call Monitor.
 - **Login pro Agent/Nebenstelle**: Jeder Agent meldet sich mit eigenem Account an und bekommt nur seine zugewiesenen Nebenstellen angezeigt. Click-to-Dial/Drag-Drop nur fuer die eigenen Nebenstellen moeglich.
 - **Nebenstellen-Gruppen mit Sichtbarkeitsrechten**: Gruppen definieren, wer welche Nebenstellen (ein- und ausgehende Anrufe) vollstaendig sehen darf. Nicht-berechtigte Benutzer sehen nur anonymisierte Rufnummern.
 - **Privacy fuer ausgehende Anrufe**: Ausgehende Anrufe sind nur fuer die eigenen (und per Gruppe berechtigten) Nebenstellen sichtbar. Andere Benutzer sehen diese Anrufe nicht.
-- **Benutzer-Status (Praesenz)**: Jeder Extension/User kann seinen Status setzen (Online, Offline, Mittagspause, Homeoffice, Office) - sichtbar fuer alle Benutzer im Dashboard.
 - **Benutzerverwaltung**: Mehrere Dashboard-Benutzer mit Rollen (Admin, Viewer)
 - **Audit-Log**: Protokoll von Dashboard-Aktionen (Login, Click-to-Dial, etc.)
 

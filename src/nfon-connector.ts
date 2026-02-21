@@ -2,7 +2,7 @@ import { EventEmitter } from "events";
 import { login, startAutoRefresh, stopAutoRefresh } from "./auth.js";
 import { getExtensions, getLineStates, getCallEventStream } from "./api.js";
 import { processEvent, setExtensionNames, getActiveCallForExtension } from "./call-aggregator.js";
-import { upsertAgentStatus, getAgentStatuses } from "./db.js";
+import { upsertAgentStatus, getAgentStatuses, getUserStatuses } from "./db.js";
 import type { NfonCallEvent, ExtensionInfo } from "../shared/types.js";
 import * as log from "./log.js";
 
@@ -44,11 +44,18 @@ export function stop(): void {
 }
 
 export function getExtensionList(): ExtensionInfo[] {
+  const userStatuses = getUserStatuses();
   return extensions.map((ext) => {
     const call = getActiveCallForExtension(ext.extensionNumber);
+    const us = userStatuses.get(ext.extensionNumber);
+    const base = {
+      ...ext,
+      userStatus: us?.status,
+      userMessage: us?.message || undefined,
+    };
     if (call) {
       return {
-        ...ext,
+        ...base,
         currentCallId: call.id,
         currentCaller: call.caller,
         currentCallee: call.callee,
@@ -57,7 +64,7 @@ export function getExtensionList(): ExtensionInfo[] {
         currentCallStatus: call.status,
       };
     }
-    return ext;
+    return base;
   });
 }
 

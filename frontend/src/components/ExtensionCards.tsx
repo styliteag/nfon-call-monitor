@@ -40,6 +40,22 @@ function presenceLabel(presence: string): string {
   return "Offline";
 }
 
+const USER_STATUS_LABELS: Record<string, string> = {
+  online: "Online",
+  offline: "Offline",
+  mittagspause: "Mittagspause",
+  homeoffice: "Homeoffice",
+  office: "Office",
+};
+
+const USER_STATUS_COLORS: Record<string, string> = {
+  online: "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
+  offline: "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400",
+  mittagspause: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300",
+  homeoffice: "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300",
+  office: "bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300",
+};
+
 function lineLabel(line: string): string {
   switch (line) {
     case "idle": return "Frei";
@@ -170,6 +186,16 @@ function ExtensionCard({ ext, now, pfContacts }: { ext: ExtensionInfo; now: numb
         </div>
       </div>
       <div className="text-xs text-gray-600 dark:text-gray-400 truncate text-left">{ext.name}</div>
+      {ext.userStatus && (
+        <div className="flex items-center gap-1 mt-0.5">
+          <span className={`inline-block px-1.5 py-0 rounded text-[10px] font-medium ${USER_STATUS_COLORS[ext.userStatus] || USER_STATUS_COLORS.offline}`}>
+            {USER_STATUS_LABELS[ext.userStatus] || ext.userStatus}
+          </span>
+          {ext.userMessage && (
+            <span className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{ext.userMessage}</span>
+          )}
+        </div>
+      )}
 
       {partner ? (
         <div className="mt-1 text-xs">

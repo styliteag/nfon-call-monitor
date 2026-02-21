@@ -41,6 +41,8 @@ export interface ExtensionInfo {
   currentCallStatus?: CallStatus;
   lastStateChange?: string;       // ISO 8601 - from NFON states updated field
   agentLoggedIn?: boolean;         // tracked via *87/*87 SSE events
+  userStatus?: string;             // "online" | "offline" | "mittagspause" | "homeoffice" | "office"
+  userMessage?: string;            // free text status message
 }
 
 export interface CallsResponse {
