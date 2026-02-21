@@ -9,9 +9,10 @@ interface Props {
   dark: boolean;
   onToggleDark: () => void;
   onLogout: () => void;
+  notifications?: { enabled: boolean; toggle: () => void; supported: boolean };
 }
 
-export function Layout({ children, appTitle, isConnected, nfonConnected, dark, onToggleDark, onLogout }: Props) {
+export function Layout({ children, appTitle, isConnected, nfonConnected, dark, onToggleDark, onLogout, notifications }: Props) {
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
       <header className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
@@ -21,6 +22,26 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
         </h1>
         <div className="flex items-center gap-3">
           <ConnectionStatus isConnected={isConnected} nfonConnected={nfonConnected} />
+          {notifications?.supported && (
+            <button
+              onClick={notifications.toggle}
+              className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+              title={notifications.enabled ? "Benachrichtigungen aus" : "Benachrichtigungen an"}
+            >
+              {notifications.enabled ? (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                  <path fillRule="evenodd" d="M10 2a6 6 0 00-6 6c0 1.887-.454 3.665-1.257 5.234a.75.75 0 00.515 1.076 32.91 32.91 0 003.256.508 3.5 3.5 0 006.972 0 32.903 32.903 0 003.256-.508.75.75 0 00.515-1.076A11.448 11.448 0 0116 8a6 6 0 00-6-6z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                  <path d="M4 8a6 6 0 0110.607-3.868.75.75 0 101.06-1.06A7.5 7.5 0 002.5 8c0 1.72-.394 3.348-1.093 4.803a.75.75 0 00.525 1.073 33.4 33.4 0 003.455.58.75.75 0 10.164-1.49 31.903 31.903 0 01-2.498-.42A12.811 12.811 0 004 8z" />
+                  <path d="M17.5 8a5.974 5.974 0 01-.941 3.22.75.75 0 101.238.844C18.574 10.78 19 9.434 19 8a7.48 7.48 0 00-1.957-5.06.75.75 0 10-1.12.996A5.98 5.98 0 0117.5 8z" />
+                  <path fillRule="evenodd" d="M7.014 14.766a.75.75 0 01.836.649 2.5 2.5 0 004.3 0 .75.75 0 011.486.186 4 4 0 01-6.872 0 .75.75 0 01.65-.835z" clipRule="evenodd" />
+                  <path d="M3.28 2.22a.75.75 0 00-1.06 1.06l14.5 14.5a.75.75 0 101.06-1.06L3.28 2.22z" />
+                </svg>
+              )}
+            </button>
+          )}
           <button
             onClick={onToggleDark}
             className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"

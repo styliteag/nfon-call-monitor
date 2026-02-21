@@ -12,7 +12,6 @@ Ideen und geplante Erweiterungen fuer den NFON Call Monitor.
 
 ## Benachrichtigungen
 
-- **Browser-Push-Notifications**: Desktop-Benachrichtigung bei eingehenden Anrufen oder verpassten Anrufen
 - **Webhook-Integration**: Konfigurierbare Webhooks bei bestimmten Events (verpasster Anruf, langer Anruf, etc.)
 - **E-Mail-Alerts**: Benachrichtigung bei X verpassten Anrufen innerhalb von Y Minuten
 

@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Prometheus-Metriken** — `GET /api/metrics` mit Basic Auth fuer Grafana-Integration
   - Metriken: `nfon_up`, `nfon_uptime_seconds`, `nfon_websocket_clients`, `nfon_active_calls`, `nfon_extensions_total`, `nfon_calls_total{status=...}`, `nfon_memory_bytes{type=...}`
   - Aktivierung via `METRICS_USER` und `METRICS_PASS` Env-Variablen (deaktiviert wenn nicht gesetzt)
+- **Browser-Push-Notifications** — Desktop-Benachrichtigungen fuer eingehende und verpasste Anrufe
+  - Glocken-Icon im Header zum Ein-/Ausschalten
+  - Zeigt Anrufer und Nebenstelle in der Notification
+  - Einstellung wird in localStorage gespeichert
 - **PLANNED-FEATURES.md** — Roadmap-Dokument mit geplanten Features
 
 ## [1.4.11] - 2026-02-21

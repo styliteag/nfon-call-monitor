@@ -7,6 +7,7 @@ import { CallHistoryTable } from "./CallHistoryTable";
 import { useCalls } from "../hooks/useCalls";
 import { useExtensions } from "../hooks/useExtensions";
 import { usePfContacts } from "../hooks/usePfContacts";
+import { useNotifications } from "../hooks/useNotifications";
 import { fetchConfig, type KopfnummerEntry } from "../lib/api";
 
 interface Props {
@@ -50,6 +51,7 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout }: Props) {
   }, [calls, activeCalls, extensions]);
 
   const pfContacts = usePfContacts(allPhoneNumbers);
+  const notifications = useNotifications();
 
   const [kopfnummern, setKopfnummern] = useState<string[]>([]);
   const [kopfnummernMap, setKopfnummernMap] = useState<KopfnummerEntry[]>([]);
@@ -63,7 +65,7 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout }: Props) {
   }, []);
 
   return (
-    <Layout appTitle={appTitle} isConnected={isConnected} nfonConnected={nfonConnected} dark={dark} onToggleDark={onToggleDark} onLogout={onLogout}>
+    <Layout appTitle={appTitle} isConnected={isConnected} nfonConnected={nfonConnected} dark={dark} onToggleDark={onToggleDark} onLogout={onLogout} notifications={notifications}>
       <ActiveCallBanner calls={activeCalls} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} />
       <ExtensionCards extensions={extensions} pfContacts={pfContacts} />
       <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} />
