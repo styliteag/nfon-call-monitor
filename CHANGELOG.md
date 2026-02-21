@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.11] - 2026-02-21
+
 ### Added
 - **Server-Downtime-Erkennung** — beim Start prüft der Server wie lange er offline war und erstellt einen Eintrag in der Anrufliste
   - Heartbeat-Timestamp wird alle 60s in die DB geschrieben (`server_heartbeat`-Tabelle)
