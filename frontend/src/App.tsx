@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { LoginForm } from "./components/LoginForm";
 import { Dashboard } from "./components/Dashboard";
+import { UpdateBanner } from "./components/UpdateBanner";
 import { useDarkMode } from "./hooks/useDarkMode";
 import { useAuth } from "./hooks/useAuth";
+import { useVersionCheck } from "./hooks/useVersionCheck";
 import { fetchVersion } from "./lib/api";
 
 const DEFAULT_TITLE = "NFON Call Monitor";
@@ -10,6 +12,7 @@ const DEFAULT_TITLE = "NFON Call Monitor";
 export default function App() {
   const { isAuthenticated, checking, error, login, logout } = useAuth();
   const { dark, toggle } = useDarkMode();
+  const { updateAvailable } = useVersionCheck();
   const [appTitle, setAppTitle] = useState(DEFAULT_TITLE);
 
   useEffect(() => {
@@ -31,5 +34,10 @@ export default function App() {
     return <LoginForm appTitle={appTitle} onLogin={login} error={error} />;
   }
 
-  return <Dashboard appTitle={appTitle} dark={dark} onToggleDark={toggle} onLogout={logout} />;
+  return (
+    <>
+      {updateAvailable && <UpdateBanner />}
+      <Dashboard appTitle={appTitle} dark={dark} onToggleDark={toggle} onLogout={logout} />
+    </>
+  );
 }

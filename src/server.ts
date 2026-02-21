@@ -164,6 +164,7 @@ app.use(express.static(frontendDist));
 app.get("*", (_req, res, next) => {
   // Only serve index.html for non-API routes
   if (_req.path.startsWith("/api")) return next();
+  res.setHeader("Cache-Control", "no-cache");
   res.sendFile(path.join(frontendDist, "index.html"), (err) => {
     if (err) next();
   });
