@@ -43,6 +43,7 @@ export interface ExtensionInfo {
   agentLoggedIn?: boolean;         // tracked via *87/*87 SSE events
   userStatus?: string;             // "online" | "offline" | "mittagspause" | "homeoffice" | "office"
   userMessage?: string;            // free text status message
+  userStatusUpdated?: string;      // ISO 8601 - when status was last changed
 }
 
 export interface CallsResponse {

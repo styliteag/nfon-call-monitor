@@ -188,9 +188,15 @@ function ExtensionCard({ ext, now, pfContacts }: { ext: ExtensionInfo; now: numb
       <div className="text-xs text-gray-600 dark:text-gray-400 truncate text-left">{ext.name}</div>
       {ext.userStatus && (
         <div className="flex items-center gap-1 mt-0.5">
-          <span className={`inline-block px-1.5 py-0 rounded text-[10px] font-medium ${USER_STATUS_COLORS[ext.userStatus] || USER_STATUS_COLORS.offline}`}>
+          <span
+            className={`inline-block px-1.5 py-0 rounded text-[10px] font-medium ${USER_STATUS_COLORS[ext.userStatus] || USER_STATUS_COLORS.offline}`}
+            title={ext.userStatusUpdated ? `seit ${relativeTime(ext.userStatusUpdated)}` : undefined}
+          >
             {USER_STATUS_LABELS[ext.userStatus] || ext.userStatus}
           </span>
+          {ext.userStatusUpdated && (
+            <span className="text-[10px] text-gray-400 dark:text-gray-500">{relativeTime(ext.userStatusUpdated)}</span>
+          )}
           {ext.userMessage && (
             <span className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{ext.userMessage}</span>
           )}

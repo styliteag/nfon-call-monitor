@@ -52,6 +52,7 @@ export function getExtensionList(): ExtensionInfo[] {
       ...ext,
       userStatus: us?.status,
       userMessage: us?.message || undefined,
+      userStatusUpdated: us?.updated,
     };
     if (call) {
       return {

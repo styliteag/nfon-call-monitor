@@ -227,11 +227,11 @@ export function setUserStatus(extension: string, status: string, message: string
   });
 }
 
-export function getUserStatuses(): Map<string, { status: string; message: string }> {
-  const rows = db.prepare("SELECT extension, status, message FROM user_status").all() as Array<{ extension: string; status: string; message: string }>;
-  const map = new Map<string, { status: string; message: string }>();
+export function getUserStatuses(): Map<string, { status: string; message: string; updated: string }> {
+  const rows = db.prepare("SELECT extension, status, message, updated FROM user_status").all() as Array<{ extension: string; status: string; message: string; updated: string }>;
+  const map = new Map<string, { status: string; message: string; updated: string }>();
   for (const row of rows) {
-    map.set(row.extension, { status: row.status, message: row.message });
+    map.set(row.extension, { status: row.status, message: row.message, updated: row.updated });
   }
   return map;
 }

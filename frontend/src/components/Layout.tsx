@@ -35,7 +35,7 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
                 title="Meine Nebenstelle — Benachrichtigungen nur fuer diese Nebenstelle"
               >
                 <option value="">Alle</option>
-                {extensions.map((ext) => (
+                {[...extensions].sort((a, b) => Number(a.extensionNumber) - Number(b.extensionNumber)).map((ext) => (
                   <option key={ext.uuid} value={ext.extensionNumber}>
                     {ext.extensionNumber} - {ext.name}
                   </option>
