@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Blaues Banner mit "Jetzt aktualisieren"-Button erscheint bei Versionswechsel
 - **Cache-Control für index.html** — `no-cache` Header verhindert dass der Browser eine veraltete `index.html` aus dem Cache lädt
 
+### Fixed
+- TypeScript-Build-Fehler im Docker: `UserStatusValue`-Typ in Layout Props und fehlender `renotify`-Typ in Notification API
+
 ## [1.5.1] - 2026-02-21
 
 ## [1.5.0] - 2026-02-21
