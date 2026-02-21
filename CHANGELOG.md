@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **"Echt verpasst"-Filter** — neuer Status-Filter der Gruppenrufe beruecksichtigt
   - Bei Sammelruf (z.B. "Zentral") gilt ein Anruf nur als verpasst wenn KEINE Nebenstelle angenommen hat
   - Korrelation ueber Call-ID (`id NOT IN (SELECT id FROM calls WHERE status = 'answered')`)
+- **Prometheus-Metriken** — `GET /api/metrics` mit Basic Auth fuer Grafana-Integration
+  - Metriken: `nfon_up`, `nfon_uptime_seconds`, `nfon_websocket_clients`, `nfon_active_calls`, `nfon_extensions_total`, `nfon_calls_total{status=...}`, `nfon_memory_bytes{type=...}`
+  - Aktivierung via `METRICS_USER` und `METRICS_PASS` Env-Variablen (deaktiviert wenn nicht gesetzt)
 - **PLANNED-FEATURES.md** — Roadmap-Dokument mit geplanten Features
 
 ## [1.4.11] - 2026-02-21

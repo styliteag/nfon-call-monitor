@@ -6,7 +6,7 @@ import { Server } from "socket.io";
 import path from "path";
 import { readFileSync } from "fs";
 
-import { initDatabase, getLastHeartbeat, updateHeartbeat, upsertCall, backupDatabase, purgeOldCalls } from "./db.js";
+import { initDatabase, getLastHeartbeat, updateHeartbeat, upsertCall, backupDatabase, purgeOldCalls, getCallCounts } from "./db.js";
 import { callEvents, getActiveCallsList, cleanStaleCalls } from "./call-aggregator.js";
 import { connectorEvents, start as startConnector, stop as stopConnector, getExtensionList, isNfonConnected } from "./nfon-connector.js";
 import callsRouter from "./routes/calls.js";
@@ -62,6 +62,67 @@ app.get("/api/health", (_req, res) => {
     nfonConnected,
     socketClients,
   });
+});
+
+// Prometheus metrics endpoint (Basic Auth)
+const METRICS_USER = process.env.METRICS_USER;
+const METRICS_PASS = process.env.METRICS_PASS;
+
+app.get("/api/metrics", (req, res) => {
+  if (!METRICS_USER || !METRICS_PASS) {
+    return res.status(404).end();
+  }
+
+  const auth = req.headers.authorization;
+  if (!auth?.startsWith("Basic ")) {
+    res.setHeader("WWW-Authenticate", 'Basic realm="metrics"');
+    return res.status(401).end();
+  }
+  const [user, pass] = Buffer.from(auth.slice(6), "base64").toString().split(":");
+  if (user !== METRICS_USER || pass !== METRICS_PASS) {
+    res.setHeader("WWW-Authenticate", 'Basic realm="metrics"');
+    return res.status(401).end();
+  }
+
+  const uptime = Math.floor(process.uptime());
+  const nfonUp = isNfonConnected() ? 1 : 0;
+  const clients = io.engine.clientsCount;
+  const activeCalls = getActiveCallsList().length;
+  const extensions = getExtensionList().length;
+  const callCounts = getCallCounts();
+  const mem = process.memoryUsage();
+
+  const lines = [
+    "# HELP nfon_up NFON SSE connection status (1=connected, 0=disconnected)",
+    "# TYPE nfon_up gauge",
+    `nfon_up ${nfonUp}`,
+    "# HELP nfon_uptime_seconds Server uptime in seconds",
+    "# TYPE nfon_uptime_seconds gauge",
+    `nfon_uptime_seconds ${uptime}`,
+    "# HELP nfon_websocket_clients Connected Socket.IO clients",
+    "# TYPE nfon_websocket_clients gauge",
+    `nfon_websocket_clients ${clients}`,
+    "# HELP nfon_active_calls Currently active calls",
+    "# TYPE nfon_active_calls gauge",
+    `nfon_active_calls ${activeCalls}`,
+    "# HELP nfon_extensions_total Total number of extensions",
+    "# TYPE nfon_extensions_total gauge",
+    `nfon_extensions_total ${extensions}`,
+    "# HELP nfon_calls_total Total calls by status",
+    "# TYPE nfon_calls_total gauge",
+    ...Object.entries(callCounts).map(([status, count]) =>
+      `nfon_calls_total{status="${status}"} ${count}`
+    ),
+    "# HELP nfon_memory_bytes Process memory usage in bytes",
+    "# TYPE nfon_memory_bytes gauge",
+    `nfon_memory_bytes{type="rss"} ${mem.rss}`,
+    `nfon_memory_bytes{type="heap_used"} ${mem.heapUsed}`,
+    `nfon_memory_bytes{type="heap_total"} ${mem.heapTotal}`,
+    "",
+  ];
+
+  res.setHeader("Content-Type", "text/plain; version=0.0.4; charset=utf-8");
+  res.send(lines.join("\n"));
 });
 
 // Auth middleware for all other /api/* routes

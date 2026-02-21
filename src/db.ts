@@ -202,6 +202,15 @@ export function getLastHeartbeat(): string | null {
   return row?.last_seen ?? null;
 }
 
+export function getCallCounts(): Record<string, number> {
+  const rows = db.prepare(
+    "SELECT status, COUNT(*) as count FROM calls GROUP BY status"
+  ).all() as Array<{ status: string; count: number }>;
+  const counts: Record<string, number> = {};
+  for (const row of rows) counts[row.status] = row.count;
+  return counts;
+}
+
 const MAX_BACKUPS = Number(process.env.BACKUP_KEEP_DAYS) || 7;
 const RETENTION_DAYS = Number(process.env.RETENTION_DAYS) || 60;
 

@@ -50,4 +50,3 @@ Ideen und geplante Erweiterungen fuer den NFON Call Monitor.
 ## Technisch / Infrastruktur
 
 - **API-Rate-Limiting**: Schutz gegen Missbrauch der REST-Endpunkte
-- **Prometheus-Metriken**: Metriken-Endpoint fuer Grafana-Integration
