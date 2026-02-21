@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-02-21
+
 ### Added
 - **Health-Check-Endpoint** — `GET /api/health` (ohne Auth) liefert Server-Status für Monitoring-Tools (Uptime Kuma, etc.)
   - `200 ok` wenn NFON SSE verbunden, `503 degraded` wenn nicht
