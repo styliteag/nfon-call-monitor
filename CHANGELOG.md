@@ -40,7 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Status wird in SQLite gespeichert (persistent ueber Neustarts)
   - Echtzeit-Broadcast an alle Clients via Socket.IO
   - `POST /api/extensions/status` Endpoint
-  - Relative Zeitangabe auf der ExtensionCard (z.B. "Homeoffice 3 Min")
+  - Datum und Uhrzeit der letzten Statusaenderung auf der ExtensionCard (z.B. "Heute 14:32")
+  - Status "–" (none) zum Zuruecksetzen — ExtensionCard zeigt dann keinen Status an
 
 ### Changed
 - **ConnectionStatus** nach rechts verschoben und "Online" in "Verbunden" umbenannt

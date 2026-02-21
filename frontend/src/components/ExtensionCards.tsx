@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { ExtensionInfo, PfContact } from "../../../shared/types";
 import { initiateCall } from "../lib/api";
+import { formatDate, formatTime } from "../lib/formatters";
 
 interface Props {
   extensions: ExtensionInfo[];
@@ -186,16 +187,15 @@ function ExtensionCard({ ext, now, pfContacts }: { ext: ExtensionInfo; now: numb
         </div>
       </div>
       <div className="text-xs text-gray-600 dark:text-gray-400 truncate text-left">{ext.name}</div>
-      {ext.userStatus && (
+      {ext.userStatus && ext.userStatus !== "none" && (
         <div className="flex items-center gap-1 mt-0.5">
-          <span
-            className={`inline-block px-1.5 py-0 rounded text-[10px] font-medium ${USER_STATUS_COLORS[ext.userStatus] || USER_STATUS_COLORS.offline}`}
-            title={ext.userStatusUpdated ? `seit ${relativeTime(ext.userStatusUpdated)}` : undefined}
-          >
+          <span className={`inline-block px-1.5 py-0 rounded text-[10px] font-medium ${USER_STATUS_COLORS[ext.userStatus] || USER_STATUS_COLORS.offline}`}>
             {USER_STATUS_LABELS[ext.userStatus] || ext.userStatus}
           </span>
           {ext.userStatusUpdated && (
-            <span className="text-[10px] text-gray-400 dark:text-gray-500">{relativeTime(ext.userStatusUpdated)}</span>
+            <span className="text-[10px] text-gray-400 dark:text-gray-500">
+              {formatDate(ext.userStatusUpdated)} {formatTime(ext.userStatusUpdated).slice(0, 5)}
+            </span>
           )}
           {ext.userMessage && (
             <span className="text-[10px] text-gray-500 dark:text-gray-400 truncate">{ext.userMessage}</span>

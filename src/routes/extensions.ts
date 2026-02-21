@@ -8,7 +8,7 @@ router.get("/", (_req, res) => {
   res.json(getExtensionList());
 });
 
-const VALID_STATUSES = ["online", "offline", "mittagspause", "homeoffice", "office"];
+const VALID_STATUSES = ["none", "online", "offline", "mittagspause", "homeoffice", "office"];
 
 router.post("/status", (req, res) => {
   const { extension, status, message } = req.body;
