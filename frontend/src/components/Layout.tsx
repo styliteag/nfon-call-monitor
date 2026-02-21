@@ -33,7 +33,7 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
                 className="rounded border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 dark:text-gray-200"
                 title="Meine Nebenstelle — Benachrichtigungen nur fuer diese Nebenstelle"
               >
-                <option value="">– keine Auswahl –</option>
+                <option value="">Alle</option>
                 {extensions.map((ext) => (
                   <option key={ext.uuid} value={ext.extensionNumber}>
                     {ext.extensionNumber} - {ext.name}
