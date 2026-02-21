@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.2] - 2026-02-21
+
 ### Added
 - **Auto-Update-Banner** — informiert Benutzer mit offener Session wenn eine neue Version deployed wurde
   - Frontend pollt alle 60 Sekunden `/api/version` und vergleicht mit der initialen Version
