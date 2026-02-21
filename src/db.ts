@@ -40,6 +40,13 @@ export function initDatabase(): void {
     )
   `);
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS server_heartbeat (
+      id INTEGER PRIMARY KEY CHECK (id = 1),
+      last_seen TEXT NOT NULL
+    )
+  `);
+
   // Fix stale calls left as ringing/active from previous runs
   const staleFixed = db.prepare(`
     UPDATE calls SET status = 'missed', end_reason = 'stale'
@@ -176,6 +183,18 @@ export function getAgentStatuses(): Map<string, boolean> {
     map.set(row.extension, row.logged_in === 1);
   }
   return map;
+}
+
+export function updateHeartbeat(): void {
+  db.prepare(`
+    INSERT INTO server_heartbeat (id, last_seen) VALUES (1, :now)
+    ON CONFLICT(id) DO UPDATE SET last_seen = :now
+  `).run({ now: new Date().toISOString() });
+}
+
+export function getLastHeartbeat(): string | null {
+  const row = db.prepare("SELECT last_seen FROM server_heartbeat WHERE id = 1").get() as { last_seen: string } | undefined;
+  return row?.last_seen ?? null;
 }
 
 function rowToCallRecord(row: Record<string, unknown>): CallRecord {

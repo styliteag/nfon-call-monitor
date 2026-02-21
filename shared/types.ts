@@ -9,7 +9,7 @@ export interface NfonCallEvent {
   error?: string;
 }
 
-export type CallStatus = "ringing" | "active" | "answered" | "missed" | "busy" | "rejected";
+export type CallStatus = "ringing" | "active" | "answered" | "missed" | "busy" | "rejected" | "system";
 
 // Aggregated call record (stored in SQLite)
 export interface CallRecord {

@@ -6,7 +6,7 @@ import { Server } from "socket.io";
 import path from "path";
 import { readFileSync } from "fs";
 
-import { initDatabase } from "./db.js";
+import { initDatabase, getLastHeartbeat, updateHeartbeat, upsertCall } from "./db.js";
 import { callEvents, getActiveCallsList, cleanStaleCalls } from "./call-aggregator.js";
 import { connectorEvents, start as startConnector, stop as stopConnector, getExtensionList, isNfonConnected } from "./nfon-connector.js";
 import callsRouter from "./routes/calls.js";
@@ -146,6 +146,37 @@ async function main() {
   console.log("=========================\n");
 
   initDatabase();
+
+  // Downtime detection: check how long the server was offline
+  const lastHeartbeat = getLastHeartbeat();
+  const now = new Date();
+  if (lastHeartbeat) {
+    const lastSeen = new Date(lastHeartbeat);
+    const downtimeMs = now.getTime() - lastSeen.getTime();
+    const downtimeMin = Math.round(downtimeMs / 60_000);
+    if (downtimeMin >= 2) {
+      const hours = Math.floor(downtimeMin / 60);
+      const mins = downtimeMin % 60;
+      const durationText = hours > 0 ? `${hours} Std ${mins} Min` : `${mins} Min`;
+      log.warn("Server", `Server war ${durationText} offline (letzter Heartbeat: ${lastHeartbeat})`);
+      upsertCall({
+        id: `downtime-${lastSeen.toISOString()}`,
+        extension: "system",
+        extensionName: "System",
+        caller: "",
+        callee: "",
+        direction: "inbound",
+        startTime: lastSeen.toISOString(),
+        endTime: now.toISOString(),
+        duration: Math.round(downtimeMs / 1000),
+        status: "system",
+        endReason: `Server offline für ${durationText} — Ereignisse in diesem Zeitraum wurden möglicherweise nicht erfasst.`,
+      });
+    }
+  }
+  updateHeartbeat();
+  setInterval(updateHeartbeat, 60_000);
+
   await initPfCache();
 
   httpServer.listen(PORT, () => {

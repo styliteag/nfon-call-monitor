@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Server-Downtime-Erkennung** — beim Start prüft der Server wie lange er offline war und erstellt einen Eintrag in der Anrufliste
+  - Heartbeat-Timestamp wird alle 60s in die DB geschrieben (`server_heartbeat`-Tabelle)
+  - Bei Downtime >= 2 Minuten erscheint ein System-Eintrag mit Info-Icon und Dauer in der Call-History
+  - Neuer `system`-Status für CallRecord mit eigenem Badge und spezieller Zeilen-Darstellung
+
 ## [1.4.10] - 2026-02-21
 
 ### Changed

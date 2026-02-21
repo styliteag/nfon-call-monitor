@@ -10,6 +10,7 @@ const arrowColor: Record<CallStatus, string> = {
   missed: "text-red-600 dark:text-red-400",
   busy: "text-orange-800 dark:text-orange-300",
   rejected: "text-red-600 dark:text-red-400",
+  system: "text-gray-500 dark:text-gray-400",
 };
 
 interface Props {
@@ -216,7 +217,24 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
               </td>
             </tr>
           ) : (
-            calls.map((call) => (
+            calls.map((call) =>
+              call.status === "system" ? (
+                <tr key={`${call.id}-${call.extension}`} className="bg-gray-50 dark:bg-gray-800/50">
+                  <td className="px-3 py-1.5 whitespace-nowrap">
+                    <div className="dark:text-gray-200">{formatTime(call.startTime)}</div>
+                    <div className="text-xs text-gray-400">{formatDate(call.startTime)}</div>
+                  </td>
+                  <td colSpan={4} className="px-3 py-1.5">
+                    <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                      <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M12 3a9 9 0 110 18 9 9 0 010-18z" />
+                      </svg>
+                      <span className="text-xs">{call.endReason}</span>
+                      <span className="text-xs text-gray-400 ml-auto">{formatDuration(call.duration)}</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
               <tr
                 key={`${call.id}-${call.extension}`}
                 className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${
@@ -253,7 +271,8 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
                   </div>
                 </td>
               </tr>
-            ))
+              )
+            )
           )}
         </tbody>
       </table>

@@ -7,6 +7,7 @@ const config: Record<CallStatus, { label: string; className: string }> = {
   missed: { label: "Verpasst", className: "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300" },
   busy: { label: "Besetzt", className: "bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-300" },
   rejected: { label: "Abgelehnt", className: "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300" },
+  system: { label: "System", className: "bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200" },
 };
 
 interface Props {
