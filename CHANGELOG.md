@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Health-Check-Endpoint** — `GET /api/health` (ohne Auth) liefert Server-Status für Monitoring-Tools (Uptime Kuma, etc.)
+  - `200 ok` wenn NFON SSE verbunden, `503 degraded` wenn nicht
+  - Enthält `version`, `uptime`, `nfonConnected`, `socketClients`
+- **Tägliches Datenbank-Backup** — automatisches SQLite-Backup jeden Tag um 02:00 Uhr
+  - Backups werden im selben Verzeichnis wie die DB gespeichert (`backups/calls-YYYY-MM-DD.db`)
+  - Im Docker-Setup landen sie im bestehenden Volume (`/app/data/backups/`)
+  - Alte Backups werden automatisch bereinigt (Standard: 7 Tage, konfigurierbar via `BACKUP_KEEP_DAYS`)
+- **Konfigurierbare Aufbewahrungsdauer** — Anrufe älter als X Tage werden täglich automatisch gelöscht
+  - Standard: 60 Tage, konfigurierbar via `RETENTION_DAYS`
+  - Purge läuft täglich um 02:00 nach dem Backup (Backup enthält noch alle Daten)
+- **PLANNED-FEATURES.md** — Roadmap-Dokument mit geplanten Features
+
 ## [1.4.11] - 2026-02-21
 
 ### Added

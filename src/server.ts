@@ -6,7 +6,7 @@ import { Server } from "socket.io";
 import path from "path";
 import { readFileSync } from "fs";
 
-import { initDatabase, getLastHeartbeat, updateHeartbeat, upsertCall } from "./db.js";
+import { initDatabase, getLastHeartbeat, updateHeartbeat, upsertCall, backupDatabase, purgeOldCalls } from "./db.js";
 import { callEvents, getActiveCallsList, cleanStaleCalls } from "./call-aggregator.js";
 import { connectorEvents, start as startConnector, stop as stopConnector, getExtensionList, isNfonConnected } from "./nfon-connector.js";
 import callsRouter from "./routes/calls.js";
@@ -46,6 +46,23 @@ app.use(express.json());
 // Public endpoints (before auth middleware)
 app.use("/api/auth", authRouter);
 app.get("/api/version", (_req, res) => res.json({ version: APP_VERSION, appTitle: APP_TITLE }));
+
+app.get("/api/health", (_req, res) => {
+  const nfonConnected = isNfonConnected();
+  const socketClients = io.engine.clientsCount;
+  const uptimeSeconds = Math.floor(process.uptime());
+
+  const status = nfonConnected ? "ok" : "degraded";
+  const httpStatus = nfonConnected ? 200 : 503;
+
+  res.status(httpStatus).json({
+    status,
+    version: APP_VERSION,
+    uptime: uptimeSeconds,
+    nfonConnected,
+    socketClients,
+  });
+});
 
 // Auth middleware for all other /api/* routes
 app.use("/api", requireAuth);
@@ -187,6 +204,22 @@ async function main() {
 
   // Periodically clean up stale calls (every 60s)
   setInterval(cleanStaleCalls, 60_000);
+
+  // Daily database backup at 02:00
+  function scheduleDailyBackup() {
+    const now = new Date();
+    const next = new Date(now);
+    next.setHours(2, 0, 0, 0);
+    if (next <= now) next.setDate(next.getDate() + 1);
+    const delay = next.getTime() - now.getTime();
+    setTimeout(() => {
+      backupDatabase();
+      purgeOldCalls();
+      setInterval(() => { backupDatabase(); purgeOldCalls(); }, 24 * 60 * 60_000);
+    }, delay);
+    log.info("Backup", `Nächstes Backup um 02:00 (in ${Math.round(delay / 60_000)} Min)`);
+  }
+  scheduleDailyBackup();
 }
 
 process.on("SIGINT", () => {

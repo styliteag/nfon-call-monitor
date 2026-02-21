@@ -1,13 +1,15 @@
 import { DatabaseSync } from "node:sqlite";
 import path from "path";
+import { mkdirSync, readdirSync, unlinkSync } from "fs";
 import type { CallRecord, CallsQuery, CallsResponse } from "../shared/types.js";
 import { isPfActive, searchContactsByName } from "./projectfacts.js";
 import * as log from "./log.js";
 
 let db: DatabaseSync;
+let dbPath: string;
 
 export function initDatabase(): void {
-  const dbPath = process.env.DB_PATH || path.join(process.cwd(), "calls.db");
+  dbPath = process.env.DB_PATH || path.join(process.cwd(), "calls.db");
   db = new DatabaseSync(dbPath);
   db.exec("PRAGMA journal_mode = WAL");
 
@@ -195,6 +197,55 @@ export function updateHeartbeat(): void {
 export function getLastHeartbeat(): string | null {
   const row = db.prepare("SELECT last_seen FROM server_heartbeat WHERE id = 1").get() as { last_seen: string } | undefined;
   return row?.last_seen ?? null;
+}
+
+const MAX_BACKUPS = Number(process.env.BACKUP_KEEP_DAYS) || 7;
+const RETENTION_DAYS = Number(process.env.RETENTION_DAYS) || 60;
+
+export function purgeOldCalls(): number {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - RETENTION_DAYS);
+  const cutoffISO = cutoff.toISOString();
+
+  const result = db.prepare("DELETE FROM calls WHERE start_time < :cutoff").run({ cutoff: cutoffISO });
+  const changes = Number(result.changes);
+  if (changes > 0) {
+    log.info("DB", `${changes} Anrufe älter als ${RETENTION_DAYS} Tage gelöscht.`);
+  }
+  return changes;
+}
+
+export function backupDatabase(): string | null {
+  const backupDir = path.join(path.dirname(dbPath), "backups");
+  mkdirSync(backupDir, { recursive: true });
+
+  const date = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const backupPath = path.join(backupDir, `calls-${date}.db`);
+
+  try {
+    db.exec(`VACUUM INTO '${backupPath.replace(/'/g, "''")}'`);
+    log.info("Backup", `Datenbank-Backup erstellt: ${backupPath}`);
+  } catch (err) {
+    log.error("Backup", "Backup fehlgeschlagen:", err);
+    return null;
+  }
+
+  // Cleanup: keep only the newest MAX_BACKUPS files
+  try {
+    const files = readdirSync(backupDir)
+      .filter((f) => f.startsWith("calls-") && f.endsWith(".db"))
+      .sort()
+      .reverse();
+
+    for (const old of files.slice(MAX_BACKUPS)) {
+      unlinkSync(path.join(backupDir, old));
+      log.info("Backup", `Altes Backup gelöscht: ${old}`);
+    }
+  } catch (err) {
+    log.warn("Backup", "Cleanup alter Backups fehlgeschlagen:", err);
+  }
+
+  return backupPath;
 }
 
 function rowToCallRecord(row: Record<string, unknown>): CallRecord {

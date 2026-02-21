@@ -47,12 +47,8 @@ Ideen und geplante Erweiterungen fuer den NFON Call Monitor.
 - **Benutzer-Status (Praesenz)**: Jeder Extension/User kann seinen Status setzen (Online, Offline, Mittagspause, Homeoffice, Office) - sichtbar fuer alle Benutzer im Dashboard.
 - **Benutzerverwaltung**: Mehrere Dashboard-Benutzer mit Rollen (Admin, Viewer)
 - **Audit-Log**: Protokoll von Dashboard-Aktionen (Login, Click-to-Dial, etc.)
-- **Multi-Standort-Support**: Mehrere NFON-Accounts/Standorte in einem Dashboard
 
 ## Technisch / Infrastruktur
 
 - **API-Rate-Limiting**: Schutz gegen Missbrauch der REST-Endpunkte
-- **Health-Check-Endpoint**: `/api/health` fuer Monitoring-Tools (Uptime Kuma, etc.)
-- **Backup/Restore**: SQLite-Datenbank-Backup per API-Aufruf oder Zeitplan
 - **Prometheus-Metriken**: Metriken-Endpoint fuer Grafana-Integration
-- **Konfigurierbare Aufbewahrungsdauer**: Anrufe aelter als X Tage automatisch loeschen
