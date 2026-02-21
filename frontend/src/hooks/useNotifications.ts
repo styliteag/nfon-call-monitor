@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import type { CallRecord } from "../../../shared/types";
 import { useSocket } from "./useSocket";
 
-export function useNotifications() {
+export function useNotifications(myExtension: string | null) {
   const { on } = useSocket();
   const [enabled, setEnabled] = useState(() => {
     if (typeof Notification === "undefined") return false;
@@ -34,9 +34,15 @@ export function useNotifications() {
   useEffect(() => {
     if (!enabled) return;
 
+    function isMyCall(c: CallRecord): boolean {
+      if (!myExtension) return true; // no extension set → show all
+      return c.extension === myExtension;
+    }
+
     const offNew = on("call:new", (call: unknown) => {
       const c = call as CallRecord;
       if (c.direction !== "inbound" || c.status !== "ringing") return;
+      if (!isMyCall(c)) return;
       const key = `${c.id}-${c.extension}`;
       if (notifiedRef.current.has(key)) return;
       notifiedRef.current.add(key);
@@ -53,6 +59,7 @@ export function useNotifications() {
     const offUpdated = on("call:updated", (call: unknown) => {
       const c = call as CallRecord;
       if (c.status !== "missed") return;
+      if (!isMyCall(c)) return;
 
       const caller = c.caller || "Unbekannt";
       const ext = c.extensionName || c.extension;
@@ -66,7 +73,7 @@ export function useNotifications() {
       offNew();
       offUpdated();
     };
-  }, [enabled, on]);
+  }, [enabled, on, myExtension]);
 
   // Cleanup old notification IDs periodically
   useEffect(() => {

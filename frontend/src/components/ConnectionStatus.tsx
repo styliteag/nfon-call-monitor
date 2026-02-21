@@ -13,7 +13,7 @@ export function ConnectionStatus({ isConnected, nfonConnected }: Props) {
         }`}
       />
       <span className={connected ? "text-green-700 dark:text-green-400" : "text-red-700 dark:text-red-400"}>
-        {!isConnected ? "Nicht verbunden" : !nfonConnected ? "NFON getrennt" : "Online"}
+        {!isConnected ? "Nicht verbunden" : !nfonConnected ? "NFON getrennt" : "Verbunden"}
       </span>
     </div>
   );

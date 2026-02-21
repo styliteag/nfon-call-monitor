@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { ExtensionInfo } from "../../../shared/types";
 import { ConnectionStatus } from "./ConnectionStatus";
 
 interface Props {
@@ -10,9 +11,11 @@ interface Props {
   onToggleDark: () => void;
   onLogout: () => void;
   notifications?: { enabled: boolean; toggle: () => void; supported: boolean };
+  myExtension?: { value: string | null; select: (ext: string | null) => void };
+  extensions?: ExtensionInfo[];
 }
 
-export function Layout({ children, appTitle, isConnected, nfonConnected, dark, onToggleDark, onLogout, notifications }: Props) {
+export function Layout({ children, appTitle, isConnected, nfonConnected, dark, onToggleDark, onLogout, notifications, myExtension, extensions }: Props) {
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
       <header className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
@@ -21,7 +24,24 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
           <span className="ml-2 text-xs font-normal text-gray-400 dark:text-gray-500">v{import.meta.env.VITE_APP_VERSION || "dev"}</span>
         </h1>
         <div className="flex items-center gap-3">
-          <ConnectionStatus isConnected={isConnected} nfonConnected={nfonConnected} />
+          {myExtension && extensions && (
+            <div className="flex items-center gap-1.5">
+              <label className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">Meine Extension:</label>
+              <select
+                value={myExtension.value || ""}
+                onChange={(e) => myExtension.select(e.target.value || null)}
+                className="rounded border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 dark:text-gray-200"
+                title="Meine Nebenstelle — Benachrichtigungen nur fuer diese Nebenstelle"
+              >
+                <option value="">– keine Auswahl –</option>
+                {extensions.map((ext) => (
+                  <option key={ext.uuid} value={ext.extensionNumber}>
+                    {ext.extensionNumber} - {ext.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           {notifications?.supported && (
             <button
               onClick={notifications.toggle}
@@ -67,6 +87,7 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
               <path fillRule="evenodd" d="M19 10a.75.75 0 00-.75-.75H8.704l1.048-.943a.75.75 0 10-1.004-1.114l-2.5 2.25a.75.75 0 000 1.114l2.5 2.25a.75.75 0 101.004-1.114l-1.048-.943h9.546A.75.75 0 0019 10z" clipRule="evenodd" />
             </svg>
           </button>
+          <ConnectionStatus isConnected={isConnected} nfonConnected={nfonConnected} />
         </div>
       </header>
       <main className="flex-1 flex flex-col overflow-hidden">{children}</main>

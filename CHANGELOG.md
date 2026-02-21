@@ -28,6 +28,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Glocken-Icon im Header zum Ein-/Ausschalten
   - Zeigt Anrufer und Nebenstelle in der Notification
   - Einstellung wird in localStorage gespeichert
+- **"Meine Extension"-Auswahl** — Benutzer kann seine eigene Nebenstelle im Header setzen
+  - Notifications werden nur fuer die eigene Nebenstelle angezeigt
+  - Auswahl wird in localStorage gespeichert (persistent ueber Sessions)
+
+### Changed
+- **ConnectionStatus** nach rechts verschoben und "Online" in "Verbunden" umbenannt
 - **PLANNED-FEATURES.md** — Roadmap-Dokument mit geplanten Features
 
 ## [1.4.11] - 2026-02-21
