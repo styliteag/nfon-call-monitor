@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { ExtensionInfo } from "../../../shared/types";
+import type { UserStatusValue } from "../hooks/useUserStatus";
 import { ConnectionStatus } from "./ConnectionStatus";
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
   notifications?: { enabled: boolean; toggle: () => void; supported: boolean };
   myExtension?: { value: string | null; select: (ext: string | null) => void };
   extensions?: ExtensionInfo[];
-  userStatus?: { status: string; message: string; update: (status: string, message: string) => void };
+  userStatus?: { status: UserStatusValue; message: string; update: (status: UserStatusValue, message: string) => Promise<void> };
 }
 
 export function Layout({ children, appTitle, isConnected, nfonConnected, dark, onToggleDark, onLogout, notifications, myExtension, extensions, userStatus }: Props) {
@@ -47,7 +48,7 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
             <div className="flex items-center gap-1.5">
               <select
                 value={userStatus.status}
-                onChange={(e) => userStatus.update(e.target.value, userStatus.message)}
+                onChange={(e) => userStatus.update(e.target.value as import("../hooks/useUserStatus").UserStatusValue, userStatus.message)}
                 className="rounded border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 dark:text-gray-200"
                 title="Mein Status"
               >

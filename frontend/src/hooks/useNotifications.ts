@@ -52,6 +52,7 @@ export function useNotifications(myExtension: string | null) {
       new Notification("Eingehender Anruf", {
         body: `${caller} → ${ext}`,
         tag: c.id,
+        // @ts-expect-error renotify is a valid Notification option but missing from TS types
         renotify: false,
       });
     });
