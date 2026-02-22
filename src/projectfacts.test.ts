@@ -20,10 +20,10 @@ describe("lookupPhone", () => {
     });
 
     it("returns Mobil for mobile numbers", () => {
-      const result = lookupPhone("01705664234");
+      const result = lookupPhone("01701234567");
       expect(result).not.toBeNull();
       expect(result!.city).toBe("Mobil");
-      expect(result!.formatted).toBe("+49 170 5664234");
+      expect(result!.formatted).toBe("+49 170 1234567");
     });
 
     it("returns Sonderrufnummer for special numbers", () => {
@@ -37,7 +37,7 @@ describe("lookupPhone", () => {
     beforeEach(() => {
       _testSetCache([
         { raw: "0625182755", contact: { name: "Firma ABC", contactId: 1 } },
-        { raw: "+49 170 5664234", contact: { name: "Max Mobil", contactId: 2 } },
+        { raw: "+49 170 1234567", contact: { name: "Max Mobil", contactId: 2 } },
       ]);
     });
 
@@ -55,7 +55,7 @@ describe("lookupPhone", () => {
     });
 
     it("finds exact match for mobile", () => {
-      const result = lookupPhone("01705664234");
+      const result = lookupPhone("01701234567");
       expect(result!.name).toBe("Max Mobil");
       expect(result!.fuzzy).toBeUndefined();
     });
@@ -118,9 +118,9 @@ describe("lookupPhone", () => {
 
     it("does NOT fuzzy match mobile numbers", () => {
       _testSetCache([
-        { raw: "0170566423", contact: { name: "Mobil Contact", contactId: 20 } },
+        { raw: "0170123456", contact: { name: "Mobil Contact", contactId: 20 } },
       ]);
-      const result = lookupPhone("01705664234");
+      const result = lookupPhone("01701234567");
       // Should NOT find the mobile contact via fuzzy
       expect(result!.name).not.toBe("Mobil Contact");
       expect(result!.city).toBe("Mobil");
@@ -170,10 +170,10 @@ describe("lookupPhone", () => {
 
   describe("lookupPhones batch", () => {
     it("returns results for multiple numbers", () => {
-      const result = lookupPhones(["0625182755", "01705664234", ""]);
+      const result = lookupPhones(["0625182755", "01701234567", ""]);
       expect(Object.keys(result)).toHaveLength(2);
       expect(result["0625182755"]).toBeDefined();
-      expect(result["01705664234"]).toBeDefined();
+      expect(result["01701234567"]).toBeDefined();
     });
 
     it("skips empty strings", () => {

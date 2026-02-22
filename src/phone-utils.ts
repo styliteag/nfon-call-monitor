@@ -7,10 +7,10 @@ const AREA_CODES: Record<string, string> = JSON.parse(
 /**
  * Normalize a phone number to digits only, converting German country codes.
  * Examples:
- *   "+49 170-5664234"  → "01705664234"
+ *   "+49 170-1234567"  → "01701234567"
  *   "0049625182755"    → "0625182755"
  *   "49625182755"      → "0625182755"
- *   "0170-5664234"     → "01705664234"
+ *   "0170-1234567"     → "01701234567"
  */
 export function normalizePhone(raw: string): string {
   let s = raw.replace(/[\s\-\(\)\/\.]/g, "");
@@ -99,7 +99,7 @@ function findAreaCodeLen(withoutZero: string): number | null {
 /**
  * Format a raw phone number nicely, e.g.:
  *   "496251555"     → "+49 6251 555"
- *   "491705664234"  → "+49 170 5664234"
+ *   "491701234567"  → "+49 170 1234567"
  *   "4962551607"    → "+49 6255 1607"
  */
 export function formatPhoneNice(raw: string): string | null {

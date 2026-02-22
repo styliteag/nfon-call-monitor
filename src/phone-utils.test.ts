@@ -3,24 +3,24 @@ import { normalizePhone, phonesMatch, classifyPhone, isGermanLandline, lookupCit
 
 describe("normalizePhone", () => {
   it("strips spaces, hyphens, parentheses, slashes, dots", () => {
-    expect(normalizePhone("0170-566 42 34")).toBe("01705664234");
+    expect(normalizePhone("0170-123 45 67")).toBe("01701234567");
     expect(normalizePhone("(06251) 82755")).toBe("0625182755");
     expect(normalizePhone("06251/827.55")).toBe("0625182755");
   });
 
   it("converts +49 prefix to 0", () => {
-    expect(normalizePhone("+49 170 5664234")).toBe("01705664234");
+    expect(normalizePhone("+49 170 1234567")).toBe("01701234567");
     expect(normalizePhone("+496251555")).toBe("06251555");
   });
 
   it("converts 0049 prefix to 0", () => {
     expect(normalizePhone("004962518275")).toBe("062518275");
-    expect(normalizePhone("00491705664234")).toBe("01705664234");
+    expect(normalizePhone("00491701234567")).toBe("01701234567");
   });
 
   it("converts bare 49 prefix to 0 (when long enough)", () => {
     expect(normalizePhone("496251555")).toBe("06251555");
-    expect(normalizePhone("491705664234")).toBe("01705664234");
+    expect(normalizePhone("491701234567")).toBe("01701234567");
   });
 
   it("does NOT convert bare 49 prefix when too short", () => {
@@ -30,7 +30,7 @@ describe("normalizePhone", () => {
 
   it("leaves already-normalized numbers unchanged", () => {
     expect(normalizePhone("0625182755")).toBe("0625182755");
-    expect(normalizePhone("01705664234")).toBe("01705664234");
+    expect(normalizePhone("01701234567")).toBe("01701234567");
   });
 });
 
@@ -61,13 +61,13 @@ describe("phonesMatch", () => {
 
   it("rejects different numbers", () => {
     expect(phonesMatch("0625182755", "0625199999")).toBe(false);
-    expect(phonesMatch("01705664234", "01711234567")).toBe(false);
+    expect(phonesMatch("01701234567", "01711234567")).toBe(false);
   });
 });
 
 describe("classifyPhone", () => {
   it("classifies mobile numbers", () => {
-    expect(classifyPhone("01705664234")).toBe("mobile");
+    expect(classifyPhone("01701234567")).toBe("mobile");
     expect(classifyPhone("01511234567")).toBe("mobile");
     expect(classifyPhone("01601234567")).toBe("mobile");
     expect(classifyPhone("01791234567")).toBe("mobile");
@@ -98,7 +98,7 @@ describe("isGermanLandline", () => {
   });
 
   it("returns false for mobile numbers", () => {
-    expect(isGermanLandline("01705664234")).toBe(false);
+    expect(isGermanLandline("01701234567")).toBe(false);
   });
 
   it("returns false for special numbers", () => {
@@ -133,8 +133,8 @@ describe("formatPhoneNice", () => {
   });
 
   it("formats mobile numbers", () => {
-    const result = formatPhoneNice("01705664234");
-    expect(result).toBe("+49 170 5664234");
+    const result = formatPhoneNice("01701234567");
+    expect(result).toBe("+49 170 1234567");
   });
 
   it("formats from international prefix", () => {
