@@ -173,16 +173,16 @@ function ExtensionCard({ ext, now, pfContacts }: { ext: ExtensionInfo; now: numb
             </svg>
           </button>
           <span
-            className={`inline-block w-2 h-2 rounded-full ${lineDotColor(ext.line)}`}
+            className={`inline-block w-2 h-2 rounded-full transition-transform duration-150 hover:scale-150 cursor-pointer ${lineDotColor(ext.line)}`}
             title={`Line: ${lineLabel(ext.line)}`}
           />
           <span
-            className={`inline-block w-2 h-2 rounded-full ${presenceDotColor(ext.presence)}`}
+            className={`inline-block w-2 h-2 rounded-full transition-transform duration-150 hover:scale-150 cursor-pointer ${presenceDotColor(ext.presence)}`}
             title={`Presence: ${presenceLabel(ext.presence)}`}
           />
           <span
-            className={`inline-block w-2 h-2 rounded-full ${ext.agentLoggedIn ? "bg-blue-500" : "bg-gray-400"}`}
-            title={`Agent: ${ext.agentLoggedIn ? "Angemeldet" : "Abgemeldet"}`}
+            className={`inline-block w-2 h-2 rounded-full transition-transform duration-150 hover:scale-150 cursor-pointer ${ext.agentLoggedIn ? "bg-blue-500 hover:bg-blue-400" : "bg-gray-400 hover:bg-gray-300"}`}
+            title={`Agent: ${ext.agentLoggedIn ? "On" : "Off"}`}
           />
         </div>
       </div>

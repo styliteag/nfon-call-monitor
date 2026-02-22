@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Improved
+- **Extension Cards** — Hover-Effekt für Status-Punkte (Line, Presence, Agent): Vergrößerung, sanfte Animation und Pointer-Cursor
+- **Agent-Status Tooltip** — zeigt jetzt "Agent: On/Off" statt "Angemeldet/Abgemeldet"
+
 ## [1.5.3] - 2026-02-22
 
 ### Added
