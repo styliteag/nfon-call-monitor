@@ -141,7 +141,7 @@ DASHBOARD_PASSWORD_HASH=   # sha256: echo -n 'password' | shasum -a 256
 # LOG=debug                   # Verbose logging (Click-to-Dial, SSE, Presence)
 
 # === ProjectFacts CRM (optional) ===
-# PF_API_BASE_URL=https://team.stylite.de
+# PF_API_BASE_URL=https://team.company.de
 # PF_API_DEVICE_ID=
 # PF_API_TOKEN=
 
