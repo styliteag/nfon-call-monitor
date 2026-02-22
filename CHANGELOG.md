@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Footer** — neuer Footer im Layout mit Copyright (Stylite AG), Links zu GitHub-Repo und Blog, Server-Uptime (via `/api/health`, aktualisiert jede Minute) und App-Version
+
 ## [1.5.2] - 2026-02-21
 
 ### Added
