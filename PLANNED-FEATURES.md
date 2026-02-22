@@ -45,6 +45,10 @@ Ideen und geplante Erweiterungen fuer den NFON Call Monitor.
 - **Benutzerverwaltung**: Mehrere Dashboard-Benutzer mit Rollen (Admin, Viewer)
 - **Audit-Log**: Protokoll von Dashboard-Aktionen (Login, Click-to-Dial, etc.)
 
+## Kommunikation
+
+- **Lokaler Chat**: Integrierter Chat zwischen allen Dashboard-Benutzern fuer schnelle interne Kommunikation direkt im Call Monitor
+
 ## Technisch / Infrastruktur
 
 - **API-Rate-Limiting**: Schutz gegen Missbrauch der REST-Endpunkte
