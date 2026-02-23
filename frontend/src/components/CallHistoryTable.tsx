@@ -105,8 +105,18 @@ function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, extensio
     );
   }
 
-  // Internal number matched by kopfnummer: show "ZBens 20" instead of just "20"
+  // Internal number matched by kopfnummer: show extension name if available, otherwise "Z-20"
   if (!isExternal && standort) {
+    const extByDurchwahl = extensions?.find((e) => e.extensionNumber === formatted);
+    if (extByDurchwahl) {
+      return (
+        <span className={`group whitespace-nowrap cursor-grab ${className ?? ""}`} title={`Extension ${formatted}`} {...dragProps}>
+          <span className="text-green-600 dark:text-green-400 font-sans">{extByDurchwahl.name}</span>
+          <span className="text-gray-400 dark:text-gray-500 font-sans text-xs ml-1">(intern)</span>
+          <span className="text-gray-400 ml-1">{formatted}</span>
+        </span>
+      );
+    }
     return (
       <span className={`group whitespace-nowrap cursor-grab ${className ?? ""}`} title={displayNum} {...dragProps}>
         <span className="text-green-600 dark:text-green-400 font-sans">{standort}</span>-{formatted}

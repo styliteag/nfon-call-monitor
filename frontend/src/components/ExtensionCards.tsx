@@ -215,7 +215,7 @@ function ExtensionCard({ ext, now, pfContacts }: { ext: ExtensionInfo; now: numb
                 {pfContacts[partner].formatted && (
                   <span className="font-mono text-gray-400 dark:text-gray-500 text-[10px]"> {pfContacts[partner].formatted}</span>
                 )}
-              </>) : <span className="font-mono">{partner}</span>}
+              </>) : <span className="font-mono dark:text-gray-200">{partner}</span>}
             </span>
           </div>
           {ext.currentCallStartTime && (

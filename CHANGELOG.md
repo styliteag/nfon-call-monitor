@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Dark Mode** — Telefonnummer auf Extension-Karte bei aktivem Anruf (roter Hintergrund) jetzt besser lesbar
+- **Call History** — Interne Nummern in Langform (z.B. 061312882210) werden jetzt korrekt zum Extension-Namen aufgelöst statt nur "Z-10" anzuzeigen
+
 ## [1.5.4] - 2026-02-22
 
 ### Improved
