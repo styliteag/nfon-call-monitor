@@ -12,10 +12,13 @@ const config: Record<CallStatus, { label: string; className: string }> = {
 
 interface Props {
   status: CallStatus;
+  direction?: "inbound" | "outbound";
 }
 
-export function CallStatusBadge({ status }: Props) {
-  const { label, className } = config[status] ?? { label: status, className: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300" };
+export function CallStatusBadge({ status, direction }: Props) {
+  const entry = config[status] ?? { label: status, className: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300" };
+  const label = status === "answered" && direction === "outbound" ? "Aufgebaut" : entry.label;
+  const className = entry.className;
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${className}`}>
       {label}

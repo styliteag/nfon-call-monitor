@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Improved
+- **Call History** — Ausgehende beantwortete Anrufe zeigen jetzt "Aufgebaut" statt "Angenommen" als Status-Badge
+
 ## [1.5.5] - 2026-02-23
 
 ### Fixed
