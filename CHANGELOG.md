@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-02-24
+
 ### Added
 - **CRM-Kontaktsuche** — Neues Suchfeld im Header zum Durchsuchen von CRM-Kontakten (Name und Telefonnummer). Nummern sind per Drag & Drop auf Extension-Cards ziehbar, per Klick kopierbar und direkt anrufbar
 
