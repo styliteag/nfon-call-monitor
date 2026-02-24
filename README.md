@@ -22,6 +22,7 @@ Echtzeit-Anrufüberwachung für NFON-Telefonanlagen. Zeigt eingehende/ausgehende
 ### Anrufsteuerung
 
 - **Click-to-Dial** — Anrufe direkt aus dem Dashboard starten. Rufnummer per Drag & Drop auf eine Extension-Karte ziehen oder den Zwischenablage-Button nutzen. Bestätigungsdialog direkt auf der Karte mit Erfolgs-/Fehler-Feedback.
+- **CRM-Kontaktsuche** — Suchfeld im Header zum Durchsuchen aller CRM-Kontakte nach Name oder Telefonnummer. Treffer erscheinen als Dropdown gruppiert nach Kontakt. Nummern sind per Drag & Drop auf Extension-Karten ziehbar, per Klick kopierbar und direkt anrufbar (wenn eigene Nebenstelle gewählt). Nur sichtbar bei aktiver ProjectFacts-Integration.
 
 ### Anrufhistorie
 
@@ -275,6 +276,7 @@ Die ProjectFacts-Integration ist **optional** — ohne Konfiguration funktionier
 | `POST /api/extensions/status` | Benutzer-Status setzen (`{ extension, status, message }`) |
 | `GET /api/pf/lookup?number=...` | Einzelner Kontakt-Lookup |
 | `POST /api/pf/lookup-batch` | Batch-Lookup (`{ numbers: [...] }`) |
+| `GET /api/pf/search?q=...` | CRM-Kontaktsuche nach Name/Nummer (max. 20 Ergebnisse) |
 | `POST /api/click-to-dial` | Click-to-Dial (`{ extension, target }`) → 202 |
 | `DELETE /api/click-to-dial/:uuid` | Laufenden Anruf abbrechen → 204 |
 
