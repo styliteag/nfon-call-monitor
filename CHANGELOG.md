@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-02-24
+
 ### Added
 - **Status-Reset** — Alle User-Status (Online, Homeoffice, etc.) werden täglich um 06:00 automatisch zurückgesetzt
 
