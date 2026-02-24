@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Stale-Cleanup überschrieb beantwortete Anrufe** — Aktive Anrufe wurden nach 5 Minuten fälschlicherweise als "stale" bereinigt. Das nachfolgende Hangup-Event legte dann einen neuen "Verpasst"-Eintrag an und überschrieb den korrekten "Angenommen"-Eintrag. Ringing-Timeout bleibt bei 5 Min, Active-Timeout ist jetzt 4 Stunden. Späte Hangup-Events aktualisieren nur noch die Endzeit statt den gesamten Record zu überschreiben
+
 ### Improved
 - **Fuzzy Matching** — Nummernzuordnung versteht jetzt die Struktur `0[Vorwahl][Kopfnummer][Durchwahl]`. Erkennt Zentrale (endet auf 0) und Durchwahlen (1-3 Ziffern) desselben Anschlusses. Vorwahl muss übereinstimmen, Zentrale-Matches werden bevorzugt
 

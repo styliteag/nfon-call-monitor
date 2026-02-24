@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
 import type { NfonCallEvent, CallRecord, CallStatus } from "../shared/types.js";
-import { upsertCall } from "./db.js";
+import { upsertCall, updateCallEnd } from "./db.js";
 import * as log from "./log.js";
 
 // In-memory map of active calls: key = "uuid:extension"
@@ -41,6 +41,18 @@ export function processEvent(event: NfonCallEvent): void {
   let record = activeCalls.get(key);
   const isNew = !record;
   const prevStatus = record?.status;
+
+  // If hangup/end arrives for a call we no longer track (e.g. cleaned up by stale),
+  // just update the end_time in the DB without overwriting the existing record.
+  if (!record && (event.state === "hangup" || event.state === "end")) {
+    const updated = updateCallEnd(event.uuid, event.extension, now, event.error);
+    if (updated) {
+      log.debug("Calls", `LATE hangup for ${extensionNames.get(event.extension) || event.extension}(${event.extension}) uuid=${event.uuid.substring(0, 8)}.. — updated end_time in DB`);
+    } else {
+      log.debug("Calls", `LATE hangup for unknown call uuid=${event.uuid.substring(0, 8)}.. ext=${event.extension} — ignored`);
+    }
+    return;
+  }
 
   if (!record) {
     record = {
@@ -141,7 +153,8 @@ export function processEvent(event: NfonCallEvent): void {
 }
 
 // Clean up stale active calls that have been ringing/active for too long without an end event
-const STALE_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+const STALE_RINGING_MS = 5 * 60 * 1000; // 5 minutes for ringing calls
+const STALE_ACTIVE_MS = 4 * 60 * 60 * 1000; // 4 hours for answered/active calls
 
 export function cleanStaleCalls(): void {
   const now = Date.now();
@@ -149,7 +162,8 @@ export function cleanStaleCalls(): void {
 
   for (const [key, record] of activeCalls) {
     const age = now - new Date(record.startTime).getTime();
-    if (age > STALE_TIMEOUT_MS) {
+    const timeout = record.status === "active" ? STALE_ACTIVE_MS : STALE_RINGING_MS;
+    if (age > timeout) {
       log.debug("Calls", `STALE cleanup: ${record.extensionName}(${record.extension}) uuid=${record.id.substring(0, 8)}.. status=${record.status} age=${Math.round(age / 1000)}s`);
       record.endTime = new Date().toISOString();
       if (record.answerTime) {

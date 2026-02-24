@@ -102,6 +102,20 @@ export function upsertCall(call: CallRecord): void {
   });
 }
 
+/**
+ * Update only the end_time for an already-completed call in the DB.
+ * Used when a late hangup event arrives after stale cleanup.
+ * Does NOT overwrite status/answerTime/duration — preserves the existing record.
+ * Returns true if a row was updated.
+ */
+export function updateCallEnd(id: string, extension: string, endTime: string, endReason?: string): boolean {
+  const result = db.prepare(`
+    UPDATE calls SET end_time = :endTime, end_reason = COALESCE(:endReason, end_reason)
+    WHERE id = :id AND extension = :extension
+  `).run({ id, extension, endTime, endReason: endReason ?? null });
+  return Number(result.changes) > 0;
+}
+
 export function getCalls(query: CallsQuery): CallsResponse {
   const page = query.page ?? 1;
   const pageSize = Math.min(query.pageSize ?? 50, 200);
