@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <!-- Phone handset rotated 135deg for "active call" look -->
+  <g transform="translate(30,34) rotate(-135)">
+    <rect x="-3.5" y="-15" width="7" height="30" rx="3.5" fill="white"/>
+    <rect x="-6.5" y="-17" width="13" height="9" rx="3" fill="white"/>
+    <rect x="-6.5" y="8" width="13" height="9" rx="3" fill="white"/>
+  </g>
+  <!-- Signal waves -->
+  <path d="M41,15 C45,11 45,5 41,1" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <path d="M46,18 C52,12 52,2 46,-4" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.4"/>
+</svg>

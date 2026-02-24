@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Favicon** — SVG-Favicon mit Telefonhörer und Signalwellen im App-Farbschema (Blau-Gradient)
+
 ## [1.6.2] - 2026-02-24
 
 ### Fixed
