@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Improved
+- **Fuzzy Matching** — Nummernzuordnung versteht jetzt die Struktur `0[Vorwahl][Kopfnummer][Durchwahl]`. Erkennt Zentrale (endet auf 0) und Durchwahlen (1-3 Ziffern) desselben Anschlusses. Vorwahl muss übereinstimmen, Zentrale-Matches werden bevorzugt
+
 ## [1.6.1] - 2026-02-24
 
 ### Added

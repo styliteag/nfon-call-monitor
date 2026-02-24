@@ -1,4 +1,4 @@
-import { normalizePhone, phonesMatch, isGermanLandline, classifyPhone, lookupCity, formatPhoneNice } from "./phone-utils.js";
+import { normalizePhone, phonesMatch, isGermanLandline, classifyPhone, lookupCity, formatPhoneNice, findAreaCodeLen } from "./phone-utils.js";
 import type { PfContact, CrmContactResult } from "../shared/types.js";
 import * as log from "./log.js";
 
@@ -131,36 +131,77 @@ function exactLookup(rawNumber: string): PfContact | null {
 }
 
 /**
- * Fuzzy match: try removing 1-3 digits from the end of both the input number
- * and the projectfacts entries to find a match. Only for German landline numbers.
+ * Fuzzy match based on German landline number structure:
+ *   0 [Vorwahl] [Kopfnummer] [Durchwahl]
+ *
+ * - Vorwahl (area code): 2-5 digits, looked up from german-area-codes.json
+ * - Kopfnummer (base): company's assigned number block
+ * - Durchwahl (extension): 0 for Zentrale, 1-3 digits for direct lines
+ *
+ * Two numbers match if they share the same Vorwahl + Kopfnummer and differ
+ * only in the Durchwahl (max 3 digits each).  Zentrale matches (one side
+ * has extension "0") are preferred over arbitrary extension pairs.
  */
 function fuzzyLookup(rawNumber: string): PfContact | null {
   const normalized = normalizePhone(rawNumber);
   if (!isGermanLandline(normalized)) return null;
 
-  for (let remove = 1; remove <= MAX_FUZZY_DIGITS; remove++) {
-    if (normalized.length <= remove + 6) continue; // keep at least 6 digits
-    const shortened = normalized.slice(0, -remove);
+  const withoutZero = normalized.slice(1);
+  const acLen = findAreaCodeLen(withoutZero);
+  if (!acLen) return null;
 
-    for (const entry of phoneCache) {
-      // Also shorten the pf number by up to `remove` digits
-      const entryNorm = entry.normalized;
-      if (!isGermanLandline(entryNorm)) continue;
+  const areaCode = withoutZero.slice(0, acLen);
+  const subscriber = withoutZero.slice(acLen);
 
-      // Check: shortened input matches full pf entry
-      if (phonesMatch(shortened, entryNorm)) {
-        return { ...entry.contact, fuzzy: remove };
-      }
-      // Check: full input matches shortened pf entry
-      if (entryNorm.length > remove + 6) {
-        const entryShortened = entryNorm.slice(0, -remove);
-        if (phonesMatch(normalized, entryShortened)) {
-          return { ...entry.contact, fuzzy: remove };
-        }
-      }
+  let bestMatch: PfContact | null = null;
+  let bestScore = Infinity; // lower = better
+
+  for (const entry of phoneCache) {
+    const entryNorm = entry.normalized;
+    if (!isGermanLandline(entryNorm)) continue;
+
+    const entryW0 = entryNorm.slice(1);
+    const entryAcLen = findAreaCodeLen(entryW0);
+    if (!entryAcLen) continue;
+
+    // Area codes must match
+    if (entryW0.slice(0, entryAcLen) !== areaCode) continue;
+
+    const entrySub = entryW0.slice(entryAcLen);
+
+    // Find common prefix length (= Kopfnummer)
+    const minLen = Math.min(subscriber.length, entrySub.length);
+    let commonLen = 0;
+    for (let i = 0; i < minLen; i++) {
+      if (subscriber[i] === entrySub[i]) commonLen++;
+      else break;
+    }
+
+    // Kopfnummer must be at least 2 digits to avoid false positives
+    if (commonLen < 2) continue;
+
+    // Extensions (Durchwahl) are the differing suffixes
+    const inputExt = subscriber.slice(commonLen);
+    const entryExt = entrySub.slice(commonLen);
+
+    // At least one must have an extension (exact matches handled elsewhere)
+    if (inputExt.length === 0 && entryExt.length === 0) continue;
+
+    // Both extensions must be at most MAX_FUZZY_DIGITS (3)
+    if (inputExt.length > MAX_FUZZY_DIGITS || entryExt.length > MAX_FUZZY_DIGITS) continue;
+
+    // Score: prefer shorter extensions, prefer Zentrale (ext "0") matches
+    const maxExtLen = Math.max(inputExt.length, entryExt.length);
+    const isZentrale = inputExt === "0" || entryExt === "0";
+    const score = isZentrale ? maxExtLen - 0.5 : maxExtLen;
+
+    if (score < bestScore) {
+      bestScore = score;
+      bestMatch = { ...entry.contact, fuzzy: maxExtLen };
     }
   }
-  return null;
+
+  return bestMatch;
 }
 
 export function lookupPhone(rawNumber: string): PfContact | null {

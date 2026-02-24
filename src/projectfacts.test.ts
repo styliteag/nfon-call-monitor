@@ -141,30 +141,93 @@ describe("lookupPhone", () => {
       expect(result!.fuzzy).toBe(1);
     });
 
-    it("does NOT fuzzy match if result would be too short", () => {
-      // The guard is: normalized.length <= remove + 6 → skip
-      // So for remove=1, need length > 7 (at least 8 chars)
-      // A 7-char input like "0625189" can't fuzzy match at all
+    it("does NOT fuzzy match if Kopfnummer too short", () => {
+      // Subscriber "8" vs "89" → common prefix "8" (1 digit) < 2 → no match
       _testClearCache();
       _testSetCache([
         { raw: "062518", contact: { name: "Very Short", contactId: 41 } },
       ]);
-      const result = lookupPhone("0625189"); // 7 chars — too short for remove=1
+      const result = lookupPhone("0625189");
       expect(result!.name).not.toBe("Very Short");
       expect(result!.fuzzy).toBeUndefined();
-      // Falls back to city
       expect(result!.city).toBe("Bensheim");
     });
 
-    it("fuzzy matches when input is long enough", () => {
+    it("fuzzy matches when Kopfnummer is long enough", () => {
       _testClearCache();
       _testSetCache([
         { raw: "0625182", contact: { name: "Long Enough", contactId: 42 } },
       ]);
-      // Input "06251823" = 8 chars. remove=1 → "0625182" (7 chars) > 7 ✓
+      // Subscriber "82" vs "823" → Kopfnummer "82" (2 digits), ext "" vs "3"
       const result = lookupPhone("06251823");
       expect(result!.name).toBe("Long Enough");
       expect(result!.fuzzy).toBe(1);
+    });
+
+    it("matches Zentrale (ending 0) to Durchwahl", () => {
+      _testClearCache();
+      _testSetCache([
+        { raw: "0625182750", contact: { name: "Firma Zentrale", contactId: 50 } },
+      ]);
+      // CRM has Zentrale (ext "0"), call from Durchwahl 5
+      const result = lookupPhone("0625182755");
+      expect(result!.name).toBe("Firma Zentrale");
+      expect(result!.fuzzy).toBe(1);
+    });
+
+    it("matches Durchwahl to Zentrale (reverse)", () => {
+      _testClearCache();
+      _testSetCache([
+        { raw: "0625182753", contact: { name: "Firma DW3", contactId: 51 } },
+      ]);
+      // CRM has Durchwahl 3, call from Zentrale
+      const result = lookupPhone("0625182750");
+      expect(result!.name).toBe("Firma DW3");
+      expect(result!.fuzzy).toBe(1);
+    });
+
+    it("matches two different Durchwahlen of same Kopfnummer", () => {
+      _testClearCache();
+      _testSetCache([
+        { raw: "0625182755", contact: { name: "Firma DW5", contactId: 52 } },
+      ]);
+      // CRM has Durchwahl 5, call from Durchwahl 8
+      const result = lookupPhone("0625182758");
+      expect(result!.name).toBe("Firma DW5");
+      expect(result!.fuzzy).toBe(1);
+    });
+
+    it("matches multi-digit Durchwahl to Zentrale", () => {
+      _testClearCache();
+      _testSetCache([
+        { raw: "0625182750", contact: { name: "Firma Zentrale", contactId: 53 } },
+      ]);
+      // CRM has Zentrale, call from Durchwahl 123 (3 digits)
+      const result = lookupPhone("06251827123");
+      expect(result!.name).toBe("Firma Zentrale");
+      expect(result!.fuzzy).toBe(3);
+    });
+
+    it("prefers Zentrale match over arbitrary extension match", () => {
+      _testClearCache();
+      _testSetCache([
+        { raw: "0625182758", contact: { name: "Firma DW8", contactId: 54 } },
+        { raw: "0625182750", contact: { name: "Firma Zentrale", contactId: 55 } },
+      ]);
+      // Both match Durchwahl 5, but Zentrale match should be preferred
+      const result = lookupPhone("0625182755");
+      expect(result!.name).toBe("Firma Zentrale");
+      expect(result!.fuzzy).toBe(1);
+    });
+
+    it("does NOT fuzzy match across different area codes", () => {
+      _testClearCache();
+      _testSetCache([
+        { raw: "0621182755", contact: { name: "Firma Mannheim", contactId: 60 } },
+      ]);
+      // Same subscriber digits but different Vorwahl (6211 vs 6251)
+      const result = lookupPhone("0625182755");
+      expect(result!.name).not.toBe("Firma Mannheim");
     });
   });
 

@@ -89,7 +89,7 @@ export function lookupCity(normalized: string): string | null {
 /**
  * Find the area code length (without leading 0) for a normalized number.
  */
-function findAreaCodeLen(withoutZero: string): number | null {
+export function findAreaCodeLen(withoutZero: string): number | null {
   for (let len = 5; len >= 2; len--) {
     if (AREA_CODES[withoutZero.slice(0, len)]) return len;
   }
