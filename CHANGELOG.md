@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-02-24
+
 ### Fixed
 - **Stale-Cleanup überschrieb beantwortete Anrufe** — Aktive Anrufe wurden nach 5 Minuten fälschlicherweise als "stale" bereinigt. Das nachfolgende Hangup-Event legte dann einen neuen "Verpasst"-Eintrag an und überschrieb den korrekten "Angenommen"-Eintrag. Ringing-Timeout bleibt bei 5 Min, Active-Timeout ist jetzt 4 Stunden. Späte Hangup-Events aktualisieren nur noch die Endzeit statt den gesamten Record zu überschreiben
 
