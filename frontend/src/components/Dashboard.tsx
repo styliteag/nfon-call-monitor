@@ -60,16 +60,18 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout }: Props) {
   const [kopfnummern, setKopfnummern] = useState<string[]>([]);
   const [kopfnummernMap, setKopfnummernMap] = useState<KopfnummerEntry[]>([]);
   const [specialNumbers, setSpecialNumbers] = useState<Record<string, string>>({});
+  const [pfActive, setPfActive] = useState(false);
   useEffect(() => {
     fetchConfig().then((c) => {
       setKopfnummern(c.kopfnummern);
       setKopfnummernMap(c.kopfnummernMap || []);
       setSpecialNumbers(c.specialNumbers || {});
+      setPfActive(c.pfActive ?? false);
     }).catch(() => {});
   }, []);
 
   return (
-    <Layout appTitle={appTitle} isConnected={isConnected} nfonConnected={nfonConnected} dark={dark} onToggleDark={onToggleDark} onLogout={onLogout} notifications={notifications} myExtension={{ value: myExtension, select: selectMyExtension }} extensions={extensions} userStatus={userStatus}>
+    <Layout appTitle={appTitle} isConnected={isConnected} nfonConnected={nfonConnected} dark={dark} onToggleDark={onToggleDark} onLogout={onLogout} notifications={notifications} myExtension={{ value: myExtension, select: selectMyExtension }} extensions={extensions} userStatus={userStatus} pfActive={pfActive}>
       <ActiveCallBanner calls={activeCalls} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} />
       <ExtensionCards extensions={extensions} pfContacts={pfContacts} />
       <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} />

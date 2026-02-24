@@ -1,5 +1,5 @@
 import { normalizePhone, phonesMatch, isGermanLandline, classifyPhone, lookupCity, formatPhoneNice } from "./phone-utils.js";
-import type { PfContact } from "../shared/types.js";
+import type { PfContact, CrmContactResult } from "../shared/types.js";
 import * as log from "./log.js";
 
 interface PhoneEntry {
@@ -210,6 +210,54 @@ export function searchContactsByName(query: string): string[] {
     }
   }
   return [...seen];
+}
+
+const MAX_SEARCH_CONTACTS = 20;
+
+export function searchContacts(query: string): CrmContactResult[] {
+  if (!cacheReady || !query || query.length < 2) return [];
+  const lower = query.toLowerCase();
+  const normalizedQuery = normalizePhone(query);
+
+  // Collect matching entries grouped by contactId
+  const grouped = new Map<number, { name: string; phones: Map<string, PhoneEntry> }>();
+
+  for (const entry of phoneCache) {
+    const nameMatch = entry.contact.name.toLowerCase().includes(lower);
+    const phoneMatch = entry.normalized.includes(normalizedQuery) || entry.raw.includes(query);
+
+    if (nameMatch || phoneMatch) {
+      let group = grouped.get(entry.contact.contactId);
+      if (!group) {
+        group = { name: entry.contact.name, phones: new Map() };
+        grouped.set(entry.contact.contactId, group);
+      }
+      // Deduplicate by normalized number
+      if (!group.phones.has(entry.normalized)) {
+        group.phones.set(entry.normalized, entry);
+      }
+    }
+
+    if (grouped.size >= MAX_SEARCH_CONTACTS) break;
+  }
+
+  // Convert to result format
+  const results: CrmContactResult[] = [];
+  for (const [contactId, group] of grouped) {
+    const phones: CrmContactResult["phones"] = [];
+    for (const entry of group.phones.values()) {
+      const formatted = formatPhoneNice(entry.raw) ?? undefined;
+      const normalized = entry.normalized;
+      const phoneType = classifyPhone(normalized);
+      const city = phoneType === "landline" ? lookupCity(normalized) ?? undefined
+        : phoneType === "mobile" ? "Mobil"
+        : undefined;
+      phones.push({ raw: entry.raw, formatted, city });
+    }
+    results.push({ contactId, name: group.name, phones });
+  }
+
+  return results;
 }
 
 export function isPfActive(): boolean {

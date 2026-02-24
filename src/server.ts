@@ -15,7 +15,7 @@ import authRouter from "./routes/auth.js";
 import pfRouter from "./routes/pf.js";
 import clickToDialRouter from "./routes/click-to-dial.js";
 import { requireAuth, validateToken } from "./dashboard-auth.js";
-import { initPfCache } from "./projectfacts.js";
+import { initPfCache, isPfActive } from "./projectfacts.js";
 import * as log from "./log.js";
 
 const PORT = Number(process.env.PORT) || 3001;
@@ -149,7 +149,7 @@ app.get("/api/config", (_req, res) => {
     if (num && label) specialNumbers[num] = label;
   }
 
-  res.json({ kopfnummern, kopfnummernMap, specialNumbers });
+  res.json({ kopfnummern, kopfnummernMap, specialNumbers, pfActive: isPfActive() });
 });
 
 // REST routes

@@ -71,3 +71,9 @@ export interface PfContact {
   city?: string;       // city name from area code lookup (fallback)
   formatted?: string;  // nicely formatted phone number e.g. "+49 6251 82755"
 }
+
+export interface CrmContactResult {
+  contactId: number;
+  name: string;
+  phones: { raw: string; formatted?: string; city?: string }[];
+}

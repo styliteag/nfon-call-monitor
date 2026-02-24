@@ -1,4 +1,4 @@
-import type { CallsResponse, CallsQuery, ExtensionInfo, PfContact } from "../../../shared/types";
+import type { CallsResponse, CallsQuery, ExtensionInfo, PfContact, CrmContactResult } from "../../../shared/types";
 import { getToken, clearToken } from "../hooks/useAuth";
 
 const BASE = "/api";
@@ -56,7 +56,7 @@ export interface KopfnummerEntry {
   name: string;
 }
 
-export async function fetchConfig(): Promise<{ kopfnummern: string[]; kopfnummernMap: KopfnummerEntry[]; specialNumbers: Record<string, string> }> {
+export async function fetchConfig(): Promise<{ kopfnummern: string[]; kopfnummernMap: KopfnummerEntry[]; specialNumbers: Record<string, string>; pfActive: boolean }> {
   const res = await authFetch(`${BASE}/config`);
   if (!res.ok) throw new Error(`Fehler: ${res.status}`);
   return res.json();
@@ -82,6 +82,13 @@ export async function setExtensionStatus(extension: string, status: string, mess
     body: JSON.stringify({ extension, status, message }),
   });
   if (!res.ok) throw new Error(`Fehler: ${res.status}`);
+}
+
+export async function searchCrmContacts(query: string): Promise<CrmContactResult[]> {
+  const res = await authFetch(`${BASE}/pf/search?q=${encodeURIComponent(query)}`);
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.results || [];
 }
 
 export async function lookupPfContacts(numbers: string[]): Promise<Record<string, PfContact>> {

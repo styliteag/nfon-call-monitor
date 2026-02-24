@@ -2,6 +2,7 @@ import { type ReactNode, useState, useEffect } from "react";
 import type { ExtensionInfo } from "../../../shared/types";
 import type { UserStatusValue } from "../hooks/useUserStatus";
 import { ConnectionStatus } from "./ConnectionStatus";
+import { CrmSearch } from "./CrmSearch";
 
 function formatUptime(seconds: number): string {
   const d = Math.floor(seconds / 86400);
@@ -24,9 +25,10 @@ interface Props {
   myExtension?: { value: string | null; select: (ext: string | null) => void };
   extensions?: ExtensionInfo[];
   userStatus?: { status: UserStatusValue; message: string; update: (status: UserStatusValue, message: string) => Promise<void> };
+  pfActive?: boolean;
 }
 
-export function Layout({ children, appTitle, isConnected, nfonConnected, dark, onToggleDark, onLogout, notifications, myExtension, extensions, userStatus }: Props) {
+export function Layout({ children, appTitle, isConnected, nfonConnected, dark, onToggleDark, onLogout, notifications, myExtension, extensions, userStatus, pfActive }: Props) {
   const [uptime, setUptime] = useState<number | null>(null);
 
   useEffect(() => {
@@ -44,10 +46,13 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
   return (
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
       <header className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
-        <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-          {appTitle}
-          <span className="ml-2 text-xs font-normal text-gray-400 dark:text-gray-500">v{import.meta.env.VITE_APP_VERSION || "dev"}</span>
-        </h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+            {appTitle}
+            <span className="ml-2 text-xs font-normal text-gray-400 dark:text-gray-500">v{import.meta.env.VITE_APP_VERSION || "dev"}</span>
+          </h1>
+          <CrmSearch myExtension={myExtension?.value ?? null} pfActive={pfActive ?? false} />
+        </div>
         <div className="flex items-center gap-3">
           {myExtension && extensions && (
             <div className="flex items-center gap-1.5">
