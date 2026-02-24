@@ -236,6 +236,11 @@ export function getUserStatuses(): Map<string, { status: string; message: string
   return map;
 }
 
+export function clearAllUserStatuses(): number {
+  const result = db.prepare("DELETE FROM user_status").run();
+  return Number(result.changes);
+}
+
 export function getCallCounts(): Record<string, number> {
   const rows = db.prepare(
     "SELECT status, COUNT(*) as count FROM calls GROUP BY status"

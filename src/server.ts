@@ -6,7 +6,7 @@ import { Server } from "socket.io";
 import path from "path";
 import { readFileSync } from "fs";
 
-import { initDatabase, getLastHeartbeat, updateHeartbeat, upsertCall, backupDatabase, purgeOldCalls, getCallCounts } from "./db.js";
+import { initDatabase, getLastHeartbeat, updateHeartbeat, upsertCall, backupDatabase, purgeOldCalls, getCallCounts, clearAllUserStatuses } from "./db.js";
 import { callEvents, getActiveCallsList, cleanStaleCalls } from "./call-aggregator.js";
 import { connectorEvents, start as startConnector, stop as stopConnector, getExtensionList, isNfonConnected } from "./nfon-connector.js";
 import callsRouter from "./routes/calls.js";
@@ -282,6 +282,27 @@ async function main() {
     log.info("Backup", `Nächstes Backup um 02:00 (in ${Math.round(delay / 60_000)} Min)`);
   }
   scheduleDailyBackup();
+
+  // Daily user status reset at 06:00
+  function scheduleDailyStatusReset() {
+    const now = new Date();
+    const next = new Date(now);
+    next.setHours(6, 0, 0, 0);
+    if (next <= now) next.setDate(next.getDate() + 1);
+    const delay = next.getTime() - now.getTime();
+    setTimeout(() => {
+      const cleared = clearAllUserStatuses();
+      log.info("Status", `Täglicher Reset: ${cleared} User-Status gelöscht`);
+      connectorEvents.emit("extensions:updated");
+      setInterval(() => {
+        const cleared = clearAllUserStatuses();
+        log.info("Status", `Täglicher Reset: ${cleared} User-Status gelöscht`);
+        connectorEvents.emit("extensions:updated");
+      }, 24 * 60 * 60_000);
+    }, delay);
+    log.info("Status", `Nächster Status-Reset um 06:00 (in ${Math.round(delay / 60_000)} Min)`);
+  }
+  scheduleDailyStatusReset();
 }
 
 process.on("SIGINT", () => {
