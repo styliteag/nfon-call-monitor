@@ -25,6 +25,8 @@ export interface CallRecord {
   duration?: number;    // seconds (answer → end)
   status: CallStatus;
   endReason?: string;
+  transferredFrom?: string;      // extension number that transferred the call
+  transferredFromName?: string;   // name of that extension
 }
 
 export interface ExtensionInfo {

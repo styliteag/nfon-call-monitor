@@ -67,6 +67,16 @@ export function processEvent(event: NfonCallEvent): void {
     };
   }
 
+  // Detect transfer: inbound call from an internal extension that has an active call
+  if (isNew && event.direction === "inbound" && extensionNames.has(event.caller)) {
+    const callerCall = getActiveCallForExtension(event.caller);
+    if (callerCall && callerCall.status === "active") {
+      record.transferredFrom = event.caller;
+      record.transferredFromName = extensionNames.get(event.caller) || event.caller;
+      log.debug("Calls", `Transfer detected: ${record.extensionName}(${record.extension}) ← ${record.transferredFromName}(${record.transferredFrom})`);
+    }
+  }
+
   // Update caller/callee if available (might arrive with later events)
   if (event.caller) record.caller = event.caller;
   if (event.callee) record.callee = event.callee;

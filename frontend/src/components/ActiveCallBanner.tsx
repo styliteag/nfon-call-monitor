@@ -19,7 +19,10 @@ export function ActiveCallBanner({ calls, kopfnummern, kopfnummernMap, pfContact
         <div key={`${call.id}-${call.extension}`} className="flex items-center gap-2 animate-pulse">
           <span className="text-yellow-600 dark:text-yellow-400 text-lg">&#9889;</span>
           <span className="text-yellow-800 dark:text-yellow-200 font-medium">
-            {call.direction === "inbound" ? "Eingehender" : "Ausgehender"} Anruf:{" "}
+            {call.transferredFrom
+              ? <>Weiterleitung von {call.transferredFromName || call.transferredFrom}:</>
+              : <>{call.direction === "inbound" ? "Eingehender" : "Ausgehender"} Anruf:</>
+            }{" "}
             {call.direction === "inbound" ? (
               <>
                 <span

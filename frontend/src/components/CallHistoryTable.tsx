@@ -279,6 +279,12 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
                     <span className={`${arrowColor[call.status] ?? "text-gray-800 dark:text-gray-300"} text-2xl font-black leading-none`} title={call.direction === "inbound" ? "Eingehend" : "Ausgehend"}>&#8594;</span>
                     <PhoneWithPf number={call.direction === "inbound" ? call.extension : call.callee} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="truncate" />
                   </div>
+                  {call.transferredFrom && (
+                    <div className="text-xs text-purple-600 dark:text-purple-400 mt-0.5 font-sans">
+                      &#8617; Weiterleitung von {call.transferredFromName || call.transferredFrom}
+                      <span className="text-gray-400 ml-1">({call.transferredFrom})</span>
+                    </div>
+                  )}
                 </td>
               </tr>
               )
