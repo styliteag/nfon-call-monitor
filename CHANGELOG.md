@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-02-26
+
 ### Added
 - **Transfer-Erkennung** — Anrufweiterleitungen werden automatisch erkannt wenn eine Extension mit aktivem Call einen neuen Outbound-Call zu einer anderen Extension startet. Call-History zeigt "Weiterleitung von [Name]" und das Active-Call-Banner zeigt bei klingelnden Transfers den Weiterleitenden an
 
