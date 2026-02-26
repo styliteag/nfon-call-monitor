@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **Caller/Callee-Anzeige zeigte CLIP-Nummer statt Extension** — Bei ausgehenden Anrufen wurde "Z-0" (Firmen-CLIP) statt der Extension angezeigt, bei eingehenden die gewählte Firmennummer statt der annehmenden Extension. Caller→Callee-Spalte und ActiveCallBanner verwenden jetzt `call.extension` für die interne Seite
+
 ## [1.6.3] - 2026-02-24
 
 ### Added

@@ -275,9 +275,9 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
                 <td className="px-3 py-1.5 font-mono dark:text-gray-300">{formatDuration(call.duration)}</td>
                 <td className="px-3 py-1.5 font-mono dark:text-gray-300">
                   <div className="grid grid-cols-[320px_auto_1fr] items-center gap-1">
-                    <PhoneWithPf number={call.caller} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="truncate text-right" />
+                    <PhoneWithPf number={call.direction === "outbound" ? call.extension : call.caller} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="truncate text-right" />
                     <span className={`${arrowColor[call.status] ?? "text-gray-800 dark:text-gray-300"} text-2xl font-black leading-none`} title={call.direction === "inbound" ? "Eingehend" : "Ausgehend"}>&#8594;</span>
-                    <PhoneWithPf number={call.callee} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="truncate" />
+                    <PhoneWithPf number={call.direction === "inbound" ? call.extension : call.callee} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="truncate" />
                   </div>
                 </td>
               </tr>
