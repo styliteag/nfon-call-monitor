@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.1] - 2026-02-27
+
 ### Added
 - **Internationale Telefonnummern** — Ausländische Nummern werden automatisch erkannt, formatiert und mit Ländername + Typ angezeigt (z.B. "Schweiz Mobil", "Vereinigte Staaten Festnetz"). Erkennung via `libphonenumber-js/max`, Ländernamen auf Deutsch. Bestehende projectfacts-Kontakte haben weiterhin Vorrang
 
