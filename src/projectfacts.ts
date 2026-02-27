@@ -1,4 +1,4 @@
-import { normalizePhone, phonesMatch, isGermanLandline, classifyPhone, lookupCity, formatPhoneNice, findAreaCodeLen } from "./phone-utils.js";
+import { normalizePhone, phonesMatch, isGermanLandline, classifyPhone, lookupCity, formatPhoneNice, findAreaCodeLen, formatInternational } from "./phone-utils.js";
 import type { PfContact, CrmContactResult } from "../shared/types.js";
 import * as log from "./log.js";
 
@@ -206,6 +206,17 @@ function fuzzyLookup(rawNumber: string): PfContact | null {
 
 export function lookupPhone(rawNumber: string): PfContact | null {
   if (!rawNumber) return null;
+
+  // 0. International number detection (before German logic)
+  const intl = formatInternational(rawNumber);
+  if (intl) {
+    // Still check PF cache — a known contact name takes priority
+    if (cacheReady) {
+      const exact = exactLookup(rawNumber);
+      if (exact) return { ...exact, formatted: intl.formatted, city: intl.label };
+    }
+    return { name: intl.label, contactId: 0, city: intl.label, formatted: intl.formatted };
+  }
 
   const formatted = formatPhoneNice(rawNumber) ?? undefined;
   const normalized = normalizePhone(rawNumber);

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { normalizePhone, phonesMatch, classifyPhone, isGermanLandline, lookupCity, formatPhoneNice } from "./phone-utils.js";
+import { normalizePhone, phonesMatch, classifyPhone, isGermanLandline, lookupCity, formatPhoneNice, formatInternational } from "./phone-utils.js";
 
 describe("normalizePhone", () => {
   it("strips spaces, hyphens, parentheses, slashes, dots", () => {
@@ -144,5 +144,79 @@ describe("formatPhoneNice", () => {
 
   it("returns null for non-German numbers", () => {
     expect(formatPhoneNice("12345678")).toBeNull();
+  });
+});
+
+describe("formatInternational", () => {
+  it("formats US numbers", () => {
+    const result = formatInternational("14089434100");
+    expect(result).not.toBeNull();
+    expect(result!.formatted).toBe("+1 408 943 4100");
+    expect(result!.label).toContain("Vereinigte Staaten");
+  });
+
+  it("formats Swiss numbers", () => {
+    const result = formatInternational("41441234567");
+    expect(result).not.toBeNull();
+    expect(result!.formatted).toMatch(/^\+41/);
+    expect(result!.label).toContain("Schweiz");
+  });
+
+  it("formats Austrian numbers", () => {
+    const result = formatInternational("4312345678");
+    expect(result).not.toBeNull();
+    expect(result!.formatted).toMatch(/^\+43/);
+    expect(result!.label).toContain("Österreich");
+  });
+
+  it("formats UK numbers", () => {
+    const result = formatInternational("442071234567");
+    expect(result).not.toBeNull();
+    expect(result!.formatted).toMatch(/^\+44/);
+    expect(result!.label).toMatch(/Vereinigtes Königreich|Großbritannien/);
+  });
+
+  it("formats French numbers", () => {
+    const result = formatInternational("33123456789");
+    expect(result).not.toBeNull();
+    expect(result!.formatted).toMatch(/^\+33/);
+    expect(result!.label).toContain("Frankreich");
+  });
+
+  it("includes phone type in label when detectable", () => {
+    // US mobile number
+    const result = formatInternational("12025551234");
+    expect(result).not.toBeNull();
+    // Type detection depends on libphonenumber-js/max metadata
+    expect(result!.label).toBeTruthy();
+  });
+
+  it("returns null for German numbers (49 prefix)", () => {
+    expect(formatInternational("4962518275")).toBeNull();
+  });
+
+  it("returns null for German numbers (+49 prefix)", () => {
+    expect(formatInternational("+496251555")).toBeNull();
+  });
+
+  it("returns null for German numbers (0049 prefix)", () => {
+    expect(formatInternational("00496251555")).toBeNull();
+  });
+
+  it("returns null for invalid/unparseable numbers", () => {
+    expect(formatInternational("123")).toBeNull();
+    expect(formatInternational("abc")).toBeNull();
+  });
+
+  it("handles + prefix in input", () => {
+    const result = formatInternational("+14089434100");
+    expect(result).not.toBeNull();
+    expect(result!.formatted).toBe("+1 408 943 4100");
+  });
+
+  it("handles 00 prefix in input", () => {
+    const result = formatInternational("0014089434100");
+    expect(result).not.toBeNull();
+    expect(result!.formatted).toBe("+1 408 943 4100");
   });
 });

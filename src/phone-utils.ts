@@ -1,8 +1,12 @@
 import { readFileSync } from "fs";
 import { join } from "path";
+import { parsePhoneNumber, type PhoneNumber } from "libphonenumber-js/max";
+
 const AREA_CODES: Record<string, string> = JSON.parse(
   readFileSync(join(__dirname, "german-area-codes.json"), "utf-8")
 );
+
+const regionNames = new Intl.DisplayNames(["de"], { type: "region" });
 
 /**
  * Normalize a phone number to digits only, converting German country codes.
@@ -138,4 +142,52 @@ export function formatPhoneNice(raw: string): string | null {
 
   // Fallback: just add +49
   return `+49 ${withoutZero}`;
+}
+
+export interface InternationalResult {
+  formatted: string;
+  label: string;   // e.g. "USA Mobil", "Schweiz", "Österreich Festnetz"
+}
+
+const PHONE_TYPE_LABELS: Record<string, string> = {
+  MOBILE: "Mobil",
+  FIXED_LINE: "Festnetz",
+  FIXED_LINE_OR_MOBILE: "Festnetz/Mobil",
+};
+
+/**
+ * Detect and format international (non-German) phone numbers.
+ * Input: raw number as delivered by NFON, e.g. "14089434100" (without +).
+ * Returns null for German numbers or if parsing fails.
+ */
+export function formatInternational(raw: string): InternationalResult | null {
+  // Strip formatting
+  let s = raw.replace(/[\s\-\(\)\/\.]/g, "");
+
+  // Normalize to E.164-ish with leading +
+  if (s.startsWith("00")) s = "+" + s.slice(2);
+  else if (s.startsWith("+")) { /* already good */ }
+  else s = "+" + s;
+
+  // Skip German numbers — they're handled by existing logic
+  if (s.startsWith("+49")) return null;
+
+  let parsed: PhoneNumber | undefined;
+  try {
+    parsed = parsePhoneNumber(s);
+  } catch {
+    return null;
+  }
+  if (!parsed?.isValid()) return null;
+
+  // Skip if it turned out to be German after all
+  if (parsed.country === "DE") return null;
+
+  const formatted = parsed.formatInternational();
+  const country = parsed.country ? (regionNames.of(parsed.country) ?? parsed.country) : "";
+  const numberType = parsed.getType();
+  const typeLabel = numberType ? PHONE_TYPE_LABELS[numberType] : undefined;
+  const label = typeLabel ? `${country} ${typeLabel}` : country;
+
+  return { formatted, label };
 }

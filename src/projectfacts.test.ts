@@ -231,6 +231,40 @@ describe("lookupPhone", () => {
     });
   });
 
+  describe("international numbers", () => {
+    it("returns formatted international number with country label", () => {
+      const result = lookupPhone("14089434100");
+      expect(result).not.toBeNull();
+      expect(result!.formatted).toBe("+1 408 943 4100");
+      expect(result!.city).toContain("Vereinigte Staaten");
+      expect(result!.name).toContain("Vereinigte Staaten");
+      expect(result!.contactId).toBe(0);
+    });
+
+    it("returns Swiss number with country label", () => {
+      const result = lookupPhone("41441234567");
+      expect(result).not.toBeNull();
+      expect(result!.city).toContain("Schweiz");
+    });
+
+    it("prefers PF contact name over international label", () => {
+      _testSetCache([
+        { raw: "+14089434100", contact: { name: "Apple Inc.", contactId: 99 } },
+      ]);
+      const result = lookupPhone("14089434100");
+      expect(result).not.toBeNull();
+      expect(result!.name).toBe("Apple Inc.");
+      expect(result!.contactId).toBe(99);
+      expect(result!.formatted).toBe("+1 408 943 4100");
+    });
+
+    it("does not interfere with German numbers", () => {
+      const result = lookupPhone("0625182755");
+      expect(result).not.toBeNull();
+      expect(result!.city).toBe("Bensheim");
+    });
+  });
+
   describe("lookupPhones batch", () => {
     it("returns results for multiple numbers", () => {
       const result = lookupPhones(["0625182755", "01701234567", ""]);
