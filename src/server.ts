@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import path from "path";
@@ -33,14 +34,18 @@ const APP_TITLE = process.env.APP_TITLE || "NFON Call Monitor";
 const app = express();
 const httpServer = createServer(app);
 
+const corsOrigins = (process.env.CORS_ORIGINS || "http://localhost:5173")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 const io = new Server(httpServer, {
-  cors: {
-    origin: ["http://localhost:5173", "http://localhost:3001"],
-  },
+  cors: { origin: corsOrigins },
 });
 
 // Middleware
-app.use(cors({ origin: ["http://localhost:5173"] }));
+app.use(helmet());
+app.use(cors({ origin: corsOrigins }));
 app.use(express.json());
 
 // Public endpoints (before auth middleware)
@@ -49,19 +54,10 @@ app.get("/api/version", (_req, res) => res.json({ version: APP_VERSION, appTitle
 
 app.get("/api/health", (_req, res) => {
   const nfonConnected = isNfonConnected();
-  const socketClients = io.engine.clientsCount;
-  const uptimeSeconds = Math.floor(process.uptime());
-
   const status = nfonConnected ? "ok" : "degraded";
   const httpStatus = nfonConnected ? 200 : 503;
 
-  res.status(httpStatus).json({
-    status,
-    version: APP_VERSION,
-    uptime: uptimeSeconds,
-    nfonConnected,
-    socketClients,
-  });
+  res.status(httpStatus).json({ status, version: APP_VERSION, nfonConnected });
 });
 
 // Prometheus metrics endpoint (Basic Auth)

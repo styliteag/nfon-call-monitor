@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import type { Request, Response, NextFunction } from "express";
 import * as log from "./log.js";
 
-const JWT_EXPIRY_SECONDS = 7 * 24 * 60 * 60; // 7 days
+const JWT_EXPIRY_SECONDS = 12 * 60 * 60; // 12 hours
 
 let jwtSecret: string;
 

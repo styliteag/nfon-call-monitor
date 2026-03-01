@@ -1,10 +1,19 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import { verifyLogin, createSession, validateToken } from "../dashboard-auth.js";
 import * as log from "../log.js";
 
 const router = Router();
 
-router.post("/login", (req, res) => {
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Zu viele Anmeldeversuche. Bitte versuchen Sie es in 15 Minuten erneut." },
+});
+
+router.post("/login", loginLimiter, (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
