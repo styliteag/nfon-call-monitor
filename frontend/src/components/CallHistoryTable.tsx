@@ -267,8 +267,8 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
                   <div className="text-xs text-gray-400">{call.extension}</div>
                 </td>
                 <td className="px-3 py-1.5 whitespace-nowrap">
-                  <CallStatusBadge status={call.status} direction={call.direction} isTransfer={!!call.transferredFrom} />
-                  {call.endReason && (
+                  <CallStatusBadge status={call.status} direction={call.direction} isTransfer={!!call.transferredFrom} endReason={call.endReason} />
+                  {call.endReason && call.endReason !== "voicemail" && (
                     <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 ml-1">{call.endReason}</span>
                   )}
                 </td>

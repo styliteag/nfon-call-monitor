@@ -115,6 +115,13 @@ export function processEvent(event: NfonCallEvent): void {
       record.status = "active";
       if (!record.answerTime) {
         record.answerTime = now;
+        // Detect instant answer for outbound calls to internal extensions (voicemail/system announcement).
+        // No human answers in < 1.5s — the PBX connected to voicemail or "not reachable" announcement.
+        const answerDelay = new Date(now).getTime() - new Date(record.startTime).getTime();
+        if (record.direction === "outbound" && answerDelay < 300 && extensionNames.has(record.callee)) {
+          record.endReason = "voicemail";
+          log.debug("Calls", `Instant answer (${answerDelay}ms) for ${record.extensionName}(${record.extension}) → ${record.callee} — likely voicemail/system`);
+        }
       }
       // Cancel ringing on all other extensions for the same call (group call).
       // Match by UUID first, but also by caller+direction+time window for
@@ -158,7 +165,7 @@ export function processEvent(event: NfonCallEvent): void {
       } else {
         record.status = resolveEndStatus(event.error);
       }
-      record.endReason = event.error;
+      record.endReason = event.error || record.endReason;
       activeCalls.delete(key);
       break;
   }

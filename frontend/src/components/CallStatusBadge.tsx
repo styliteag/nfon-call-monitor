@@ -14,13 +14,17 @@ interface Props {
   status: CallStatus;
   direction?: "inbound" | "outbound";
   isTransfer?: boolean;
+  endReason?: string;
 }
 
-export function CallStatusBadge({ status, direction, isTransfer }: Props) {
+export function CallStatusBadge({ status, direction, isTransfer, endReason }: Props) {
   const entry = config[status] ?? { label: status, className: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300" };
   let label = entry.label;
   let className = entry.className;
-  if (isTransfer && status === "answered") {
+  if (status === "answered" && direction === "outbound" && endReason === "voicemail") {
+    label = "Mailbox";
+    className = "bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200";
+  } else if (isTransfer && status === "answered") {
     label = "Weitergeleitet";
     className = "bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300";
   } else if (status === "answered" && direction === "outbound") {
