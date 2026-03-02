@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.4] - 2026-03-02
+
 ### Fixed
 - **Log-Zeitstempel** — `toISOString()` gibt immer UTC zurück, unabhängig von `TZ`. Log-Timestamps nutzen jetzt `getHours()`/`getMinutes()`/`getSeconds()` die die lokale Zeitzone respektieren
 
