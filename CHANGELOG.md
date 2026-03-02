@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Improved
+- **Transfer-Darstellung erweitert** — Weitergeleitete Anrufe zeigen jetzt den **Original-Anrufer** (externe Nummer) auf allen Transfer-Zeilen an. Sowohl der eingehende Leg (Ziel-Extension) als auch der ausgehende Leg (weiterleitende Extension) werden als Transfer markiert. Neues lila "Weitergeleitet"-Badge und lila Rand links für visuelle Gruppierung
+- **Transfer-Erkennung auf beiden Seiten** — Bisher wurde nur die Empfänger-Seite (inbound) als Transfer erkannt. Jetzt wird auch die Absender-Seite (outbound) markiert, wenn eine Extension während eines aktiven Inbound-Calls einen neuen Outbound-Call startet
+- **ActiveCallBanner zeigt Original-Anrufer** — Bei eingehenden Transfer-Calls im Banner wird der externe Anrufer angezeigt (z.B. "Weiterleitung von Michael Seifert (Anrufer: Hamburg +49 40 87709355)")
+
+### Fixed
+- **Group-Cancel löschte Transfer-Legs** — Bei Transfers mit gleicher UUID wurden Caller/Callee-Legs fälschlicherweise als Gruppenruf-Teilnehmer gecancelt. Attended Transfers (Rückfrage) und Blind Transfers bei denen das Ziel abnimmt funktionierten dadurch nicht korrekt. Fix: Group-Cancel prüft jetzt zusätzlich die Call-Richtung — Gruppenrufe (alle inbound) werden weiter gecancelt, Transfer-Legs (inbound + outbound) bleiben erhalten
+
 ## [1.8.0] - 2026-03-01
 
 ## [1.7.1] - 2026-02-27

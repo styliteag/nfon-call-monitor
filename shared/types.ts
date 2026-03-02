@@ -27,6 +27,7 @@ export interface CallRecord {
   endReason?: string;
   transferredFrom?: string;      // extension number that transferred the call
   transferredFromName?: string;   // name of that extension
+  originalCaller?: string;        // original external caller (set on transfer legs)
 }
 
 export interface ExtensionInfo {

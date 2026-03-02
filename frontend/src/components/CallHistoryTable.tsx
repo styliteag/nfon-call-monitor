@@ -249,7 +249,7 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
                 key={`${call.id}-${call.extension}`}
                 className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${
                   call.status === "ringing" ? "bg-yellow-50 dark:bg-yellow-900/20 animate-pulse" : ""
-                }`}
+                } ${call.transferredFrom ? "border-l-2 border-l-purple-500 dark:border-l-purple-400" : ""}`}
               >
                 <td className="px-3 py-1.5 whitespace-nowrap">
                   <div className="dark:text-gray-200">
@@ -267,7 +267,7 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
                   <div className="text-xs text-gray-400">{call.extension}</div>
                 </td>
                 <td className="px-3 py-1.5 whitespace-nowrap">
-                  <CallStatusBadge status={call.status} direction={call.direction} />
+                  <CallStatusBadge status={call.status} direction={call.direction} isTransfer={!!call.transferredFrom} />
                   {call.endReason && (
                     <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300 ml-1">{call.endReason}</span>
                   )}
@@ -281,8 +281,16 @@ export function CallHistoryTable({ calls, total, page, pageSize, loading, onPage
                   </div>
                   {call.transferredFrom && (
                     <div className="text-xs text-purple-600 dark:text-purple-400 mt-0.5 font-sans">
-                      &#8617; Weiterleitung von {call.transferredFromName || call.transferredFrom}
-                      <span className="text-gray-400 ml-1">({call.transferredFrom})</span>
+                      {call.direction === "outbound"
+                        ? <>&#8618; Weiterleitung an <span className="font-medium">{call.callee}</span></>
+                        : <>&#8617; Weiterleitung von {call.transferredFromName || call.transferredFrom}
+                          <span className="text-gray-400 ml-1">({call.transferredFrom})</span></>
+                      }
+                      {call.originalCaller && (
+                        <span className="text-gray-400 ml-1">
+                          &mdash; Anrufer: <PhoneWithPf number={call.originalCaller} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="inline" />
+                        </span>
+                      )}
                     </div>
                   )}
                 </td>

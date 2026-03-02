@@ -66,6 +66,10 @@ export function initDatabase(): void {
     db.exec("ALTER TABLE calls ADD COLUMN transferred_from_name TEXT");
     log.info("DB", "Migration: transferred_from/transferred_from_name Spalten hinzugefügt.");
   }
+  if (!colNames.has("original_caller")) {
+    db.exec("ALTER TABLE calls ADD COLUMN original_caller TEXT");
+    log.info("DB", "Migration: original_caller Spalte hinzugefügt.");
+  }
 
   // Fix stale calls left as ringing/active from previous runs
   const staleFixed = db.prepare(`
@@ -81,8 +85,8 @@ export function initDatabase(): void {
 
 export function upsertCall(call: CallRecord): void {
   const stmt = db.prepare(`
-    INSERT INTO calls (id, extension, caller, callee, extension_name, direction, start_time, answer_time, end_time, duration, status, end_reason, transferred_from, transferred_from_name)
-    VALUES (:id, :extension, :caller, :callee, :extensionName, :direction, :startTime, :answerTime, :endTime, :duration, :status, :endReason, :transferredFrom, :transferredFromName)
+    INSERT INTO calls (id, extension, caller, callee, extension_name, direction, start_time, answer_time, end_time, duration, status, end_reason, transferred_from, transferred_from_name, original_caller)
+    VALUES (:id, :extension, :caller, :callee, :extensionName, :direction, :startTime, :answerTime, :endTime, :duration, :status, :endReason, :transferredFrom, :transferredFromName, :originalCaller)
     ON CONFLICT(id, extension) DO UPDATE SET
       caller = :caller,
       callee = :callee,
@@ -94,7 +98,8 @@ export function upsertCall(call: CallRecord): void {
       status = :status,
       end_reason = :endReason,
       transferred_from = :transferredFrom,
-      transferred_from_name = :transferredFromName
+      transferred_from_name = :transferredFromName,
+      original_caller = :originalCaller
   `);
 
   stmt.run({
@@ -112,6 +117,7 @@ export function upsertCall(call: CallRecord): void {
     endReason: call.endReason ?? null,
     transferredFrom: call.transferredFrom ?? null,
     transferredFromName: call.transferredFromName ?? null,
+    originalCaller: call.originalCaller ?? null,
   });
 }
 
@@ -342,5 +348,6 @@ function rowToCallRecord(row: Record<string, unknown>): CallRecord {
     endReason: (row.end_reason as string) || undefined,
     transferredFrom: (row.transferred_from as string) || undefined,
     transferredFromName: (row.transferred_from_name as string) || undefined,
+    originalCaller: (row.original_caller as string) || undefined,
   };
 }

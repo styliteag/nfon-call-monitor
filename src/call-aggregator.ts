@@ -73,7 +73,22 @@ export function processEvent(event: NfonCallEvent): void {
     if (callerCall && callerCall.status === "active") {
       record.transferredFrom = event.caller;
       record.transferredFromName = extensionNames.get(event.caller) || event.caller;
-      log.debug("Calls", `Transfer detected: ${record.extensionName}(${record.extension}) ← ${record.transferredFromName}(${record.transferredFrom})`);
+      // Store original external caller from the active call being transferred
+      if (callerCall.direction === "inbound" && callerCall.caller) {
+        record.originalCaller = callerCall.caller;
+      }
+      log.debug("Calls", `Transfer detected: ${record.extensionName}(${record.extension}) ← ${record.transferredFromName}(${record.transferredFrom})${record.originalCaller ? ` (orig: ${record.originalCaller})` : ""}`);
+    }
+  }
+
+  // Detect transfer outbound leg: extension makes outbound call while having an active inbound call
+  if (isNew && event.direction === "outbound" && extensionNames.has(event.extension)) {
+    const activeInbound = getActiveCallForExtension(event.extension);
+    if (activeInbound && activeInbound.status === "active" && activeInbound.direction === "inbound" && activeInbound.id !== event.uuid) {
+      record.transferredFrom = event.extension;
+      record.transferredFromName = extensionNames.get(event.extension) || event.extension;
+      record.originalCaller = activeInbound.caller;
+      log.debug("Calls", `Transfer outbound: ${record.extensionName}(${record.extension}) → ${event.callee} (orig: ${record.originalCaller})`);
     }
   }
 
@@ -110,7 +125,10 @@ export function processEvent(event: NfonCallEvent): void {
           if (otherRecord.extension === event.extension) continue;
           if (otherRecord.status !== "ringing") continue;
 
-          const sameUuid = otherRecord.id === event.uuid;
+          // Only cancel same-direction records: group calls have all legs inbound,
+          // while transfer calls have one inbound + one outbound leg with the same UUID.
+          const sameUuid = otherRecord.id === event.uuid
+            && otherRecord.direction === record.direction;
           const sameCaller = record.direction === "inbound"
             && otherRecord.direction === "inbound"
             && otherRecord.caller === record.caller

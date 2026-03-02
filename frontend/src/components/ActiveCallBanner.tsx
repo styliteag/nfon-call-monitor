@@ -20,7 +20,7 @@ export function ActiveCallBanner({ calls, kopfnummern, kopfnummernMap, pfContact
           <span className="text-yellow-600 dark:text-yellow-400 text-lg">&#9889;</span>
           <span className="text-yellow-800 dark:text-yellow-200 font-medium">
             {call.transferredFrom
-              ? <>Weiterleitung von {call.transferredFromName || call.transferredFrom}:</>
+              ? <>Weiterleitung von {call.transferredFromName || call.transferredFrom}{call.originalCaller ? <> (Anrufer: {pfContacts?.[call.originalCaller]?.name || formatPhone(call.originalCaller, kopfnummern)})</> : ""}:</>
               : <>{call.direction === "inbound" ? "Eingehender" : "Ausgehender"} Anruf:</>
             }{" "}
             {call.direction === "inbound" ? (

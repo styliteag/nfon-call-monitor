@@ -13,12 +13,19 @@ const config: Record<CallStatus, { label: string; className: string }> = {
 interface Props {
   status: CallStatus;
   direction?: "inbound" | "outbound";
+  isTransfer?: boolean;
 }
 
-export function CallStatusBadge({ status, direction }: Props) {
+export function CallStatusBadge({ status, direction, isTransfer }: Props) {
   const entry = config[status] ?? { label: status, className: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300" };
-  const label = status === "answered" && direction === "outbound" ? "Aufgebaut" : entry.label;
-  const className = entry.className;
+  let label = entry.label;
+  let className = entry.className;
+  if (isTransfer && status === "answered") {
+    label = "Weitergeleitet";
+    className = "bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300";
+  } else if (status === "answered" && direction === "outbound") {
+    label = "Aufgebaut";
+  }
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${className}`}>
       {label}
