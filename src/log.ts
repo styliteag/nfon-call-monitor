@@ -1,7 +1,12 @@
 const isDebug = () => (process.env.LOG || "").toLowerCase() === "debug";
 
 function ts(): string {
-  return new Date().toISOString().slice(11, 23);
+  const d = new Date();
+  const h = String(d.getHours()).padStart(2, "0");
+  const m = String(d.getMinutes()).padStart(2, "0");
+  const s = String(d.getSeconds()).padStart(2, "0");
+  const ms = String(d.getMilliseconds()).padStart(3, "0");
+  return `${h}:${m}:${s}.${ms}`;
 }
 
 /** Always shown: startup, important state changes */
