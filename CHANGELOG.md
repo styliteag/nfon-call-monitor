@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.3] - 2026-03-02
+
 ### Fixed
 - **Docker-Zeitzone** — `tzdata`-Paket im Alpine-Image installiert, damit `TZ=Europe/Berlin` korrekt funktioniert. Ohne tzdata wurde die Env-Variable ignoriert und Logs zeigten UTC-Zeit
 
