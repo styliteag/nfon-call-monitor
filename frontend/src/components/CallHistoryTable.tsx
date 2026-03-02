@@ -33,7 +33,7 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       type="button"
-      className="inline-flex items-center ml-1 text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
+      className="inline-flex items-center mr-1 text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
       title="Nummer kopieren"
       onClick={(e) => {
         e.stopPropagation();
@@ -114,8 +114,7 @@ function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, extensio
     }
     return (
       <span className={`group whitespace-nowrap cursor-grab ${className ?? ""}`} title={displayNum} {...dragProps}>
-        <span className="text-green-600 dark:text-green-400 font-sans">{standort}</span>-{formatted}
-        <CopyButton text={displayNum} />
+        <span className="text-green-600 dark:text-green-400 font-sans">{standort}</span>-<CopyButton text={displayNum} />{formatted}
       </span>
     );
   }
@@ -133,17 +132,17 @@ function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, extensio
       <span className={`group whitespace-nowrap cursor-grab ${className ?? ""}`} title={displayNum} {...dragProps}>
         <span className={nameColor}>{contact.name}{fuzzyMarker}</span>
         {showCity && <span className="text-amber-600 dark:text-amber-400 font-sans italic ml-1">({contact.city})</span>}
-        <span className="text-gray-400 ml-1">{displayNum}</span>
-        <CopyButton text={displayNum} />
+        <CopyButton text={displayNum} /><span className="text-gray-400">{displayNum}</span>
       </span>
     );
   }
 
   return (
     <span className={`group whitespace-nowrap cursor-grab ${className ?? ""}`} title={displayNum} {...dragProps}>
-      {formatted === number ? displayNum : formatted}
       <CopyButton text={displayNum} />
+      {formatted === number ? displayNum : formatted}
     </span>
+
   );
 }
 

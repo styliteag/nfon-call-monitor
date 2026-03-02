@@ -78,7 +78,6 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout, layout, onTo
       {layout === "split" ? (
         <div className="flex-1 hidden lg:flex flex-row overflow-hidden">
           <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-            <ActiveCallBanner calls={activeCalls} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} />
             <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} total={total} page={page} pageSize={filters.pageSize ?? 20} onPageChange={setPage} onPageSizeChange={(size) => updateFilters({ pageSize: size })} />
             <CallHistoryTable
               calls={calls}
@@ -96,8 +95,8 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout, layout, onTo
         </div>
       ) : null}
       {/* Stacked layout (also shown on small screens when split is selected) */}
+      <ActiveCallBanner calls={activeCalls} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} />
       <div className={layout === "split" ? "flex-1 flex flex-col overflow-hidden lg:hidden" : "flex-1 flex flex-col overflow-hidden"}>
-        <ActiveCallBanner calls={activeCalls} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} />
         <ExtensionCards extensions={extensions} pfContacts={pfContacts} />
         <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} total={total} page={page} pageSize={filters.pageSize ?? 20} onPageChange={setPage} onPageSizeChange={(size) => updateFilters({ pageSize: size })} />
         <CallHistoryTable

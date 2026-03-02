@@ -11,7 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Split-Layout** — Optionales Side-by-Side-Layout: Calls links, Extensions rechts. Toggle-Button im Header, Preference wird in localStorage gespeichert. Auf kleinen Bildschirmen (< 1024px) automatisch gestapelt
 
 ### Changed
-- **Filter- und Paginierungsleiste zusammengelegt** — Filter, Anrufzähler und Seitennavigation in einer einzigen Zeile
+- **Filter- und Paginierungsleiste zusammengelegt** — Filter, Anrufzähler und Seitennavigation in einer kompakten Zeile mit Chevron-Icons statt Text-Buttons
+- **Extension-Sidebar 2-spaltig** — Compact-Variante im Split-Layout nutzt 2-Spalten-Grid statt einer Spalte, halbiert die Scrollhöhe
+- **Copy-Button vor Nummer** — Kopier-Button in der Anrufliste steht jetzt direkt vor der Telefonnummer statt dahinter, damit er nicht abgeschnitten wird
+- **Eingehender-Anruf-Overlay** — Klingelnde Anrufe werden als schwebendes Overlay oben links angezeigt statt als Banner im Content-Flow
 
 ## [1.8.4] - 2026-03-02
 
