@@ -90,7 +90,7 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout, layout, onTo
               specialNumbers={specialNumbers}
             />
           </div>
-          <div className="w-72 xl:w-80 border-l border-gray-200 dark:border-gray-700 shrink-0 overflow-y-auto">
+          <div className="w-80 xl:w-96 border-l border-gray-200 dark:border-gray-700 shrink-0 overflow-y-auto">
             <ExtensionCards extensions={extensions} pfContacts={pfContacts} variant="compact" />
           </div>
         </div>

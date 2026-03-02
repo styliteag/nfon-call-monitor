@@ -274,7 +274,7 @@ export function ExtensionCards({ extensions, pfContacts, variant = "grid" }: Pro
   const sorted = [...extensions].sort((a, b) => Number(a.extensionNumber) - Number(b.extensionNumber));
 
   const containerClass = variant === "compact"
-    ? "flex flex-col gap-2 px-3 py-3"
+    ? "grid grid-cols-2 gap-2 px-3 py-3"
     : "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 px-4 py-3";
 
   return (
