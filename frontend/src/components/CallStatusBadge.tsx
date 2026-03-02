@@ -22,7 +22,7 @@ export function CallStatusBadge({ status, direction, isTransfer, endReason }: Pr
   let label = entry.label;
   let className = entry.className;
   if (status === "answered" && direction === "outbound" && endReason === "voicemail") {
-    label = "Mailbox";
+    label = "Ansage?";
     className = "bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200";
   } else if (isTransfer && status === "answered") {
     label = "Weitergeleitet";
