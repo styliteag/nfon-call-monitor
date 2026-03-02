@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.1] - 2026-03-02
+
 ### Improved
 - **Transfer-Darstellung erweitert** — Weitergeleitete Anrufe zeigen jetzt den **Original-Anrufer** (externe Nummer) auf allen Transfer-Zeilen an. Sowohl der eingehende Leg (Ziel-Extension) als auch der ausgehende Leg (weiterleitende Extension) werden als Transfer markiert. Neues lila "Weitergeleitet"-Badge und lila Rand links für visuelle Gruppierung
 - **Transfer-Erkennung auf beiden Seiten** — Bisher wurde nur die Empfänger-Seite (inbound) als Transfer erkannt. Jetzt wird auch die Absender-Seite (outbound) markiert, wenn eine Extension während eines aktiven Inbound-Calls einen neuen Outbound-Call startet
