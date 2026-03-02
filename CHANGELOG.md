@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.2] - 2026-03-02
+
 ### Added
 - **Mailbox/Nicht-erreichbar-Erkennung** — Ausgehende Anrufe zu internen Extensions die sofort "beantwortet" werden (< 300ms) werden als Mailbox/Systemansage erkannt. Zeigt graues "Ansage?"-Badge statt grünem "Aufgebaut". Erkennt Fälle wo die gerufene Extension nicht eingeloggt/erreichbar ist und die PBX eine Ansage abspielt
 
