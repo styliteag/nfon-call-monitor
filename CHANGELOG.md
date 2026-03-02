@@ -21,7 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Eingehender-Anruf-Overlay** — Klingelnde Anrufe werden als schwebendes Overlay oben links angezeigt statt als Banner im Content-Flow
 - **Footer entfernt** — Uptime und Copyright in den Header verschoben, Versionsnummer verlinkt auf GitHub-Repo
 - **Auto-PageSize** — Seitengröße der Anrufliste passt sich automatisch an die Fensterhöhe an. Manueller Override über Dropdown weiterhin möglich (Option "Auto" setzt zurück)
-- **Scrollbalken versteckt** — Scrollbalken in Anrufliste und Extension-Sidebar ausgeblendet
+- **Scrollbalken versteckt** — Scrollbalken in Anrufliste nur bei Auto-PageSize ausgeblendet, bei manueller Auswahl sichtbar. Extension-Sidebar immer ohne Scrollbalken
+- **Auto-PageSize Stacked-Layout** — Berechnung beruecksichtigt jetzt die ExtensionCards-Hoehe im gestapelten Layout (Grid-Spalten basierend auf Fensterbreite)
 
 ### Fixed
 - **Health-Endpoint** — `uptime`-Feld zur `/api/health`-Response hinzugefuegt, damit die Anzeige im Header funktioniert

@@ -60,7 +60,7 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout, layout, onTo
   const { myExtension, select: selectMyExtension } = useMyExtension();
   const userStatus = useUserStatus(myExtension, extensions);
   const notifications = useNotifications(myExtension);
-  const autoPageSize = useAutoPageSize();
+  const autoPageSize = useAutoPageSize({ layout: layout === "split" ? "split" : "stacked", extensionCount: extensions.length });
   const [manualPageSize, setManualPageSize] = useState<number | null>(null);
   const effectivePageSize = manualPageSize ?? autoPageSize;
 
@@ -98,6 +98,7 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout, layout, onTo
               pfContacts={pfContacts}
               extensions={extensions}
               specialNumbers={specialNumbers}
+              hideScrollbar={manualPageSize === null}
             />
           </div>
           <div className="w-80 xl:w-96 border-l border-gray-200 dark:border-gray-700 shrink-0 overflow-y-auto scrollbar-hide">
