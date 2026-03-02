@@ -52,7 +52,7 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
         <div className="flex items-center gap-3">
           <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">
             {appTitle}
-            <span className="ml-2 text-xs font-normal text-gray-400 dark:text-gray-500">v{import.meta.env.VITE_APP_VERSION || "dev"}</span>
+            <a href="https://github.com/styliteag/nfon-call-monitor" target="_blank" rel="noopener noreferrer" className="ml-2 text-xs font-normal text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">v{import.meta.env.VITE_APP_VERSION || "dev"} &copy; {new Date().getFullYear()} Stylite AG</a>
           </h1>
           <CrmSearch myExtension={myExtension?.value ?? null} pfActive={pfActive ?? false} />
         </div>
@@ -165,21 +165,10 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
             </svg>
           </button>
           <ConnectionStatus isConnected={isConnected} nfonConnected={nfonConnected} />
+          {uptime !== null && <span className="text-xs text-gray-400 dark:text-gray-500" title="Server-Uptime">{formatUptime(uptime)}</span>}
         </div>
       </header>
       <main className="flex-1 flex flex-col overflow-hidden">{children}</main>
-      <footer className="flex items-center justify-between px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs text-gray-400 dark:text-gray-500">
-        <span>&copy; {new Date().getFullYear()} Stylite AG</span>
-        <span className="flex items-center gap-1.5">
-          <a href="https://github.com/styliteag/nfon-call-monitor" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600 dark:hover:text-gray-300">GitHub</a>
-          <span>·</span>
-          <a href="https://blog.stylite.de" target="_blank" rel="noopener noreferrer" className="hover:text-gray-600 dark:hover:text-gray-300">Blog</a>
-        </span>
-        <span className="flex items-center gap-2">
-          {uptime !== null && <span title="Server-Uptime">Uptime: {formatUptime(uptime)}</span>}
-          <span>v{import.meta.env.VITE_APP_VERSION || "dev"}</span>
-        </span>
-      </footer>
     </div>
   );
 }

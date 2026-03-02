@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Extension-Sidebar 2-spaltig** — Compact-Variante im Split-Layout nutzt 2-Spalten-Grid statt einer Spalte, halbiert die Scrollhöhe
 - **Copy-Button vor Nummer** — Kopier-Button in der Anrufliste steht jetzt direkt vor der Telefonnummer statt dahinter, damit er nicht abgeschnitten wird
 - **Eingehender-Anruf-Overlay** — Klingelnde Anrufe werden als schwebendes Overlay oben links angezeigt statt als Banner im Content-Flow
+- **Footer entfernt** — Uptime und Copyright in den Header verschoben, Versionsnummer verlinkt auf GitHub-Repo
+
+### Fixed
+- **Health-Endpoint** — `uptime`-Feld zur `/api/health`-Response hinzugefuegt, damit die Anzeige im Header funktioniert
 
 ## [1.8.4] - 2026-03-02
 

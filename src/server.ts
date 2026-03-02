@@ -57,7 +57,7 @@ app.get("/api/health", (_req, res) => {
   const status = nfonConnected ? "ok" : "degraded";
   const httpStatus = nfonConnected ? 200 : 503;
 
-  res.status(httpStatus).json({ status, version: APP_VERSION, nfonConnected });
+  res.status(httpStatus).json({ status, version: APP_VERSION, nfonConnected, uptime: Math.floor(process.uptime()) });
 });
 
 // Prometheus metrics endpoint (Basic Auth)
