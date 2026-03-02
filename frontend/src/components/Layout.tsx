@@ -1,6 +1,7 @@
 import { type ReactNode, useState, useEffect } from "react";
 import type { ExtensionInfo } from "../../../shared/types";
 import type { UserStatusValue } from "../hooks/useUserStatus";
+import type { LayoutMode } from "../hooks/useLayout";
 import { ConnectionStatus } from "./ConnectionStatus";
 import { CrmSearch } from "./CrmSearch";
 
@@ -26,9 +27,11 @@ interface Props {
   extensions?: ExtensionInfo[];
   userStatus?: { status: UserStatusValue; message: string; update: (status: UserStatusValue, message: string) => Promise<void> };
   pfActive?: boolean;
+  layout?: LayoutMode;
+  onToggleLayout?: () => void;
 }
 
-export function Layout({ children, appTitle, isConnected, nfonConnected, dark, onToggleDark, onLogout, notifications, myExtension, extensions, userStatus, pfActive }: Props) {
+export function Layout({ children, appTitle, isConnected, nfonConnected, dark, onToggleDark, onLogout, notifications, myExtension, extensions, userStatus, pfActive, layout, onToggleLayout }: Props) {
   const [uptime, setUptime] = useState<number | null>(null);
 
   useEffect(() => {
@@ -96,6 +99,25 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
                 className="rounded border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 w-32"
               />
             </div>
+          )}
+          {onToggleLayout && (
+            <button
+              onClick={onToggleLayout}
+              className="hidden lg:inline-flex p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+              title={layout === "split" ? "Gestapeltes Layout" : "Geteiltes Layout"}
+            >
+              {layout === "split" ? (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                  <path fillRule="evenodd" d="M2 4.25A2.25 2.25 0 014.25 2h11.5A2.25 2.25 0 0118 4.25v11.5A2.25 2.25 0 0115.75 18H4.25A2.25 2.25 0 012 15.75V4.25zM4.25 3.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h11.5a.75.75 0 00.75-.75V4.25a.75.75 0 00-.75-.75H4.25z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M3.5 10a.75.75 0 01.75-.75h11.5a.75.75 0 010 1.5H4.25A.75.75 0 013.5 10z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                  <path fillRule="evenodd" d="M2 4.25A2.25 2.25 0 014.25 2h11.5A2.25 2.25 0 0118 4.25v11.5A2.25 2.25 0 0115.75 18H4.25A2.25 2.25 0 012 15.75V4.25zM4.25 3.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h11.5a.75.75 0 00.75-.75V4.25a.75.75 0 00-.75-.75H4.25z" clipRule="evenodd" />
+                  <path fillRule="evenodd" d="M10 2.5a.75.75 0 01.75.75v13.5a.75.75 0 01-1.5 0V3.25A.75.75 0 0110 2.5z" clipRule="evenodd" />
+                </svg>
+              )}
+            </button>
           )}
           {notifications?.supported && (
             <button

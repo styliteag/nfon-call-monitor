@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Split-Layout** — Optionales Side-by-Side-Layout: Calls links, Extensions rechts. Toggle-Button im Header, Preference wird in localStorage gespeichert. Auf kleinen Bildschirmen (< 1024px) automatisch gestapelt
+
+### Changed
+- **Filter- und Paginierungsleiste zusammengelegt** — Filter, Anrufzähler und Seitennavigation in einer einzigen Zeile
+
 ## [1.8.4] - 2026-03-02
 
 ### Fixed

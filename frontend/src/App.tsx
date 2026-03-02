@@ -3,6 +3,7 @@ import { LoginForm } from "./components/LoginForm";
 import { Dashboard } from "./components/Dashboard";
 import { UpdateBanner } from "./components/UpdateBanner";
 import { useDarkMode } from "./hooks/useDarkMode";
+import { useLayout } from "./hooks/useLayout";
 import { useAuth } from "./hooks/useAuth";
 import { useVersionCheck } from "./hooks/useVersionCheck";
 import { fetchVersion } from "./lib/api";
@@ -12,6 +13,7 @@ const DEFAULT_TITLE = "NFON Call Monitor";
 export default function App() {
   const { isAuthenticated, checking, error, login, logout } = useAuth();
   const { dark, toggle } = useDarkMode();
+  const { layout, toggle: toggleLayout } = useLayout();
   const { updateAvailable } = useVersionCheck();
   const [appTitle, setAppTitle] = useState(DEFAULT_TITLE);
 
@@ -37,7 +39,7 @@ export default function App() {
   return (
     <>
       {updateAvailable && <UpdateBanner />}
-      <Dashboard appTitle={appTitle} dark={dark} onToggleDark={toggle} onLogout={logout} />
+      <Dashboard appTitle={appTitle} dark={dark} onToggleDark={toggle} onLogout={logout} layout={layout} onToggleLayout={toggleLayout} />
     </>
   );
 }

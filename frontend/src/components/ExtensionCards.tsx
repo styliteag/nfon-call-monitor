@@ -6,6 +6,7 @@ import { formatDate, formatTime } from "../lib/formatters";
 interface Props {
   extensions: ExtensionInfo[];
   pfContacts?: Record<string, PfContact>;
+  variant?: "grid" | "compact";
 }
 
 function isOnline(presence: string): boolean {
@@ -265,15 +266,19 @@ function ExtensionCard({ ext, now, pfContacts }: { ext: ExtensionInfo; now: numb
   );
 }
 
-export function ExtensionCards({ extensions, pfContacts }: Props) {
+export function ExtensionCards({ extensions, pfContacts, variant = "grid" }: Props) {
   const now = useTimer(extensions);
 
   if (extensions.length === 0) return null;
 
   const sorted = [...extensions].sort((a, b) => Number(a.extensionNumber) - Number(b.extensionNumber));
 
+  const containerClass = variant === "compact"
+    ? "flex flex-col gap-2 px-3 py-3"
+    : "grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 px-4 py-3";
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 px-4 py-3">
+    <div className={containerClass}>
       {sorted.map((ext) => (
         <ExtensionCard key={ext.uuid} ext={ext} now={now} pfContacts={pfContacts} />
       ))}

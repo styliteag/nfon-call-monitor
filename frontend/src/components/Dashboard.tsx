@@ -11,15 +11,18 @@ import { useNotifications } from "../hooks/useNotifications";
 import { useMyExtension } from "../hooks/useMyExtension";
 import { useUserStatus } from "../hooks/useUserStatus";
 import { fetchConfig, type KopfnummerEntry } from "../lib/api";
+import type { LayoutMode } from "../hooks/useLayout";
 
 interface Props {
   appTitle: string;
   dark: boolean;
   onToggleDark: () => void;
   onLogout: () => void;
+  layout: LayoutMode;
+  onToggleLayout: () => void;
 }
 
-export function Dashboard({ appTitle, dark, onToggleDark, onLogout }: Props) {
+export function Dashboard({ appTitle, dark, onToggleDark, onLogout, layout, onToggleLayout }: Props) {
   const {
     calls,
     activeCalls,
@@ -71,24 +74,42 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout }: Props) {
   }, []);
 
   return (
-    <Layout appTitle={appTitle} isConnected={isConnected} nfonConnected={nfonConnected} dark={dark} onToggleDark={onToggleDark} onLogout={onLogout} notifications={notifications} myExtension={{ value: myExtension, select: selectMyExtension }} extensions={extensions} userStatus={userStatus} pfActive={pfActive}>
-      <ActiveCallBanner calls={activeCalls} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} />
-      <ExtensionCards extensions={extensions} pfContacts={pfContacts} />
-      <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} />
-      <CallHistoryTable
-        calls={calls}
-        total={total}
-        page={page}
-        pageSize={filters.pageSize ?? 20}
-        loading={loading}
-        onPageChange={setPage}
-        onPageSizeChange={(size) => updateFilters({ pageSize: size })}
-        kopfnummern={kopfnummern}
-        kopfnummernMap={kopfnummernMap}
-        pfContacts={pfContacts}
-        extensions={extensions}
-        specialNumbers={specialNumbers}
-      />
+    <Layout appTitle={appTitle} isConnected={isConnected} nfonConnected={nfonConnected} dark={dark} onToggleDark={onToggleDark} onLogout={onLogout} notifications={notifications} myExtension={{ value: myExtension, select: selectMyExtension }} extensions={extensions} userStatus={userStatus} pfActive={pfActive} layout={layout} onToggleLayout={onToggleLayout}>
+      {layout === "split" ? (
+        <div className="flex-1 hidden lg:flex flex-row overflow-hidden">
+          <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <ActiveCallBanner calls={activeCalls} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} />
+            <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} total={total} page={page} pageSize={filters.pageSize ?? 20} onPageChange={setPage} onPageSizeChange={(size) => updateFilters({ pageSize: size })} />
+            <CallHistoryTable
+              calls={calls}
+              loading={loading}
+              kopfnummern={kopfnummern}
+              kopfnummernMap={kopfnummernMap}
+              pfContacts={pfContacts}
+              extensions={extensions}
+              specialNumbers={specialNumbers}
+            />
+          </div>
+          <div className="w-72 xl:w-80 border-l border-gray-200 dark:border-gray-700 shrink-0 overflow-y-auto">
+            <ExtensionCards extensions={extensions} pfContacts={pfContacts} variant="compact" />
+          </div>
+        </div>
+      ) : null}
+      {/* Stacked layout (also shown on small screens when split is selected) */}
+      <div className={layout === "split" ? "flex-1 flex flex-col overflow-hidden lg:hidden" : "flex-1 flex flex-col overflow-hidden"}>
+        <ActiveCallBanner calls={activeCalls} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} />
+        <ExtensionCards extensions={extensions} pfContacts={pfContacts} />
+        <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} total={total} page={page} pageSize={filters.pageSize ?? 20} onPageChange={setPage} onPageSizeChange={(size) => updateFilters({ pageSize: size })} />
+        <CallHistoryTable
+          calls={calls}
+          loading={loading}
+          kopfnummern={kopfnummern}
+          kopfnummernMap={kopfnummernMap}
+          pfContacts={pfContacts}
+          extensions={extensions}
+          specialNumbers={specialNumbers}
+        />
+      </div>
     </Layout>
   );
 }
