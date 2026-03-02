@@ -148,7 +148,7 @@ function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, extensio
 
 export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, pfContacts, extensions, specialNumbers }: Props) {
   return (
-    <div className="flex-1 overflow-auto">
+    <div className="flex-1 overflow-auto scrollbar-hide">
       <table className="w-full text-sm table-fixed">
         <colgroup>
           <col className="w-[120px]" />

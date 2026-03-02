@@ -14,7 +14,7 @@ export function useCalls() {
   const [activeCalls, setActiveCalls] = useState<CallRecord[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<CallsQuery>({ pageSize: 20 });
+  const [filters, setFilters] = useState<CallsQuery>({});
   const [loading, setLoading] = useState(true);
 
   const loadCalls = useCallback(async (query?: CallsQuery) => {

@@ -50,11 +50,9 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
     <div className="h-screen flex flex-col bg-white dark:bg-gray-900">
       <header className="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-sm">
         <div className="flex items-center gap-3">
-          <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-            {appTitle}
-            <a href="https://github.com/styliteag/nfon-call-monitor" target="_blank" rel="noopener noreferrer" className="ml-2 text-xs font-normal text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">v{import.meta.env.VITE_APP_VERSION || "dev"} &copy; {new Date().getFullYear()} Stylite AG</a>
-          </h1>
+          <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">{appTitle}</h1>
           <CrmSearch myExtension={myExtension?.value ?? null} pfActive={pfActive ?? false} />
+          <a href="https://github.com/styliteag/nfon-call-monitor" target="_blank" rel="noopener noreferrer" className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">v{import.meta.env.VITE_APP_VERSION || "dev"} &copy; {new Date().getFullYear()} Stylite AG</a>
         </div>
         <div className="flex items-center gap-3">
           {myExtension && extensions && (

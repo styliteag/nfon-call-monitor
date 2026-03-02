@@ -11,6 +11,7 @@ import { useNotifications } from "../hooks/useNotifications";
 import { useMyExtension } from "../hooks/useMyExtension";
 import { useUserStatus } from "../hooks/useUserStatus";
 import { fetchConfig, type KopfnummerEntry } from "../lib/api";
+import { useAutoPageSize } from "../hooks/useAutoPageSize";
 import type { LayoutMode } from "../hooks/useLayout";
 
 interface Props {
@@ -59,6 +60,16 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout, layout, onTo
   const { myExtension, select: selectMyExtension } = useMyExtension();
   const userStatus = useUserStatus(myExtension, extensions);
   const notifications = useNotifications(myExtension);
+  const autoPageSize = useAutoPageSize();
+  const [manualPageSize, setManualPageSize] = useState<number | null>(null);
+  const effectivePageSize = manualPageSize ?? autoPageSize;
+
+  // Sync auto page size into filters
+  useEffect(() => {
+    if (manualPageSize === null) {
+      updateFilters({ pageSize: autoPageSize });
+    }
+  }, [autoPageSize, manualPageSize, updateFilters]);
 
   const [kopfnummern, setKopfnummern] = useState<string[]>([]);
   const [kopfnummernMap, setKopfnummernMap] = useState<KopfnummerEntry[]>([]);
@@ -78,7 +89,7 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout, layout, onTo
       {layout === "split" ? (
         <div className="flex-1 hidden lg:flex flex-row overflow-hidden">
           <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-            <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} total={total} page={page} pageSize={filters.pageSize ?? 20} onPageChange={setPage} onPageSizeChange={(size) => updateFilters({ pageSize: size })} />
+            <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} total={total} page={page} pageSize={effectivePageSize} pageSizeRaw={manualPageSize ?? 0} onPageChange={setPage} onPageSizeChange={(size) => { setManualPageSize(size === 0 ? null : size); updateFilters({ pageSize: size === 0 ? autoPageSize : size }); }} />
             <CallHistoryTable
               calls={calls}
               loading={loading}
@@ -89,7 +100,7 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout, layout, onTo
               specialNumbers={specialNumbers}
             />
           </div>
-          <div className="w-80 xl:w-96 border-l border-gray-200 dark:border-gray-700 shrink-0 overflow-y-auto">
+          <div className="w-80 xl:w-96 border-l border-gray-200 dark:border-gray-700 shrink-0 overflow-y-auto scrollbar-hide">
             <ExtensionCards extensions={extensions} pfContacts={pfContacts} variant="compact" />
           </div>
         </div>
@@ -98,7 +109,7 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout, layout, onTo
       <ActiveCallBanner calls={activeCalls} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} />
       <div className={layout === "split" ? "flex-1 flex flex-col overflow-hidden lg:hidden" : "flex-1 flex flex-col overflow-hidden"}>
         <ExtensionCards extensions={extensions} pfContacts={pfContacts} />
-        <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} total={total} page={page} pageSize={filters.pageSize ?? 20} onPageChange={setPage} onPageSizeChange={(size) => updateFilters({ pageSize: size })} />
+        <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} total={total} page={page} pageSize={effectivePageSize} pageSizeRaw={manualPageSize ?? 0} onPageChange={setPage} onPageSizeChange={(size) => { setManualPageSize(size === 0 ? null : size); updateFilters({ pageSize: size === 0 ? autoPageSize : size }); }} />
         <CallHistoryTable
           calls={calls}
           loading={loading}

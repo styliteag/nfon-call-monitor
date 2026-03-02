@@ -1,7 +1,7 @@
 import type { CallsQuery } from "../../../shared/types";
 import type { ExtensionInfo } from "../../../shared/types";
 
-const PAGE_SIZE_OPTIONS = [5, 10, 20, 30, 50, 100];
+const PAGE_SIZE_OPTIONS = [0, 5, 10, 20, 30, 50, 100]; // 0 = auto
 
 interface Props {
   filters: CallsQuery;
@@ -10,13 +10,14 @@ interface Props {
   total: number;
   page: number;
   pageSize: number;
+  pageSizeRaw?: number; // 0 = auto
   onPageChange: (page: number) => void;
   onPageSizeChange: (size: number) => void;
 }
 
 const selectClass = "rounded border border-gray-300 dark:border-gray-600 px-1.5 py-1 text-xs bg-white dark:bg-gray-700 dark:text-gray-200";
 
-export function Filters({ filters, extensions, onFilterChange, total, page, pageSize, onPageChange, onPageSizeChange }: Props) {
+export function Filters({ filters, extensions, onFilterChange, total, page, pageSize, pageSizeRaw, onPageChange, onPageSizeChange }: Props) {
   const totalPages = Math.ceil(total / pageSize);
 
   return (
@@ -88,12 +89,12 @@ export function Filters({ filters, extensions, onFilterChange, total, page, page
       <div className="flex items-center gap-1.5 ml-auto">
         <span className="text-xs text-gray-400 dark:text-gray-500 tabular-nums">{total}</span>
         <select
-          value={pageSize}
+          value={pageSizeRaw ?? pageSize}
           onChange={(e) => onPageSizeChange(Number(e.target.value))}
           className="rounded border border-gray-300 dark:border-gray-600 px-1 py-1 text-xs bg-white dark:bg-gray-700 dark:text-gray-200"
         >
           {PAGE_SIZE_OPTIONS.map((n) => (
-            <option key={n} value={n}>{n}</option>
+            <option key={n} value={n}>{n === 0 ? "Auto" : n}</option>
           ))}
         </select>
         {totalPages > 1 && (
