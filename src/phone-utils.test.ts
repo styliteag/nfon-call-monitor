@@ -4,8 +4,8 @@ import { normalizePhone, phonesMatch, classifyPhone, isGermanLandline, lookupCit
 describe("normalizePhone", () => {
   it("strips spaces, hyphens, parentheses, slashes, dots", () => {
     expect(normalizePhone("0170-123 45 67")).toBe("01701234567");
-    expect(normalizePhone("(06251) 82755")).toBe("0625182755");
-    expect(normalizePhone("06251/827.55")).toBe("0625182755");
+    expect(normalizePhone("(06251) 55505")).toBe("0625155505");
+    expect(normalizePhone("06251/555.05")).toBe("0625155505");
   });
 
   it("converts +49 prefix to 0", () => {
@@ -14,7 +14,7 @@ describe("normalizePhone", () => {
   });
 
   it("converts 0049 prefix to 0", () => {
-    expect(normalizePhone("004962518275")).toBe("062518275");
+    expect(normalizePhone("004962515550")).toBe("062515550");
     expect(normalizePhone("00491701234567")).toBe("01701234567");
   });
 
@@ -29,24 +29,24 @@ describe("normalizePhone", () => {
   });
 
   it("leaves already-normalized numbers unchanged", () => {
-    expect(normalizePhone("0625182755")).toBe("0625182755");
+    expect(normalizePhone("0625155505")).toBe("0625155505");
     expect(normalizePhone("01701234567")).toBe("01701234567");
   });
 });
 
 describe("phonesMatch", () => {
   it("matches identical numbers", () => {
-    expect(phonesMatch("0625182755", "0625182755")).toBe(true);
+    expect(phonesMatch("0625155505", "0625155505")).toBe(true);
   });
 
   it("matches with different formatting", () => {
-    expect(phonesMatch("+49 6251 82755", "0625182755")).toBe(true);
-    expect(phonesMatch("0049-6251-82755", "06251/82755")).toBe(true);
+    expect(phonesMatch("+49 6251 55505", "0625155505")).toBe(true);
+    expect(phonesMatch("0049-6251-55505", "06251/55505")).toBe(true);
   });
 
   it("matches suffix (kopfnummer handling)", () => {
     // One number has a longer prefix — suffix matching should work
-    expect(phonesMatch("0625182755", "625182755")).toBe(true);
+    expect(phonesMatch("0625155505", "625155505")).toBe(true);
   });
 
   it("still matches identical numbers even if short (exact equality)", () => {
@@ -60,7 +60,7 @@ describe("phonesMatch", () => {
   });
 
   it("rejects different numbers", () => {
-    expect(phonesMatch("0625182755", "0625199999")).toBe(false);
+    expect(phonesMatch("0625155505", "0625199999")).toBe(false);
     expect(phonesMatch("01701234567", "01711234567")).toBe(false);
   });
 });
@@ -81,7 +81,7 @@ describe("classifyPhone", () => {
   });
 
   it("classifies landline numbers", () => {
-    expect(classifyPhone("0625182755")).toBe("landline");
+    expect(classifyPhone("0625155505")).toBe("landline");
     expect(classifyPhone("06930000")).toBe("landline");
     expect(classifyPhone("03012345678")).toBe("landline");
   });
@@ -94,7 +94,7 @@ describe("classifyPhone", () => {
 
 describe("isGermanLandline", () => {
   it("returns true for landline numbers", () => {
-    expect(isGermanLandline("0625182755")).toBe(true);
+    expect(isGermanLandline("0625155505")).toBe(true);
   });
 
   it("returns false for mobile numbers", () => {
@@ -109,7 +109,7 @@ describe("isGermanLandline", () => {
 describe("lookupCity", () => {
   it("finds city for known area codes", () => {
     // 6251 = Heppenheim
-    const city = lookupCity("0625182755");
+    const city = lookupCity("0625155505");
     expect(city).toBeTruthy();
     expect(typeof city).toBe("string");
   });
@@ -128,8 +128,8 @@ describe("lookupCity", () => {
 
 describe("formatPhoneNice", () => {
   it("formats landline numbers with area code", () => {
-    const result = formatPhoneNice("0625182755");
-    expect(result).toBe("+49 6251 82755");
+    const result = formatPhoneNice("0625155505");
+    expect(result).toBe("+49 6251 55505");
   });
 
   it("formats mobile numbers", () => {
@@ -149,9 +149,9 @@ describe("formatPhoneNice", () => {
 
 describe("formatInternational", () => {
   it("formats US numbers", () => {
-    const result = formatInternational("14089434100");
+    const result = formatInternational("12125550100");
     expect(result).not.toBeNull();
-    expect(result!.formatted).toBe("+1 408 943 4100");
+    expect(result!.formatted).toBe("+1 212 555 0100");
     expect(result!.label).toContain("Vereinigte Staaten");
   });
 
@@ -192,7 +192,7 @@ describe("formatInternational", () => {
   });
 
   it("returns null for German numbers (49 prefix)", () => {
-    expect(formatInternational("4962518275")).toBeNull();
+    expect(formatInternational("4962515550")).toBeNull();
   });
 
   it("returns null for German numbers (+49 prefix)", () => {
@@ -209,14 +209,14 @@ describe("formatInternational", () => {
   });
 
   it("handles + prefix in input", () => {
-    const result = formatInternational("+14089434100");
+    const result = formatInternational("+12125550100");
     expect(result).not.toBeNull();
-    expect(result!.formatted).toBe("+1 408 943 4100");
+    expect(result!.formatted).toBe("+1 212 555 0100");
   });
 
   it("handles 00 prefix in input", () => {
-    const result = formatInternational("0014089434100");
+    const result = formatInternational("0012125550100");
     expect(result).not.toBeNull();
-    expect(result!.formatted).toBe("+1 408 943 4100");
+    expect(result!.formatted).toBe("+1 212 555 0100");
   });
 });

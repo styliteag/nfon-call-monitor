@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Test-Telefonnummern anonymisiert** — Potenziell echte Rufnummern in Tests durch fiktive ersetzt (06251-8275x → 06251-5550x, Apple 1-408-943-4100 → 1-212-555-0100)
+
 ## [1.8.7] - 2026-03-02
 
 ## [1.8.6] - 2026-03-02

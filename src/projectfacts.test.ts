@@ -12,10 +12,10 @@ describe("lookupPhone", () => {
     });
 
     it("returns city for German landline", () => {
-      const result = lookupPhone("0625182755");
+      const result = lookupPhone("0625155505");
       expect(result).not.toBeNull();
       expect(result!.city).toBe("Bensheim");
-      expect(result!.formatted).toBe("+49 6251 82755");
+      expect(result!.formatted).toBe("+49 6251 55505");
       expect(result!.contactId).toBe(0);
     });
 
@@ -36,20 +36,20 @@ describe("lookupPhone", () => {
   describe("exact match", () => {
     beforeEach(() => {
       _testSetCache([
-        { raw: "0625182755", contact: { name: "Firma ABC", contactId: 1 } },
+        { raw: "0625155505", contact: { name: "Firma ABC", contactId: 1 } },
         { raw: "+49 170 1234567", contact: { name: "Max Mobil", contactId: 2 } },
       ]);
     });
 
     it("finds exact match for landline", () => {
-      const result = lookupPhone("0625182755");
+      const result = lookupPhone("0625155505");
       expect(result!.name).toBe("Firma ABC");
       expect(result!.contactId).toBe(1);
       expect(result!.fuzzy).toBeUndefined();
     });
 
     it("finds exact match with different formatting", () => {
-      const result = lookupPhone("+49 6251 82755");
+      const result = lookupPhone("+49 6251 55505");
       expect(result!.name).toBe("Firma ABC");
       expect(result!.fuzzy).toBeUndefined();
     });
@@ -63,10 +63,10 @@ describe("lookupPhone", () => {
     it("exact match takes priority over fuzzy", () => {
       // Add another entry that would fuzzy-match
       _testSetCache([
-        { raw: "0625182755", contact: { name: "Exact Match", contactId: 1 } },
-        { raw: "062518275", contact: { name: "Fuzzy Match", contactId: 2 } },
+        { raw: "0625155505", contact: { name: "Exact Match", contactId: 1 } },
+        { raw: "062515550", contact: { name: "Fuzzy Match", contactId: 2 } },
       ]);
-      const result = lookupPhone("0625182755");
+      const result = lookupPhone("0625155505");
       expect(result!.name).toBe("Exact Match");
       expect(result!.fuzzy).toBeUndefined();
     });
@@ -75,32 +75,32 @@ describe("lookupPhone", () => {
   describe("fuzzy match", () => {
     beforeEach(() => {
       _testSetCache([
-        { raw: "062518275", contact: { name: "Firma Kurz", contactId: 10 } },
+        { raw: "062515550", contact: { name: "Firma Kurz", contactId: 10 } },
       ]);
     });
 
     it("matches when input has 1 extra trailing digit", () => {
-      // Input: 0625182755, cache: 062518275 → input with 1 digit removed matches
-      const result = lookupPhone("0625182755");
+      // Input: 0625155505, cache: 062515550 → input with 1 digit removed matches
+      const result = lookupPhone("0625155505");
       expect(result!.name).toBe("Firma Kurz");
       expect(result!.fuzzy).toBe(1);
     });
 
     it("matches when input has 2 extra trailing digits", () => {
-      const result = lookupPhone("06251827512");
+      const result = lookupPhone("06251555012");
       expect(result!.name).toBe("Firma Kurz");
       expect(result!.fuzzy).toBe(2);
     });
 
     it("matches when input has 3 extra trailing digits", () => {
-      const result = lookupPhone("062518275123");
+      const result = lookupPhone("062515550123");
       expect(result!.name).toBe("Firma Kurz");
       expect(result!.fuzzy).toBe(3);
     });
 
     it("does NOT fuzzy match beyond 3 digits", () => {
       // 4 extra digits — should NOT match
-      const result = lookupPhone("0625182751234");
+      const result = lookupPhone("0625155501234");
       expect(result!.name).not.toBe("Firma Kurz");
       // Should fall back to city
       expect(result!.city).toBe("Bensheim");
@@ -108,10 +108,10 @@ describe("lookupPhone", () => {
 
     it("matches when cache entry has extra trailing digits (reverse direction)", () => {
       _testSetCache([
-        { raw: "06251827551", contact: { name: "Firma Lang", contactId: 11 } },
+        { raw: "06251555051", contact: { name: "Firma Lang", contactId: 11 } },
       ]);
       // Input is shorter, cache entry is longer → pf entry shortened matches input
-      const result = lookupPhone("0625182755");
+      const result = lookupPhone("0625155505");
       expect(result!.name).toBe("Firma Lang");
       expect(result!.fuzzy).toBe(1);
     });
@@ -135,19 +135,19 @@ describe("lookupPhone", () => {
     });
 
     it("preserves city and formatted in fuzzy results", () => {
-      const result = lookupPhone("0625182755");
+      const result = lookupPhone("0625155505");
       expect(result!.city).toBe("Bensheim");
-      expect(result!.formatted).toBe("+49 6251 82755");
+      expect(result!.formatted).toBe("+49 6251 55505");
       expect(result!.fuzzy).toBe(1);
     });
 
     it("does NOT fuzzy match if Kopfnummer too short", () => {
-      // Subscriber "8" vs "89" → common prefix "8" (1 digit) < 2 → no match
+      // Subscriber "7" vs "79" → common prefix "7" (1 digit) < 2 → no match
       _testClearCache();
       _testSetCache([
-        { raw: "062518", contact: { name: "Very Short", contactId: 41 } },
+        { raw: "062517", contact: { name: "Very Short", contactId: 41 } },
       ]);
-      const result = lookupPhone("0625189");
+      const result = lookupPhone("0625179");
       expect(result!.name).not.toBe("Very Short");
       expect(result!.fuzzy).toBeUndefined();
       expect(result!.city).toBe("Bensheim");
@@ -156,10 +156,10 @@ describe("lookupPhone", () => {
     it("fuzzy matches when Kopfnummer is long enough", () => {
       _testClearCache();
       _testSetCache([
-        { raw: "0625182", contact: { name: "Long Enough", contactId: 42 } },
+        { raw: "0625177", contact: { name: "Long Enough", contactId: 42 } },
       ]);
-      // Subscriber "82" vs "823" → Kopfnummer "82" (2 digits), ext "" vs "3"
-      const result = lookupPhone("06251823");
+      // Subscriber "77" vs "773" → Kopfnummer "77" (2 digits), ext "" vs "3"
+      const result = lookupPhone("06251773");
       expect(result!.name).toBe("Long Enough");
       expect(result!.fuzzy).toBe(1);
     });
@@ -167,10 +167,10 @@ describe("lookupPhone", () => {
     it("matches Zentrale (ending 0) to Durchwahl", () => {
       _testClearCache();
       _testSetCache([
-        { raw: "0625182750", contact: { name: "Firma Zentrale", contactId: 50 } },
+        { raw: "0625155500", contact: { name: "Firma Zentrale", contactId: 50 } },
       ]);
       // CRM has Zentrale (ext "0"), call from Durchwahl 5
-      const result = lookupPhone("0625182755");
+      const result = lookupPhone("0625155505");
       expect(result!.name).toBe("Firma Zentrale");
       expect(result!.fuzzy).toBe(1);
     });
@@ -178,10 +178,10 @@ describe("lookupPhone", () => {
     it("matches Durchwahl to Zentrale (reverse)", () => {
       _testClearCache();
       _testSetCache([
-        { raw: "0625182753", contact: { name: "Firma DW3", contactId: 51 } },
+        { raw: "0625155503", contact: { name: "Firma DW3", contactId: 51 } },
       ]);
       // CRM has Durchwahl 3, call from Zentrale
-      const result = lookupPhone("0625182750");
+      const result = lookupPhone("0625155500");
       expect(result!.name).toBe("Firma DW3");
       expect(result!.fuzzy).toBe(1);
     });
@@ -189,10 +189,10 @@ describe("lookupPhone", () => {
     it("matches two different Durchwahlen of same Kopfnummer", () => {
       _testClearCache();
       _testSetCache([
-        { raw: "0625182755", contact: { name: "Firma DW5", contactId: 52 } },
+        { raw: "0625155505", contact: { name: "Firma DW5", contactId: 52 } },
       ]);
       // CRM has Durchwahl 5, call from Durchwahl 8
-      const result = lookupPhone("0625182758");
+      const result = lookupPhone("0625155508");
       expect(result!.name).toBe("Firma DW5");
       expect(result!.fuzzy).toBe(1);
     });
@@ -200,10 +200,10 @@ describe("lookupPhone", () => {
     it("matches multi-digit Durchwahl to Zentrale", () => {
       _testClearCache();
       _testSetCache([
-        { raw: "0625182750", contact: { name: "Firma Zentrale", contactId: 53 } },
+        { raw: "0625155500", contact: { name: "Firma Zentrale", contactId: 53 } },
       ]);
       // CRM has Zentrale, call from Durchwahl 123 (3 digits)
-      const result = lookupPhone("06251827123");
+      const result = lookupPhone("06251555123");
       expect(result!.name).toBe("Firma Zentrale");
       expect(result!.fuzzy).toBe(3);
     });
@@ -211,11 +211,11 @@ describe("lookupPhone", () => {
     it("prefers Zentrale match over arbitrary extension match", () => {
       _testClearCache();
       _testSetCache([
-        { raw: "0625182758", contact: { name: "Firma DW8", contactId: 54 } },
-        { raw: "0625182750", contact: { name: "Firma Zentrale", contactId: 55 } },
+        { raw: "0625155508", contact: { name: "Firma DW8", contactId: 54 } },
+        { raw: "0625155500", contact: { name: "Firma Zentrale", contactId: 55 } },
       ]);
       // Both match Durchwahl 5, but Zentrale match should be preferred
-      const result = lookupPhone("0625182755");
+      const result = lookupPhone("0625155505");
       expect(result!.name).toBe("Firma Zentrale");
       expect(result!.fuzzy).toBe(1);
     });
@@ -223,19 +223,19 @@ describe("lookupPhone", () => {
     it("does NOT fuzzy match across different area codes", () => {
       _testClearCache();
       _testSetCache([
-        { raw: "0621182755", contact: { name: "Firma Mannheim", contactId: 60 } },
+        { raw: "0621155505", contact: { name: "Firma Mannheim", contactId: 60 } },
       ]);
       // Same subscriber digits but different Vorwahl (6211 vs 6251)
-      const result = lookupPhone("0625182755");
+      const result = lookupPhone("0625155505");
       expect(result!.name).not.toBe("Firma Mannheim");
     });
   });
 
   describe("international numbers", () => {
     it("returns formatted international number with country label", () => {
-      const result = lookupPhone("14089434100");
+      const result = lookupPhone("12125550100");
       expect(result).not.toBeNull();
-      expect(result!.formatted).toBe("+1 408 943 4100");
+      expect(result!.formatted).toBe("+1 212 555 0100");
       expect(result!.city).toContain("Vereinigte Staaten");
       expect(result!.name).toContain("Vereinigte Staaten");
       expect(result!.contactId).toBe(0);
@@ -249,17 +249,17 @@ describe("lookupPhone", () => {
 
     it("prefers PF contact name over international label", () => {
       _testSetCache([
-        { raw: "+14089434100", contact: { name: "Apple Inc.", contactId: 99 } },
+        { raw: "+12125550100", contact: { name: "Apple Inc.", contactId: 99 } },
       ]);
-      const result = lookupPhone("14089434100");
+      const result = lookupPhone("12125550100");
       expect(result).not.toBeNull();
       expect(result!.name).toBe("Apple Inc.");
       expect(result!.contactId).toBe(99);
-      expect(result!.formatted).toBe("+1 408 943 4100");
+      expect(result!.formatted).toBe("+1 212 555 0100");
     });
 
     it("does not interfere with German numbers", () => {
-      const result = lookupPhone("0625182755");
+      const result = lookupPhone("0625155505");
       expect(result).not.toBeNull();
       expect(result!.city).toBe("Bensheim");
     });
@@ -267,9 +267,9 @@ describe("lookupPhone", () => {
 
   describe("lookupPhones batch", () => {
     it("returns results for multiple numbers", () => {
-      const result = lookupPhones(["0625182755", "01701234567", ""]);
+      const result = lookupPhones(["0625155505", "01701234567", ""]);
       expect(Object.keys(result)).toHaveLength(2);
-      expect(result["0625182755"]).toBeDefined();
+      expect(result["0625155505"]).toBeDefined();
       expect(result["01701234567"]).toBeDefined();
     });
 
@@ -280,11 +280,11 @@ describe("lookupPhone", () => {
 
     it("includes fuzzy matches in batch results", () => {
       _testSetCache([
-        { raw: "062518275", contact: { name: "Batch Fuzzy", contactId: 50 } },
+        { raw: "062515550", contact: { name: "Batch Fuzzy", contactId: 50 } },
       ]);
-      const result = lookupPhones(["0625182755"]);
-      expect(result["0625182755"].name).toBe("Batch Fuzzy");
-      expect(result["0625182755"].fuzzy).toBe(1);
+      const result = lookupPhones(["0625155505"]);
+      expect(result["0625155505"].name).toBe("Batch Fuzzy");
+      expect(result["0625155505"].fuzzy).toBe(1);
     });
   });
 });
