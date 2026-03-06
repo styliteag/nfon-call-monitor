@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
 import { login, startAutoRefresh, stopAutoRefresh } from "./auth.js";
 import { getExtensions, getLineStates, getCallEventStream } from "./api.js";
-import { processEvent, setExtensionNames, getActiveCallForExtension } from "./call-aggregator.js";
+import { processEvent, setExtensionNames, getActiveCallForExtension, getActiveCallsList } from "./call-aggregator.js";
 import { upsertAgentStatus, getAgentStatuses, getUserStatuses } from "./db.js";
 import type { NfonCallEvent, ExtensionInfo } from "../shared/types.js";
 import * as log from "./log.js";
@@ -45,6 +45,21 @@ export function stop(): void {
 
 export function getExtensionList(): ExtensionInfo[] {
   const userStatuses = getUserStatuses();
+  const activeCalls = getActiveCallsList();
+
+  // Build a map to find internal call partners: for each active call,
+  // find another active call with matching caller+callee but opposite direction.
+  const partnerMap = new Map<string, { ext: string; name: string }>();
+  for (const call of activeCalls) {
+    for (const other of activeCalls) {
+      if (other.extension === call.extension) continue;
+      if (other.caller === call.caller && other.callee === call.callee && other.direction !== call.direction) {
+        partnerMap.set(call.extension, { ext: other.extension, name: other.extensionName });
+        break;
+      }
+    }
+  }
+
   return extensions.map((ext) => {
     const call = getActiveCallForExtension(ext.extensionNumber);
     const us = userStatuses.get(ext.extensionNumber);
@@ -55,6 +70,7 @@ export function getExtensionList(): ExtensionInfo[] {
       userStatusUpdated: us?.updated,
     };
     if (call) {
+      const partner = partnerMap.get(ext.extensionNumber);
       return {
         ...base,
         currentCallId: call.id,
@@ -63,6 +79,8 @@ export function getExtensionList(): ExtensionInfo[] {
         currentCallDirection: call.direction,
         currentCallStartTime: call.answerTime || call.startTime,
         currentCallStatus: call.status,
+        currentCallPartnerExt: partner?.ext,
+        currentCallPartnerName: partner?.name,
       };
     }
     return base;

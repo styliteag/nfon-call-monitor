@@ -147,6 +147,9 @@ function ExtensionCard({ ext, now, pfContacts }: { ext: ExtensionInfo; now: numb
   }, [requestCall, showFeedback]);
 
   const partner = callPartner(ext);
+  const partnerLabel = ext.currentCallPartnerName
+    ? `${ext.currentCallPartnerName} (${ext.currentCallPartnerExt})`
+    : undefined;
 
   const borderClass = dragOver
     ? "border-blue-500 border-dashed bg-blue-50 dark:bg-blue-900/30"
@@ -211,7 +214,9 @@ function ExtensionCard({ ext, now, pfContacts }: { ext: ExtensionInfo; now: numb
               {ext.currentCallDirection === "inbound" ? "\u2199" : "\u2197"}
             </span>
             <span className="truncate" title={partner}>
-              {pfContacts?.[partner]?.name ? (<>
+              {partnerLabel ? (
+                <span className="text-green-600 dark:text-green-400">{partnerLabel}</span>
+              ) : pfContacts?.[partner]?.name ? (<>
                 <span className="text-blue-600 dark:text-blue-400">{pfContacts[partner].name}</span>
                 {pfContacts[partner].formatted && (
                   <span className="font-mono text-gray-400 dark:text-gray-500 text-[10px]"> {pfContacts[partner].formatted}</span>

@@ -42,6 +42,8 @@ export interface ExtensionInfo {
   currentCallDirection?: "inbound" | "outbound";
   currentCallStartTime?: string;  // ISO 8601
   currentCallStatus?: CallStatus;
+  currentCallPartnerExt?: string;   // extension number of call partner (internal calls)
+  currentCallPartnerName?: string;  // name of call partner (internal calls)
   lastStateChange?: string;       // ISO 8601 - from NFON states updated field
   agentLoggedIn?: boolean;         // tracked via *87/*87 SSE events
   userStatus?: string;             // "online" | "offline" | "mittagspause" | "homeoffice" | "office"
