@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.8] - 2026-03-06
+
 ### Fixed
 - **Falscher Gesprächspartner bei internen Anrufen** — Bei internen Calls (z.B. Ext 10 → 52) wurde im Extension-Tile der falsche CRM-Kontakt angezeigt (z.B. Holger/55 statt Michael/52), weil NFON volle Telefonnummern statt Extension-Nummern liefert. Jetzt werden aktive Calls gegeneinander abgeglichen und der korrekte interne Partner direkt angezeigt
 
