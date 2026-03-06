@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Test-Telefonnummern anonymisiert** — Potenziell echte Rufnummern in Tests durch fiktive ersetzt
+- **Rollup aktualisiert** — 4.57.1 → 4.59.0 (dev dependency)
 
 ## [1.8.7] - 2026-03-02
 
