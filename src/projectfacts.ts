@@ -6,6 +6,7 @@ interface PhoneEntry {
   normalized: string;
   raw: string;
   contact: PfContact;
+  pfLabel?: string;  // subtype caption from PF: "Arbeit", "Privat", "Weitere", etc.
 }
 
 let phoneCache: PhoneEntry[] = [];
@@ -59,6 +60,8 @@ interface ListItem {
 
 interface ContactFieldDetail {
   value: string;
+  type?: { caption: string; value: string };
+  subtype?: { caption: string; value: string };
   contact: {
     caption: string;
     value: number;
@@ -105,6 +108,7 @@ async function loadPhoneCache(): Promise<void> {
       return {
         normalized: normalizePhone(detail.value),
         raw: detail.value,
+        pfLabel: detail.subtype?.caption ?? undefined,
         contact: {
           name: detail.contact.caption,
           contactId: detail.contact.value,
@@ -114,7 +118,15 @@ async function loadPhoneCache(): Promise<void> {
 
     phoneCache = entries.filter((e): e is PhoneEntry => e !== null);
     cacheReady = true;
-    log.info("pf", `${phoneCache.length} Telefon-Einträge aus projectfacts geladen.`);
+
+    // Log subtype distribution
+    const labelCounts = new Map<string, number>();
+    for (const e of phoneCache) {
+      const key = e.pfLabel || "(ohne)";
+      labelCounts.set(key, (labelCounts.get(key) || 0) + 1);
+    }
+    const labelInfo = [...labelCounts.entries()].map(([l, c]) => `${l}=${c}`).join(", ");
+    log.info("pf", `${phoneCache.length} Telefon-Einträge geladen. Subtypes: ${labelInfo}`);
   } catch (err) {
     log.warn("pf", "Fehler beim Laden des Phone-Cache:", err);
   }
@@ -293,19 +305,30 @@ export function searchContacts(query: string): CrmContactResult[] {
     if (grouped.size >= MAX_SEARCH_CONTACTS) break;
   }
 
-  // Convert to result format
+  // Convert to result format, deduplicating contacts with same name + same phones
   const results: CrmContactResult[] = [];
+  const seenContacts = new Set<string>();
+
   for (const [contactId, group] of grouped) {
     const phones: CrmContactResult["phones"] = [];
-    for (const entry of group.phones.values()) {
+    const normalizedNums: string[] = [];
+
+    for (const [normalizedNum, entry] of group.phones) {
+      normalizedNums.push(normalizedNum);
       const formatted = formatPhoneNice(entry.raw) ?? undefined;
-      const normalized = entry.normalized;
-      const phoneType = classifyPhone(normalized);
-      const city = phoneType === "landline" ? lookupCity(normalized) ?? undefined
+      const phoneType = classifyPhone(normalizedNum);
+      const city = phoneType === "landline" ? lookupCity(normalizedNum) ?? undefined
         : phoneType === "mobile" ? "Mobil"
         : undefined;
-      phones.push({ raw: entry.raw, formatted, city });
+      const label = entry.pfLabel;
+      phones.push({ raw: entry.raw, formatted, city, label });
     }
+
+    // Deduplicate contacts with identical name and phone set
+    const dedupKey = `${group.name}::${normalizedNums.sort().join("|")}`;
+    if (seenContacts.has(dedupKey)) continue;
+    seenContacts.add(dedupKey);
+
     results.push({ contactId, name: group.name, phones });
   }
 
@@ -327,11 +350,12 @@ export function lookupPhones(numbers: string[]): Record<string, PfContact> {
 }
 
 /** @internal Test helper — inject entries into the phone cache */
-export function _testSetCache(entries: { raw: string; contact: PfContact }[]): void {
+export function _testSetCache(entries: { raw: string; contact: PfContact; pfLabel?: string }[]): void {
   phoneCache = entries.map((e) => ({
     normalized: normalizePhone(e.raw),
     raw: e.raw,
     contact: e.contact,
+    pfLabel: e.pfLabel,
   }));
   cacheReady = true;
 }

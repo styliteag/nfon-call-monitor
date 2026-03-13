@@ -100,7 +100,7 @@ export function CrmSearch({ myExtension, pfActive }: Props) {
         </div>
       )}
       {open && (
-        <div className="absolute top-full left-0 mt-1 w-80 max-h-96 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50">
+        <div className="absolute top-full left-0 mt-1 w-96 max-h-96 overflow-y-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50">
           {results.length === 0 && searched && (
             <div className="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">Keine Ergebnisse</div>
           )}
@@ -124,7 +124,11 @@ export function CrmSearch({ myExtension, pfActive }: Props) {
                     title={`${phone.formatted || phone.raw}${phone.city ? ` (${phone.city})` : ""} — Drag auf Extension-Card zum Anrufen`}
                   >
                     {phone.formatted || phone.raw}
-                    {phone.city && <span className="ml-1 text-xs text-gray-400 dark:text-gray-500">({phone.city})</span>}
+                    {(phone.city || phone.label) && (() => {
+                      const parts = [phone.label, phone.city].filter((v): v is string => !!v);
+                      const unique = parts.filter((v, i) => parts.indexOf(v) === i);
+                      return <span className="ml-1 text-xs text-gray-400 dark:text-gray-500">({unique.join(" · ")})</span>;
+                    })()}
                   </span>
                   <button
                     onClick={() => handleCopy(phone.formatted || phone.raw)}

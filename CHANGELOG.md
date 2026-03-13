@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **CRM-Subtyp-Labels in der Suche** — Telefonnummern in der CRM-Suche zeigen jetzt den Subtyp aus ProjectFacts an (z.B. "Arbeit", "Privat", "Weitere"). Darstellung kombiniert mit Ort/Typ: `+49 177 5938126 (Arbeit · Mobil)`
+
+### Fixed
+- **Doppelte Kontakte in der CRM-Suche** — Kontakte mit identischem Namen und identischen Telefonnummern werden jetzt dedupliziert
+
 ## [1.8.8] - 2026-03-06
 
 ### Fixed

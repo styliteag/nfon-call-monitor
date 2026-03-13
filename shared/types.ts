@@ -80,5 +80,5 @@ export interface PfContact {
 export interface CrmContactResult {
   contactId: number;
   name: string;
-  phones: { raw: string; formatted?: string; city?: string }[];
+  phones: { raw: string; formatted?: string; city?: string; label?: string }[];
 }
