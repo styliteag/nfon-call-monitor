@@ -33,8 +33,9 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       type="button"
-      className="inline-flex items-center mr-1 text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
+      className="inline-flex items-center mr-1 text-gray-300 hover:text-gray-500 dark:text-gray-600 dark:hover:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity focus-visible:opacity-100 focus-visible:outline-2 focus-visible:outline-blue-500"
       title="Nummer kopieren"
+      aria-label="Nummer kopieren"
       onClick={(e) => {
         e.stopPropagation();
         navigator.clipboard.writeText(text);
@@ -148,7 +149,7 @@ function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, extensio
 
 export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, pfContacts, extensions, specialNumbers, hideScrollbar }: Props & { hideScrollbar?: boolean }) {
   return (
-    <div className={`flex-1 overflow-auto${hideScrollbar ? " scrollbar-hide" : ""}`}>
+    <div className={hideScrollbar ? "flex-1 min-h-0 overflow-auto scrollbar-hide" : "overflow-auto"}>
       <table className="w-full text-sm table-fixed">
         <colgroup>
           <col className="w-[120px]" />
@@ -157,7 +158,7 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
           <col className="w-[80px]" />
           <col />
         </colgroup>
-        <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0">
+        <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0 z-10">
           <tr className="text-left text-gray-500 dark:text-gray-400 text-xs uppercase">
             <th className="px-3 py-2">Zeit</th>
             <th className="px-3 py-2">Extension</th>
@@ -168,11 +169,17 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
         </thead>
         <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
           {loading && calls.length === 0 ? (
-            <tr>
-              <td colSpan={5} className="text-center py-8 text-gray-400">
-                Lade...
-              </td>
-            </tr>
+            <>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <tr key={i}>
+                  <td className="px-3 py-1.5"><div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /><div className="h-3 w-12 bg-gray-100 dark:bg-gray-800 rounded animate-pulse mt-1" /></td>
+                  <td className="px-3 py-1.5"><div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /><div className="h-3 w-10 bg-gray-100 dark:bg-gray-800 rounded animate-pulse mt-1" /></td>
+                  <td className="px-3 py-1.5"><div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" /></td>
+                  <td className="px-3 py-1.5"><div className="h-4 w-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /></td>
+                  <td className="px-3 py-1.5"><div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" /></td>
+                </tr>
+              ))}
+            </>
           ) : calls.length === 0 ? (
             <tr>
               <td colSpan={5} className="text-center py-8 text-gray-400">
@@ -227,9 +234,9 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
                 </td>
                 <td className="px-3 py-1.5 font-mono dark:text-gray-300">{formatDuration(call.duration)}</td>
                 <td className="px-3 py-1.5 font-mono dark:text-gray-300">
-                  <div className="grid grid-cols-[320px_auto_1fr] items-center gap-1">
+                  <div className="grid grid-cols-[minmax(100px,1fr)_auto_minmax(100px,1fr)] items-center gap-1">
                     <PhoneWithPf number={call.direction === "outbound" ? call.extension : call.caller} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="truncate text-right" />
-                    <span className={`${arrowColor[call.status] ?? "text-gray-800 dark:text-gray-300"} text-2xl font-black leading-none`} title={call.direction === "inbound" ? "Eingehend" : "Ausgehend"}>&#8594;</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={`w-5 h-5 shrink-0 ${arrowColor[call.status] ?? "text-gray-800 dark:text-gray-300"}`} aria-label={call.direction === "inbound" ? "Eingehend" : "Ausgehend"}><path fillRule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clipRule="evenodd" /></svg>
                     <PhoneWithPf number={call.direction === "inbound" ? call.extension : call.callee} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="truncate" />
                   </div>
                   {call.transferredFrom && (

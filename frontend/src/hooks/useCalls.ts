@@ -3,9 +3,9 @@ import type { CallRecord, CallsQuery } from "../../../shared/types";
 import { fetchCalls } from "../lib/api";
 import { useSocket } from "./useSocket";
 
-// Sort calls by startTime descending (newest first)
+// Sort calls by startTime descending (newest first) — returns a new array
 function sortByTime(calls: CallRecord[]): CallRecord[] {
-  return calls.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+  return [...calls].sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
 }
 
 export function useCalls() {

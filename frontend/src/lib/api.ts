@@ -51,12 +51,9 @@ export async function fetchExtensions(): Promise<ExtensionInfo[]> {
   return res.json();
 }
 
-export interface KopfnummerEntry {
-  nr: string;
-  name: string;
-}
+export type { KopfnummerEntry } from "./formatters";
 
-export async function fetchConfig(): Promise<{ kopfnummern: string[]; kopfnummernMap: KopfnummerEntry[]; specialNumbers: Record<string, string>; pfActive: boolean }> {
+export async function fetchConfig(): Promise<{ kopfnummern: string[]; kopfnummernMap: import("./formatters").KopfnummerEntry[]; specialNumbers: Record<string, string>; pfActive: boolean }> {
   const res = await authFetch(`${BASE}/config`);
   if (!res.ok) throw new Error(`Fehler: ${res.status}`);
   return res.json();

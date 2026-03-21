@@ -73,7 +73,8 @@ export function Filters({ filters, extensions, onFilterChange, total, page, page
           onFilterChange({ dateFrom: e.target.value ? `${e.target.value}T00:00:00` : undefined })
         }
         className={selectClass}
-        placeholder="Von"
+        aria-label="Datum von"
+        title="Datum von"
       />
 
       <input
@@ -83,7 +84,8 @@ export function Filters({ filters, extensions, onFilterChange, total, page, page
           onFilterChange({ dateTo: e.target.value ? `${e.target.value}T23:59:59` : undefined })
         }
         className={selectClass}
-        placeholder="Bis"
+        aria-label="Datum bis"
+        title="Datum bis"
       />
 
       <div className="flex items-center gap-1.5 ml-auto">
@@ -92,6 +94,7 @@ export function Filters({ filters, extensions, onFilterChange, total, page, page
           value={pageSizeRaw ?? pageSize}
           onChange={(e) => onPageSizeChange(Number(e.target.value))}
           className="rounded border border-gray-300 dark:border-gray-600 px-1 py-1 text-xs bg-white dark:bg-gray-700 dark:text-gray-200"
+          aria-label="Einträge pro Seite"
         >
           {PAGE_SIZE_OPTIONS.map((n) => (
             <option key={n} value={n}>{n === 0 ? "Auto" : n}</option>

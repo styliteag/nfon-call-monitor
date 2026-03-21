@@ -57,8 +57,9 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
         <div className="flex items-center gap-3">
           {myExtension && extensions && (
             <div className="flex items-center gap-1.5">
-              <label className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">Meine Extension:</label>
+              <label htmlFor="my-extension-select" className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">Meine Extension:</label>
               <select
+                id="my-extension-select"
                 value={myExtension.value || ""}
                 onChange={(e) => myExtension.select(e.target.value || null)}
                 className="rounded border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 dark:text-gray-200"
@@ -80,6 +81,7 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
                 onChange={(e) => userStatus.update(e.target.value as import("../hooks/useUserStatus").UserStatusValue, userStatus.message)}
                 className="rounded border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 dark:text-gray-200"
                 title="Mein Status"
+                aria-label="Mein Status"
               >
                 <option value="none">–</option>
                 <option value="online">Online</option>
@@ -94,6 +96,7 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
                 onChange={(e) => userStatus.update(userStatus.status, e.target.value)}
                 placeholder="Statustext…"
                 maxLength={100}
+                aria-label="Statusnachricht"
                 className="rounded border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm bg-white dark:bg-gray-700 dark:text-gray-200 w-32"
               />
             </div>
@@ -101,8 +104,9 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
           {onToggleLayout && (
             <button
               onClick={onToggleLayout}
-              className="hidden lg:inline-flex p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+              className="hidden lg:inline-flex p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-2"
               title={layout === "split" ? "Gestapeltes Layout" : "Geteiltes Layout"}
+              aria-label={layout === "split" ? "Gestapeltes Layout" : "Geteiltes Layout"}
             >
               {layout === "split" ? (
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
@@ -120,8 +124,9 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
           {notifications?.supported && (
             <button
               onClick={notifications.toggle}
-              className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+              className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-2"
               title={notifications.enabled ? "Benachrichtigungen aus" : "Benachrichtigungen an"}
+              aria-label={notifications.enabled ? "Benachrichtigungen aus" : "Benachrichtigungen an"}
             >
               {notifications.enabled ? (
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
@@ -139,8 +144,9 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
           )}
           <button
             onClick={onToggleDark}
-            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-2"
             title={dark ? "Light Mode" : "Dark Mode"}
+            aria-label={dark ? "Light Mode" : "Dark Mode"}
           >
             {dark ? (
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
@@ -154,8 +160,9 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
           </button>
           <button
             onClick={onLogout}
-            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400"
+            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400 focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-2"
             title="Abmelden"
+            aria-label="Abmelden"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
               <path fillRule="evenodd" d="M3 4.25A2.25 2.25 0 015.25 2h5.5A2.25 2.25 0 0113 4.25v2a.75.75 0 01-1.5 0v-2a.75.75 0 00-.75-.75h-5.5a.75.75 0 00-.75.75v11.5c0 .414.336.75.75.75h5.5a.75.75 0 00.75-.75v-2a.75.75 0 011.5 0v2A2.25 2.25 0 0110.75 18h-5.5A2.25 2.25 0 013 15.75V4.25z" clipRule="evenodd" />
@@ -166,7 +173,7 @@ export function Layout({ children, appTitle, isConnected, nfonConnected, dark, o
           {uptime !== null && <span className="text-xs text-gray-400 dark:text-gray-500" title="Server-Uptime">{formatUptime(uptime)}</span>}
         </div>
       </header>
-      <main className="flex-1 flex flex-col overflow-hidden">{children}</main>
+      <main className="flex-1 min-h-0 flex flex-col overflow-auto">{children}</main>
     </div>
   );
 }

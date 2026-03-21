@@ -108,7 +108,10 @@ export function Dashboard({ appTitle, dark, onToggleDark, onLogout, layout, onTo
       ) : null}
       {/* Stacked layout (also shown on small screens when split is selected) */}
       <ActiveCallBanner calls={activeCalls} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} />
-      <div className={layout === "split" ? "flex-1 flex flex-col overflow-hidden lg:hidden" : "flex-1 flex flex-col overflow-hidden"}>
+      <div className={layout === "split"
+        ? "flex-1 min-h-0 flex flex-col overflow-hidden lg:hidden"
+        : `flex-1 min-h-0 flex flex-col ${manualPageSize === null ? "overflow-hidden" : "overflow-y-auto"}`
+      }>
         <ExtensionCards extensions={extensions} pfContacts={pfContacts} />
         <Filters filters={filters} extensions={extensions} onFilterChange={updateFilters} total={total} page={page} pageSize={effectivePageSize} pageSizeRaw={manualPageSize ?? 0} onPageChange={setPage} onPageSizeChange={(size) => { setManualPageSize(size === 0 ? null : size); updateFilters({ pageSize: size === 0 ? autoPageSize : size }); }} />
         <CallHistoryTable

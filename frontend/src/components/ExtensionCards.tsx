@@ -168,8 +168,9 @@ function ExtensionCard({ ext, now, pfContacts }: { ext: ExtensionInfo; now: numb
         <div className="flex items-center gap-1">
           <button
             onClick={handleClipboard}
-            className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 p-0.5 rounded transition-colors"
+            className="text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 p-0.5 rounded transition-colors focus-visible:outline-2 focus-visible:outline-blue-500"
             title="Zwischenablage anrufen"
+            aria-label="Nummer aus Zwischenablage anrufen"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
               <path d="M2 3a1 1 0 0 1 1-1h1.172a3 3 0 0 1 2.12.879l.83.828A1 1 0 0 0 7.828 4H14a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V5H7.828a3 3 0 0 1-2.12-.879l-.83-.828A1 1 0 0 0 4.172 3H3v12h4a1 1 0 1 1 0 2H3a2 2 0 0 1-2-2V4a1 1 0 0 1 1-1Z" />
@@ -210,8 +211,12 @@ function ExtensionCard({ ext, now, pfContacts }: { ext: ExtensionInfo; now: numb
       {partner ? (
         <div className="mt-1 text-xs">
           <div className="flex items-center gap-1 justify-center">
-            <span title={ext.currentCallDirection === "inbound" ? "Eingehend" : "Ausgehend"}>
-              {ext.currentCallDirection === "inbound" ? "\u2199" : "\u2197"}
+            <span title={ext.currentCallDirection === "inbound" ? "Eingehend" : "Ausgehend"} aria-label={ext.currentCallDirection === "inbound" ? "Eingehend" : "Ausgehend"}>
+              {ext.currentCallDirection === "inbound" ? (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 text-green-600 dark:text-green-400"><path fillRule="evenodd" d="M2 8a.75.75 0 0 1 .75-.75h8.69L8.22 4.03a.75.75 0 0 1 1.06-1.06l4.5 4.5a.75.75 0 0 1 0 1.06l-4.5 4.5a.75.75 0 0 1-1.06-1.06l3.22-3.22H2.75A.75.75 0 0 1 2 8Z" clipRule="evenodd" /></svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 text-blue-600 dark:text-blue-400"><path fillRule="evenodd" d="M14 8a.75.75 0 0 1-.75.75H4.56l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06l4.5-4.5a.75.75 0 0 1 1.06 1.06L4.56 7.25h8.69A.75.75 0 0 1 14 8Z" clipRule="evenodd" /></svg>
+              )}
             </span>
             <span className="truncate" title={partner}>
               {partnerLabel ? (
