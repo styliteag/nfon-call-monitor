@@ -1,10 +1,26 @@
 import { EventEmitter } from "events";
 import type { NfonCallEvent, CallRecord, CallStatus } from "../shared/types.js";
-import { upsertCall, updateCallEnd } from "./db.js";
+import { upsertCall, updateCallEnd, getCallById } from "./db.js";
 import * as log from "./log.js";
 
 // In-memory map of active calls: key = "uuid:extension"
 const activeCalls = new Map<string, CallRecord>();
+
+// Track which call IDs we've already emitted at least once (so subsequent
+// upserts emit call:updated rather than call:new). Bounded by the number of
+// distinct calls in the process lifetime.
+const emittedCallIds = new Set<string>();
+
+function emitAggregated(callId: string): void {
+  const aggregated = getCallById(callId);
+  if (!aggregated) return;
+  if (emittedCallIds.has(callId)) {
+    callEvents.emit("call:updated", aggregated);
+  } else {
+    emittedCallIds.add(callId);
+    callEvents.emit("call:new", aggregated);
+  }
+}
 
 // Extension name lookup: extension number → name
 const extensionNames = new Map<string, string>();
@@ -148,7 +164,7 @@ export function processEvent(event: NfonCallEvent): void {
             otherRecord.endReason = "cancel";
             activeCalls.delete(otherKey);
             upsertCall(otherRecord);
-            callEvents.emit("call:updated", otherRecord);
+            emitAggregated(otherRecord.id);
           }
         }
       }
@@ -179,12 +195,8 @@ export function processEvent(event: NfonCallEvent): void {
   // Persist to database
   upsertCall(record);
 
-  // Emit events for Socket.IO
-  if (isNew) {
-    callEvents.emit("call:new", record);
-  } else {
-    callEvents.emit("call:updated", record);
-  }
+  // Emit aggregated call (across all legs) for Socket.IO
+  emitAggregated(record.id);
 }
 
 // Clean up stale active calls that have been ringing/active for too long without an end event
@@ -212,7 +224,7 @@ export function cleanStaleCalls(): void {
       record.endReason = "stale";
       activeCalls.delete(key);
       upsertCall(record);
-      callEvents.emit("call:updated", record);
+      emitAggregated(record.id);
       cleaned++;
     }
   }

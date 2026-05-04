@@ -7,7 +7,7 @@ import { Server } from "socket.io";
 import path from "path";
 import { readFileSync } from "fs";
 
-import { initDatabase, getLastHeartbeat, updateHeartbeat, upsertCall, backupDatabase, purgeOldCalls, getCallCounts, clearAllUserStatuses } from "./db.js";
+import { initDatabase, getLastHeartbeat, updateHeartbeat, upsertCall, backupDatabase, purgeOldCalls, getCallCounts, clearAllUserStatuses, getActiveCalls } from "./db.js";
 import { callEvents, getActiveCallsList, cleanStaleCalls } from "./call-aggregator.js";
 import { connectorEvents, start as startConnector, stop as stopConnector, getExtensionList, isNfonConnected } from "./nfon-connector.js";
 import callsRouter from "./routes/calls.js";
@@ -180,8 +180,8 @@ io.use((socket, next) => {
 io.on("connection", (socket) => {
   log.debug("Socket.IO", `Client verbunden: ${socket.id}`);
 
-  // Send current state on connect
-  socket.emit("active-calls", getActiveCallsList());
+  // Send current state on connect (aggregated by call.id, not per-leg).
+  socket.emit("active-calls", getActiveCalls());
   socket.emit("extensions", getExtensionList());
   if (isNfonConnected()) {
     socket.emit("nfon:connected");

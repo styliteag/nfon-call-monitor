@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import type { CallRecord } from "../../../shared/types";
+import type { Call } from "../../../shared/types";
 import { useSocket } from "./useSocket";
 
 export function useNotifications(myExtension: string | null) {
@@ -34,23 +34,31 @@ export function useNotifications(myExtension: string | null) {
   useEffect(() => {
     if (!enabled) return;
 
-    function isMyCall(c: CallRecord): boolean {
-      if (!myExtension) return true; // no extension set → show all
-      return c.extension === myExtension;
+    function targetExtension(c: Call): { ext: string; name: string } {
+      if (myExtension) {
+        const myLeg = c.legs.find((l) => l.extension === myExtension);
+        if (myLeg) return { ext: myLeg.extension, name: myLeg.extensionName || myLeg.extension };
+      }
+      const first = c.legs[0];
+      return { ext: first?.extension ?? "", name: first?.extensionName || first?.extension || "" };
+    }
+
+    function isMyCall(c: Call): boolean {
+      if (!myExtension) return true;
+      return c.legs.some((l) => l.extension === myExtension);
     }
 
     const offNew = on("call:new", (call: unknown) => {
-      const c = call as CallRecord;
+      const c = call as Call;
       if (c.direction !== "inbound" || c.status !== "ringing") return;
       if (!isMyCall(c)) return;
-      const key = `${c.id}-${c.extension}`;
-      if (notifiedRef.current.has(key)) return;
-      notifiedRef.current.add(key);
+      if (notifiedRef.current.has(c.id)) return;
+      notifiedRef.current.add(c.id);
 
       const caller = c.caller || "Unbekannt";
-      const ext = c.extensionName || c.extension;
+      const target = targetExtension(c);
       new Notification("Eingehender Anruf", {
-        body: `${caller} → ${ext}`,
+        body: `${caller} → ${target.name}`,
         tag: c.id,
         // @ts-expect-error renotify is a valid Notification option but missing from TS types
         renotify: false,
@@ -58,14 +66,14 @@ export function useNotifications(myExtension: string | null) {
     });
 
     const offUpdated = on("call:updated", (call: unknown) => {
-      const c = call as CallRecord;
+      const c = call as Call;
       if (c.status !== "missed") return;
       if (!isMyCall(c)) return;
 
       const caller = c.caller || "Unbekannt";
-      const ext = c.extensionName || c.extension;
+      const target = targetExtension(c);
       new Notification("Verpasster Anruf", {
-        body: `${caller} → ${ext}`,
+        body: `${caller} → ${target.name}`,
         tag: `missed-${c.id}`,
       });
     });

@@ -1,7 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import path from "path";
 import { mkdirSync, readdirSync, unlinkSync } from "fs";
-import type { CallRecord, CallsQuery, CallsResponse } from "../shared/types.js";
+import type { Call, CallLeg, CallRecord, CallStatus, CallsQuery, CallsResponse } from "../shared/types.js";
 import { isPfActive, searchContactsByName } from "./projectfacts.js";
 import * as log from "./log.js";
 
@@ -191,8 +191,10 @@ export function getCalls(query: CallsQuery): CallsResponse {
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
   // Paginate by distinct call id (one logical call = one page slot, even if
-  // it has multiple legs / hunt-group members). Returns all matching legs of
-  // the selected calls so the frontend can render them as a single group.
+  // the call has multiple legs / hunt-group members). The filters above
+  // pick the matching IDs; once we have them we load *all* legs of those
+  // calls so the aggregated Call has full context (e.g. on a status filter
+  // the answering leg is still included as part of the matched call).
   const totalRow = db.prepare(
     `SELECT COUNT(DISTINCT id) as count FROM calls ${where}`
   ).get(params) as { count: number };
@@ -214,28 +216,31 @@ export function getCalls(query: CallsQuery): CallsResponse {
   }).join(", ");
   const orderMap = new Map(idRows.map((row, i) => [row.id, i]));
 
-  const rows = db.prepare(
-    `SELECT * FROM calls ${where ? `${where} AND` : "WHERE"} id IN (${idPlaceholders})`
-  ).all({ ...params, ...idParams }) as Array<Record<string, unknown>>;
+  const legRows = db.prepare(
+    `SELECT * FROM calls WHERE id IN (${idPlaceholders})`
+  ).all(idParams) as Array<Record<string, unknown>>;
 
-  rows.sort((a, b) => {
-    const ai = orderMap.get(a.id as string) ?? 0;
-    const bi = orderMap.get(b.id as string) ?? 0;
-    if (ai !== bi) return ai - bi;
-    return (b.start_time as string).localeCompare(a.start_time as string);
-  });
-
-  const calls: CallRecord[] = rows.map(rowToCallRecord);
+  const grouped = legsByCallId(legRows.map(rowToCallRecord));
+  const calls: Call[] = idRows
+    .map((row) => grouped.get(row.id))
+    .filter((legs): legs is CallLeg[] => !!legs && legs.length > 0)
+    .sort((a, b) => (orderMap.get(a[0].id) ?? 0) - (orderMap.get(b[0].id) ?? 0))
+    .map(aggregateLegs);
 
   return { calls, total: totalRow.count, page, pageSize };
 }
 
-export function getActiveCalls(): CallRecord[] {
+export function getActiveCalls(): Call[] {
   const rows = db.prepare(
-    "SELECT * FROM calls WHERE status IN ('ringing', 'active') ORDER BY start_time DESC"
+    `SELECT * FROM calls
+     WHERE id IN (SELECT DISTINCT id FROM calls WHERE status IN ('ringing', 'active'))
+     ORDER BY start_time DESC`
   ).all() as Array<Record<string, unknown>>;
 
-  return rows.map(rowToCallRecord);
+  const grouped = legsByCallId(rows.map(rowToCallRecord));
+  return [...grouped.values()]
+    .map(aggregateLegs)
+    .sort((a, b) => b.startTime.localeCompare(a.startTime));
 }
 
 export function upsertAgentStatus(extension: string, loggedIn: boolean): void {
@@ -359,6 +364,68 @@ export function backupDatabase(): string | null {
   }
 
   return backupPath;
+}
+
+// Aggregate per-leg statuses into a single call status. From the user's
+// perspective: any leg still ringing/active makes the call live; an
+// answered leg makes the call answered. Otherwise the call is missed,
+// unless every leg ended with the same hangup reason (all busy / all
+// rejected) — in which case we keep the specific reason.
+function aggregateStatus(legs: CallLeg[]): CallStatus {
+  if (legs.some((l) => l.status === "ringing")) return "ringing";
+  if (legs.some((l) => l.status === "active")) return "active";
+  if (legs.some((l) => l.status === "answered")) return "answered";
+  if (legs.some((l) => l.status === "system")) return "system";
+  if (legs.every((l) => l.status === "busy")) return "busy";
+  if (legs.every((l) => l.status === "rejected")) return "rejected";
+  return "missed";
+}
+
+export function aggregateLegs(legs: CallLeg[]): Call {
+  if (legs.length === 0) {
+    throw new Error("aggregateLegs called with empty legs array");
+  }
+  const sorted = [...legs].sort((a, b) => a.startTime.localeCompare(b.startTime));
+  const first = sorted[0];
+  const answerer = sorted.find((l) => l.status === "answered" || l.status === "active");
+  const status = aggregateStatus(sorted);
+  const endTimes = sorted.map((l) => l.endTime).filter((t): t is string => !!t);
+  const endTime = endTimes.length > 0 ? [...endTimes].sort().at(-1) : undefined;
+  const transferLeg = sorted.find((l) => l.transferredFrom);
+  return {
+    id: first.id,
+    caller: first.caller,
+    callee: first.callee,
+    direction: first.direction,
+    startTime: first.startTime,
+    answerTime: answerer?.answerTime,
+    endTime,
+    duration: answerer?.duration ?? first.duration,
+    status,
+    endReason: answerer?.endReason ?? first.endReason,
+    transferredFrom: transferLeg?.transferredFrom,
+    transferredFromName: transferLeg?.transferredFromName,
+    originalCaller: transferLeg?.originalCaller ?? first.originalCaller,
+    answeredBy: answerer?.extension,
+    answeredByName: answerer?.extensionName,
+    legs: sorted,
+  };
+}
+
+function legsByCallId(legs: CallLeg[]): Map<string, CallLeg[]> {
+  const map = new Map<string, CallLeg[]>();
+  for (const leg of legs) {
+    const list = map.get(leg.id);
+    if (list) list.push(leg);
+    else map.set(leg.id, [leg]);
+  }
+  return map;
+}
+
+export function getCallById(id: string): Call | undefined {
+  const rows = db.prepare("SELECT * FROM calls WHERE id = :id").all({ id }) as Array<Record<string, unknown>>;
+  if (rows.length === 0) return undefined;
+  return aggregateLegs(rows.map(rowToCallRecord));
 }
 
 function rowToCallRecord(row: Record<string, unknown>): CallRecord {

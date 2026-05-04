@@ -1,17 +1,17 @@
 import { useState, useEffect, useCallback } from "react";
-import type { CallRecord, CallsQuery } from "../../../shared/types";
+import type { Call, CallsQuery } from "../../../shared/types";
 import { fetchCalls } from "../lib/api";
 import { useSocket } from "./useSocket";
 
 // Sort calls by startTime descending (newest first) — returns a new array
-function sortByTime(calls: CallRecord[]): CallRecord[] {
+function sortByTime(calls: Call[]): Call[] {
   return [...calls].sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
 }
 
 export function useCalls() {
   const { on, isConnected, nfonConnected } = useSocket();
-  const [calls, setCalls] = useState<CallRecord[]>([]);
-  const [activeCalls, setActiveCalls] = useState<CallRecord[]>([]);
+  const [calls, setCalls] = useState<Call[]>([]);
+  const [activeCalls, setActiveCalls] = useState<Call[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState<CallsQuery>({});
@@ -36,20 +36,19 @@ export function useCalls() {
     loadCalls({ ...filters, page });
   }, [filters, page, loadCalls]);
 
-  // Socket.IO events
+  // Socket.IO events. The server emits aggregated Call objects (one per
+  // call.id) for both call:new and call:updated.
   useEffect(() => {
     const offNew = on("call:new", (call: unknown) => {
-      const c = call as CallRecord;
+      const c = call as Call;
       if (c.status === "ringing" || c.status === "active") {
-        setActiveCalls((prev) => [...prev.filter((p) => !(p.id === c.id && p.extension === c.extension)), c]);
+        setActiveCalls((prev) => [...prev.filter((p) => p.id !== c.id), c]);
       }
-      // Add to calls list if on first page, deduplicate by (id, extension) to
-      // avoid duplicate React keys when NFON re-rings the same extension
       if (page === 1) {
         let isNewCallId = false;
         setCalls((prev) => {
           isNewCallId = !prev.some((p) => p.id === c.id);
-          const without = prev.filter((p) => !(p.id === c.id && p.extension === c.extension));
+          const without = prev.filter((p) => p.id !== c.id);
           return sortByTime([c, ...without]).slice(0, filters.pageSize ?? 20);
         });
         if (isNewCallId) setTotal((t) => t + 1);
@@ -57,22 +56,17 @@ export function useCalls() {
     });
 
     const offUpdated = on("call:updated", (call: unknown) => {
-      const c = call as CallRecord;
+      const c = call as Call;
       if (c.status === "ringing" || c.status === "active") {
-        setActiveCalls((prev) => [...prev.filter((p) => !(p.id === c.id && p.extension === c.extension)), c]);
+        setActiveCalls((prev) => [...prev.filter((p) => p.id !== c.id), c]);
       } else {
-        setActiveCalls((prev) => prev.filter((p) => !(p.id === c.id && p.extension === c.extension)));
+        setActiveCalls((prev) => prev.filter((p) => p.id !== c.id));
       }
-      // Update in call list
-      setCalls((prev) =>
-        prev.map((existing) =>
-          existing.id === c.id && existing.extension === c.extension ? c : existing
-        )
-      );
+      setCalls((prev) => prev.map((existing) => (existing.id === c.id ? c : existing)));
     });
 
     const offActive = on("active-calls", (calls: unknown) => {
-      setActiveCalls(sortByTime(calls as CallRecord[]));
+      setActiveCalls(sortByTime(calls as Call[]));
     });
 
     return () => {

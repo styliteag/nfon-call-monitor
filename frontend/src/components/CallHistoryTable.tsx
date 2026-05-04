@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { CallRecord, CallStatus, ExtensionInfo, PfContact } from "../../../shared/types";
+import type { Call, CallStatus, ExtensionInfo, PfContact } from "../../../shared/types";
 import { CallStatusBadge } from "./CallStatusBadge";
 import { formatTime, formatDate, formatDuration, formatPhone, getStandort, type KopfnummerEntry } from "../lib/formatters";
 
@@ -14,7 +14,7 @@ const arrowColor: Record<CallStatus, string> = {
 };
 
 interface Props {
-  calls: CallRecord[];
+  calls: Call[];
   loading: boolean;
   kopfnummern?: string[];
   kopfnummernMap?: KopfnummerEntry[];
@@ -155,40 +155,57 @@ function PhoneWithPf({ number, kopfnummern, kopfnummernMap, pfContacts, extensio
   );
 }
 
-interface CallGroup {
-  primary: CallRecord;
-  members: CallRecord[];
-  isHuntGroup: boolean;
+function isHuntGroup(call: Call): boolean {
+  return (
+    call.legs.length > 1 &&
+    call.direction === "inbound" &&
+    call.status !== "system" &&
+    !call.transferredFrom
+  );
 }
 
-function groupCalls(calls: CallRecord[]): CallGroup[] {
-  const byId = new Map<string, CallRecord[]>();
-  const order: string[] = [];
-  for (const c of calls) {
-    if (!byId.has(c.id)) {
-      byId.set(c.id, []);
-      order.push(c.id);
-    }
-    byId.get(c.id)!.push(c);
+// Resolve the dialed target into a human-readable label using the
+// KOPFNUMMERN config (prefix → site name): "MZ-Zentrale" for *-0 of a
+// known site, "MZ-20" for a direct extension dial, or "Zentrale" / "DW 20"
+// as fallback when the site name is not configured.
+interface DialedTarget {
+  label: string;
+  standort?: string;
+  durchwahl: string;
+}
+function dialedTargetLabel(callee: string, kopfnummern?: string[], kopfnummernMap?: KopfnummerEntry[]): DialedTarget | undefined {
+  if (!callee || !kopfnummern) return undefined;
+  const prefix = kopfnummern.find((p) => callee.startsWith(p));
+  if (!prefix) return undefined;
+  const dw = callee.slice(prefix.length);
+  if (!dw) return undefined;
+  const standort = kopfnummernMap?.find((e) => e.nr === prefix)?.name;
+  if (dw === "0") {
+    return { label: standort ? `${standort}-0` : "Zentrale", standort, durchwahl: dw };
   }
-  return order.map((id) => {
-    const members = byId.get(id)!;
-    const isHuntGroup =
-      members.length > 1 &&
-      members[0].direction === "inbound" &&
-      members[0].status !== "system" &&
-      !members.some((m) => m.transferredFrom);
-    if (!isHuntGroup) {
-      return { primary: members[0], members, isHuntGroup: false };
-    }
-    const answerer = members.find((m) => m.status === "answered" || m.status === "active");
-    const primary = answerer ?? members[0];
-    return { primary, members, isHuntGroup: true };
-  });
+  return { label: standort ? `${standort}-${dw}` : `DW ${dw}`, standort, durchwahl: dw };
+}
+
+function DialedBadge({ target, callee }: { target: DialedTarget; callee: string }) {
+  const isZentrale = target.durchwahl === "0";
+  const cls = isZentrale
+    ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300"
+    : "bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200";
+  const fullNumber = callee.startsWith("+") ? callee : `+${callee}`;
+  return (
+    <span
+      className={`group/dial relative inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium ${cls} font-sans shrink-0`}
+      title={`Gewählt: ${fullNumber}`}
+    >
+      {target.label}
+      <span className="pointer-events-none invisible opacity-0 group-hover/dial:visible group-hover/dial:opacity-100 transition-opacity absolute z-30 left-1/2 -translate-x-1/2 top-full mt-1 whitespace-nowrap text-[11px] bg-gray-900 text-gray-100 dark:bg-gray-700 px-2 py-1 rounded shadow-lg font-mono">
+        Gewählt: {fullNumber}
+      </span>
+    </span>
+  );
 }
 
 export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, pfContacts, extensions, specialNumbers, hideScrollbar }: Props & { hideScrollbar?: boolean }) {
-  const groups = groupCalls(calls);
   return (
     <div className={hideScrollbar ? "flex-1 min-h-0 overflow-auto scrollbar-hide" : "overflow-auto"}>
       <table className="w-full text-sm table-fixed">
@@ -228,27 +245,17 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
               </td>
             </tr>
           ) : (
-            groups.map((group) => {
-              const call = group.primary;
-              if (group.isHuntGroup) {
-                const answerer = group.members.find((m) => m.status === "answered" || m.status === "active");
-                const isRinging = group.members.some((m) => m.status === "ringing");
-                const ringerLabels = group.members.map((m) => m.extensionName || m.extension);
-                const others = answerer
-                  ? group.members.filter((m) => m.extension !== answerer.extension).map((m) => m.extensionName || m.extension)
+            calls.map((call) => {
+              if (isHuntGroup(call)) {
+                const isRinging = call.legs.some((l) => l.status === "ringing");
+                const ringerLabels = call.legs.map((l) => l.extensionName || l.extension);
+                const others = call.answeredBy
+                  ? call.legs.filter((l) => l.extension !== call.answeredBy).map((l) => l.extensionName || l.extension)
                   : [];
                 const huntBadge = (() => {
-                  if (!call.callee || !kopfnummern) return null;
-                  const prefix = kopfnummern.find((p) => call.callee.startsWith(p));
-                  if (!prefix) return null;
-                  const dw = call.callee.slice(prefix.length);
-                  if (dw === "0") {
-                    return <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300 font-sans shrink-0" title={`Gewählt: ${call.callee} (Zentrale)`}>Zentrale</span>;
-                  }
-                  if (dw) {
-                    return <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 font-sans shrink-0" title={`Gewählt: ${call.callee}`}>Gruppe DW {dw}</span>;
-                  }
-                  return null;
+                  const target = dialedTargetLabel(call.callee, kopfnummern, kopfnummernMap);
+                  if (!target) return null;
+                  return <DialedBadge target={target} callee={call.callee} />;
                 })();
                 return (
                   <tr
@@ -258,25 +265,36 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
                     <td className="px-3 py-1.5 whitespace-nowrap align-top">
                       <div className="dark:text-gray-200">
                         {formatTime(call.startTime)}
-                        {answerer?.answerTime && (
-                          <span className="text-xs text-gray-400 ml-1" title={`Angenommen: ${formatTime(answerer.answerTime)}`}>
-                            +{Math.round((new Date(answerer.answerTime).getTime() - new Date(call.startTime).getTime()) / 1000)}s
+                        {call.answerTime && (
+                          <span className="text-xs text-gray-400 ml-1" title={`Angenommen: ${formatTime(call.answerTime)}`}>
+                            +{Math.round((new Date(call.answerTime).getTime() - new Date(call.startTime).getTime()) / 1000)}s
                           </span>
                         )}
                       </div>
                       <div className="text-xs text-gray-400">{formatDate(call.startTime)}</div>
                     </td>
                     <td className="px-3 py-1.5 truncate align-top">
-                      {answerer ? (
+                      {call.answeredBy ? (
                         <>
-                          <div className="font-medium dark:text-gray-200 truncate">{answerer.extensionName || answerer.extension}</div>
-                          <div className="text-xs text-gray-400">{answerer.extension} · von {group.members.length}</div>
+                          <div className="font-medium dark:text-gray-200 truncate">{call.answeredByName || call.answeredBy}</div>
+                          <div className="text-xs text-gray-400">{call.answeredBy} · von {call.legs.length}</div>
                         </>
                       ) : (
-                        <>
-                          <div className="font-medium text-gray-500 dark:text-gray-400 italic truncate">Hunt-Group</div>
-                          <div className="text-xs text-gray-400">{group.members.length} klingelten</div>
-                        </>
+                        (() => {
+                          const target = dialedTargetLabel(call.callee, kopfnummern, kopfnummernMap);
+                          const fullNumber = call.callee ? (call.callee.startsWith("+") ? call.callee : `+${call.callee}`) : "";
+                          return (
+                            <>
+                              <div
+                                className="font-medium text-indigo-700 dark:text-indigo-300 truncate"
+                                title={fullNumber ? `Gewählt: ${fullNumber}` : undefined}
+                              >
+                                {target?.label ?? "Gruppe"}
+                              </div>
+                              <div className="text-xs text-gray-400">{call.legs.length} klingelten</div>
+                            </>
+                          );
+                        })()
                       )}
                     </td>
                     <td className="px-3 py-1.5 whitespace-nowrap align-top">
@@ -290,10 +308,10 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
                         <div className="flex items-center gap-1 min-w-0">{huntBadge}</div>
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-sans truncate" title={ringerLabels.join(", ")}>
-                        {answerer ? (
+                        {call.answeredBy ? (
                           <>
                             <span className="text-gray-400">↳ angenommen von </span>
-                            <span className="text-green-600 dark:text-green-400 font-medium">{answerer.extensionName || answerer.extension}</span>
+                            <span className="text-green-600 dark:text-green-400 font-medium">{call.answeredByName || call.answeredBy}</span>
                             {others.length > 0 && (
                               <span className="text-gray-400"> · klingelte auch: {others.join(", ")}</span>
                             )}
@@ -309,8 +327,11 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
                   </tr>
                 );
               }
+              const leg = call.legs.find((l) => l.status === "answered" || l.status === "active")
+                ?? call.legs.find((l) => l.transferredFrom)
+                ?? call.legs[0];
               return call.status === "system" ? (
-                <tr key={`${call.id}-${call.extension}`} className="bg-gray-50 dark:bg-gray-800/50">
+                <tr key={call.id} className="bg-gray-50 dark:bg-gray-800/50">
                   <td className="px-3 py-1.5 whitespace-nowrap">
                     <div className="dark:text-gray-200">{formatTime(call.startTime)}</div>
                     <div className="text-xs text-gray-400">{formatDate(call.startTime)}</div>
@@ -327,7 +348,7 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
                 </tr>
               ) : (
               <tr
-                key={`${call.id}-${call.extension}`}
+                key={call.id}
                 className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${
                   call.status === "ringing" ? "bg-yellow-50 dark:bg-yellow-900/20 animate-pulse" : ""
                 } ${call.transferredFrom ? "border-l-2 border-l-purple-500 dark:border-l-purple-400" : ""}`}
@@ -344,8 +365,8 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
                   <div className="text-xs text-gray-400">{formatDate(call.startTime)}</div>
                 </td>
                 <td className="px-3 py-1.5 truncate">
-                  <div className="font-medium dark:text-gray-200 truncate">{call.extensionName || call.extension}</div>
-                  <div className="text-xs text-gray-400">{call.extension}</div>
+                  <div className="font-medium dark:text-gray-200 truncate">{leg.extensionName || leg.extension}</div>
+                  <div className="text-xs text-gray-400">{leg.extension}</div>
                 </td>
                 <td className="px-3 py-1.5 whitespace-nowrap">
                   <CallStatusBadge status={call.status} direction={call.direction} isTransfer={!!call.transferredFrom} endReason={call.endReason} />
@@ -356,23 +377,18 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
                 <td className="px-3 py-1.5 font-mono dark:text-gray-300">{formatDuration(call.duration)}</td>
                 <td className="px-3 py-1.5 font-mono dark:text-gray-300">
                   <div className="grid grid-cols-[minmax(100px,1fr)_auto_minmax(100px,1fr)] items-center gap-1">
-                    <PhoneWithPf number={call.direction === "outbound" ? call.extension : call.caller} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="truncate text-right" />
+                    <PhoneWithPf number={call.direction === "outbound" ? leg.extension : call.caller} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="truncate text-right" />
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={`w-5 h-5 shrink-0 ${arrowColor[call.status] ?? "text-gray-800 dark:text-gray-300"}`} aria-label={call.direction === "inbound" ? "Eingehend" : "Ausgehend"}><path fillRule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clipRule="evenodd" /></svg>
                     <div className="flex items-center gap-1 min-w-0">
                       {(() => {
-                        if (call.direction !== "inbound" || !call.callee || !kopfnummern) return null;
-                        const prefix = kopfnummern.find((p) => call.callee.startsWith(p));
-                        if (!prefix) return null;
-                        const dw = call.callee.slice(prefix.length);
-                        if (dw === "0") {
-                          return <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300 font-sans shrink-0" title={`Gewählt: ${call.callee} (Zentrale)`}>Zentrale</span>;
-                        }
-                        if (dw && dw !== call.extension) {
-                          return <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200 font-sans shrink-0" title={`Gewählt: ${call.callee}`}>DW {dw}</span>;
-                        }
-                        return null;
+                        if (call.direction !== "inbound") return null;
+                        const target = dialedTargetLabel(call.callee, kopfnummern, kopfnummernMap);
+                        if (!target) return null;
+                        const isZentrale = target.durchwahl === "0";
+                        if (!isZentrale && target.durchwahl === leg.extension) return null;
+                        return <DialedBadge target={target} callee={call.callee} />;
                       })()}
-                      <PhoneWithPf number={call.direction === "inbound" ? call.extension : call.callee} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="truncate" />
+                      <PhoneWithPf number={call.direction === "inbound" ? leg.extension : call.callee} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="truncate" />
                     </div>
                   </div>
                   {call.transferredFrom && (

@@ -11,9 +11,11 @@ export interface NfonCallEvent {
 
 export type CallStatus = "ringing" | "active" | "answered" | "missed" | "busy" | "rejected" | "system";
 
-// Aggregated call record (stored in SQLite)
-export interface CallRecord {
-  id: string;           // NFON call UUID
+// One leg of a call: a single ringing/answered extension. Stored 1:1 in
+// SQLite. The DB primary key is (id, extension) — a call may have multiple
+// legs when several extensions ring (hunt-group, *0 / Zentrale).
+export interface CallLeg {
+  id: string;           // NFON call UUID — shared by all legs of a call
   caller: string;
   callee: string;
   extension: string;
@@ -28,6 +30,31 @@ export interface CallRecord {
   transferredFrom?: string;      // extension number that transferred the call
   transferredFromName?: string;   // name of that extension
   originalCaller?: string;        // original external caller (set on transfer legs)
+}
+
+// Backwards-compat alias for the leg-level DB record.
+export type CallRecord = CallLeg;
+
+// Aggregated call across all its legs. This is what API endpoints return
+// and what the UI renders. Status/duration/answerTime are derived from the
+// answering leg (if any) or the most relevant leg.
+export interface Call {
+  id: string;
+  caller: string;
+  callee: string;
+  direction: "inbound" | "outbound";
+  startTime: string;        // earliest leg startTime
+  answerTime?: string;      // from answering leg
+  endTime?: string;         // latest leg endTime
+  duration?: number;        // from answering leg
+  status: CallStatus;       // aggregated across legs
+  endReason?: string;       // from answering leg, else first leg
+  transferredFrom?: string;
+  transferredFromName?: string;
+  originalCaller?: string;
+  legs: CallLeg[];
+  answeredBy?: string;      // extension number of leg that answered, if any
+  answeredByName?: string;
 }
 
 export interface ExtensionInfo {
@@ -52,7 +79,7 @@ export interface ExtensionInfo {
 }
 
 export interface CallsResponse {
-  calls: CallRecord[];
+  calls: Call[];
   total: number;
   page: number;
   pageSize: number;
