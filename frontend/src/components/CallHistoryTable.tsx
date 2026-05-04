@@ -302,12 +302,12 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
                     </td>
                     <td className="px-3 py-1.5 font-mono dark:text-gray-300 align-top">{formatDuration(call.duration)}</td>
                     <td className="px-3 py-1.5 font-mono dark:text-gray-300 align-top">
-                      <div className="grid grid-cols-[minmax(100px,1fr)_auto_minmax(100px,1fr)] items-center gap-1">
+                      <div className="grid grid-cols-[clamp(220px,50%,420px)_auto_minmax(100px,1fr)] items-center gap-1">
                         <PhoneWithPf number={call.caller} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="truncate text-right" />
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={`w-5 h-5 shrink-0 ${arrowColor[call.status] ?? "text-gray-800 dark:text-gray-300"}`} aria-label="Eingehend"><path fillRule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clipRule="evenodd" /></svg>
                         <div className="flex items-center gap-1 min-w-0">{huntBadge}</div>
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 font-sans truncate" title={ringerLabels.join(", ")}>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 pl-10 font-sans truncate" title={ringerLabels.join(", ")}>
                         {call.answeredBy ? (
                           <>
                             <span className="text-gray-400">↳ angenommen von </span>
@@ -318,7 +318,7 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
                           </>
                         ) : (
                           <>
-                            <span className="text-gray-400">klingelte bei: </span>
+                            <span className="text-gray-400">↳ klingelte bei: </span>
                             <span className="text-gray-600 dark:text-gray-300">{ringerLabels.join(", ")}</span>
                           </>
                         )}
@@ -376,7 +376,7 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
                 </td>
                 <td className="px-3 py-1.5 font-mono dark:text-gray-300">{formatDuration(call.duration)}</td>
                 <td className="px-3 py-1.5 font-mono dark:text-gray-300">
-                  <div className="grid grid-cols-[minmax(100px,1fr)_auto_minmax(100px,1fr)] items-center gap-1">
+                  <div className="grid grid-cols-[clamp(220px,50%,420px)_auto_minmax(100px,1fr)] items-center gap-1">
                     <PhoneWithPf number={call.direction === "outbound" ? leg.extension : call.caller} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="truncate text-right" />
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className={`w-5 h-5 shrink-0 ${arrowColor[call.status] ?? "text-gray-800 dark:text-gray-300"}`} aria-label={call.direction === "inbound" ? "Eingehend" : "Ausgehend"}><path fillRule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clipRule="evenodd" /></svg>
                     <div className="flex items-center gap-1 min-w-0">
