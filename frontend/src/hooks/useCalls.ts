@@ -46,11 +46,13 @@ export function useCalls() {
       // Add to calls list if on first page, deduplicate by (id, extension) to
       // avoid duplicate React keys when NFON re-rings the same extension
       if (page === 1) {
+        let isNewCallId = false;
         setCalls((prev) => {
+          isNewCallId = !prev.some((p) => p.id === c.id);
           const without = prev.filter((p) => !(p.id === c.id && p.extension === c.extension));
           return sortByTime([c, ...without]).slice(0, filters.pageSize ?? 20);
         });
-        setTotal((t) => t + 1);
+        if (isNewCallId) setTotal((t) => t + 1);
       }
     });
 

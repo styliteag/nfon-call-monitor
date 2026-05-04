@@ -190,15 +190,44 @@ export function getCalls(query: CallsQuery): CallsResponse {
 
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
-  const total = db.prepare(`SELECT COUNT(*) as count FROM calls ${where}`).get(params) as { count: number };
+  // Paginate by distinct call id (one logical call = one page slot, even if
+  // it has multiple legs / hunt-group members). Returns all matching legs of
+  // the selected calls so the frontend can render them as a single group.
+  const totalRow = db.prepare(
+    `SELECT COUNT(DISTINCT id) as count FROM calls ${where}`
+  ).get(params) as { count: number };
+
+  const idRows = db.prepare(
+    `SELECT id, MAX(start_time) as max_st FROM calls ${where}
+     GROUP BY id ORDER BY max_st DESC, id LIMIT :limit OFFSET :offset`
+  ).all({ ...params, limit: pageSize, offset }) as Array<{ id: string; max_st: string }>;
+
+  if (idRows.length === 0) {
+    return { calls: [], total: totalRow.count, page, pageSize };
+  }
+
+  const idParams: Record<string, string> = {};
+  const idPlaceholders = idRows.map((row, i) => {
+    const key = `gid${i}`;
+    idParams[key] = row.id;
+    return `:${key}`;
+  }).join(", ");
+  const orderMap = new Map(idRows.map((row, i) => [row.id, i]));
 
   const rows = db.prepare(
-    `SELECT * FROM calls ${where} ORDER BY start_time DESC LIMIT :limit OFFSET :offset`
-  ).all({ ...params, limit: pageSize, offset }) as Array<Record<string, unknown>>;
+    `SELECT * FROM calls ${where ? `${where} AND` : "WHERE"} id IN (${idPlaceholders})`
+  ).all({ ...params, ...idParams }) as Array<Record<string, unknown>>;
+
+  rows.sort((a, b) => {
+    const ai = orderMap.get(a.id as string) ?? 0;
+    const bi = orderMap.get(b.id as string) ?? 0;
+    if (ai !== bi) return ai - bi;
+    return (b.start_time as string).localeCompare(a.start_time as string);
+  });
 
   const calls: CallRecord[] = rows.map(rowToCallRecord);
 
-  return { calls, total: total.count, page, pageSize };
+  return { calls, total: totalRow.count, page, pageSize };
 }
 
 export function getActiveCalls(): CallRecord[] {
