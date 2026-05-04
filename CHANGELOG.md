@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.8.11] - 2026-05-04
 
+### Added
+- **Hunt-Group-Anrufe in einer Zeile** — Anrufe an die Zentrale oder einen Sammelruf werden jetzt als ein Eintrag dargestellt statt als eine Zeile pro klingelnder Extension. Die zweite Textzeile zeigt entweder den Annehmer („↳ angenommen von …") oder alle gerufenen Extensions („↳ klingelte bei …")
+- **Zielnummer-Label** — Eingehende Anrufe zeigen das gewählte Ziel als Badge in der Verbindung-Spalte: `MZ-0` für die Zentrale, `MZ-74` für eine Direktdurchwahl. Ohne `KOPFNUMMERN_NAME` Fallback auf „Zentrale" / „DW xx"
+- **Vollständige Zielnummer per Hover** — Beim Hover über das Zielnummer-Badge erscheint ein Popup mit der kompletten gewählten Rufnummer im internationalen Format
+- **Tests für Call-Aggregation** — 9 Unit-Tests für die neue `aggregateLegs`-Funktion (Hunt-Group fully-missed, partial answer, ringing/active-Precedence, Transfer-Metadata, end-time aggregation)
+
+### Changed
+- **API liefert aggregierte Calls** — Backend gibt jetzt einen aggregierten `Call` mit `legs[]` zurück statt mehrerer `CallRecord`-Beine pro Anruf. Pagination zählt logische Anrufe (nicht Klingelvorgänge), Live-Updates broadcasten auf Call-Ebene
+- **Pfeil-Alignment in der Anrufliste** — Caller- und Zielspalte teilen eine konsistente Grid-Breite (`clamp(220px, 50%, 420px)`), so dass der Pfeil zwischen Anrufer und Ziel in allen Zeilen auf derselben X-Position sitzt — egal ob Hunt-Group oder Single-Leg
+- **Zweite Zeile eingerückt** — Die Sekundärzeile bei Hunt-Group-Anrufen ist um 40px eingerückt, damit das `↳` optisch von der ersten Zeile abgegrenzt ist
+
 ## [1.8.10] - 2026-03-21
 
 ## [1.8.9] - 2026-03-13
