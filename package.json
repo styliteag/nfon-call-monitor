@@ -14,7 +14,7 @@
   },
   "keywords": [],
   "author": "Wim Bonis <wb@stylite.de>",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "type": "commonjs",
   "dependencies": {
     "cors": "^2.8.5",
