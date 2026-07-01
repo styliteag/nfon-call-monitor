@@ -392,6 +392,13 @@ export function aggregateLegs(legs: CallLeg[]): Call {
   const endTimes = sorted.map((l) => l.endTime).filter((t): t is string => !!t);
   const endTime = endTimes.length > 0 ? [...endTimes].sort().at(-1) : undefined;
   const transferLeg = sorted.find((l) => l.transferredFrom);
+  // Same-uuid sequential transfer: the transferring extension is itself an
+  // (answered) leg of this call. Anchor the row on the transferrer and expose
+  // the target via transferredTo, rather than the recipient-anchored "von"
+  // rendering used for cross-uuid transfers (where the source is not a leg).
+  const sameUuidSource = transferLeg
+    ? sorted.find((l) => l.extension === transferLeg.transferredFrom && !!l.answerTime)
+    : undefined;
   return {
     id: first.id,
     caller: first.caller,
@@ -403,9 +410,11 @@ export function aggregateLegs(legs: CallLeg[]): Call {
     duration: answerer?.duration ?? first.duration,
     status,
     endReason: answerer?.endReason ?? first.endReason,
-    transferredFrom: transferLeg?.transferredFrom,
-    transferredFromName: transferLeg?.transferredFromName,
-    originalCaller: transferLeg?.originalCaller ?? first.originalCaller,
+    transferredFrom: sameUuidSource ? undefined : transferLeg?.transferredFrom,
+    transferredFromName: sameUuidSource ? undefined : transferLeg?.transferredFromName,
+    transferredTo: sameUuidSource ? transferLeg?.extension : undefined,
+    transferredToName: sameUuidSource ? transferLeg?.extensionName : undefined,
+    originalCaller: sameUuidSource ? undefined : (transferLeg?.originalCaller ?? first.originalCaller),
     answeredBy: answerer?.extension,
     answeredByName: answerer?.extensionName,
     legs: sorted,

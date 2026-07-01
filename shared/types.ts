@@ -51,6 +51,8 @@ export interface Call {
   endReason?: string;       // from answering leg, else first leg
   transferredFrom?: string;
   transferredFromName?: string;
+  transferredTo?: string;         // same-uuid transfer target extension (transferrer view)
+  transferredToName?: string;
   originalCaller?: string;
   legs: CallLeg[];
   answeredBy?: string;      // extension number of leg that answered, if any

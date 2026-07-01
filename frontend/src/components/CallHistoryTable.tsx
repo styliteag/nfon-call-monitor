@@ -160,7 +160,8 @@ function isHuntGroup(call: Call): boolean {
     call.legs.length > 1 &&
     call.direction === "inbound" &&
     call.status !== "system" &&
-    !call.transferredFrom
+    !call.transferredFrom &&
+    !call.transferredTo
   );
 }
 
@@ -351,7 +352,7 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
                 key={call.id}
                 className={`hover:bg-gray-50 dark:hover:bg-gray-800 ${
                   call.status === "ringing" ? "bg-yellow-50 dark:bg-yellow-900/20 animate-pulse" : ""
-                } ${call.transferredFrom ? "border-l-2 border-l-purple-500 dark:border-l-purple-400" : ""}`}
+                } ${call.transferredFrom || call.transferredTo ? "border-l-2 border-l-purple-500 dark:border-l-purple-400" : ""}`}
               >
                 <td className="px-3 py-1.5 whitespace-nowrap">
                   <div className="dark:text-gray-200">
@@ -403,6 +404,12 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
                           &mdash; Anrufer: <PhoneWithPf number={call.originalCaller} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="inline" />
                         </span>
                       )}
+                    </div>
+                  )}
+                  {call.transferredTo && (
+                    <div className="text-xs text-purple-600 dark:text-purple-400 mt-0.5 font-sans">
+                      &#8618; weitergeleitet an <span className="font-medium">{call.transferredToName || call.transferredTo}</span>
+                      <span className="text-gray-400 ml-1">({call.transferredTo})</span>
                     </div>
                   )}
                 </td>

@@ -94,6 +94,33 @@ describe("aggregateLegs", () => {
     expect(call.originalCaller).toBe("493012345678");
   });
 
+  it("anchors a same-uuid sequential transfer on the transferrer and exposes transferredTo", () => {
+    // Manfred(30) answered, then forwarded the caller to Robin(54) on the same
+    // NFON uuid. The transferring extension is itself an answered leg.
+    const legs: CallLeg[] = [
+      leg({ extension: "30", extensionName: "Manfred Klein", status: "answered", duration: 45, startTime: "2026-07-01T12:28:36.000Z", answerTime: "2026-07-01T12:28:45.000Z", endTime: "2026-07-01T12:29:30.000Z" }),
+      leg({ extension: "54", extensionName: "Robin Will", status: "answered", duration: 20, startTime: "2026-07-01T12:29:30.000Z", answerTime: "2026-07-01T12:29:40.000Z", transferredFrom: "30", transferredFromName: "Manfred Klein", originalCaller: "4961313861172" }),
+    ];
+    const call = aggregateLegs(legs);
+    expect(call.status).toBe("answered");
+    expect(call.answeredBy).toBe("30");          // transferrer anchors the row
+    expect(call.duration).toBe(45);
+    expect(call.transferredFrom).toBeUndefined(); // no recipient-anchored "von"
+    expect(call.transferredTo).toBe("54");
+    expect(call.transferredToName).toBe("Robin Will");
+    expect(call.originalCaller).toBeUndefined();
+  });
+
+  it("keeps recipient-anchored transfer when the source is not a leg (cross-uuid)", () => {
+    const legs: CallLeg[] = [
+      leg({ extension: "20", status: "answered", transferredFrom: "30", transferredFromName: "Andre Keller", originalCaller: "493012345678" }),
+    ];
+    const call = aggregateLegs(legs);
+    expect(call.transferredFrom).toBe("30");
+    expect(call.transferredTo).toBeUndefined();
+    expect(call.originalCaller).toBe("493012345678");
+  });
+
   it("uses the earliest leg startTime for the call startTime", () => {
     const legs: CallLeg[] = [
       leg({ extension: "20", startTime: "2026-05-04T10:25:08.500Z", status: "missed" }),

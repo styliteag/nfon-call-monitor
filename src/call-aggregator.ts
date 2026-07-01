@@ -97,6 +97,23 @@ export function processEvent(event: NfonCallEvent): void {
     }
   }
 
+  // Detect same-uuid sequential transfer: a new inbound leg for a call whose
+  // other leg was already answered (e.g. Manfred answered, then forwarded the
+  // caller to Robin on the same NFON uuid). Distinct from a hunt-group, where
+  // sibling legs are still ringing (never answered) when a new leg appears.
+  if (isNew && !record.transferredFrom && event.direction === "inbound") {
+    const existing = getCallById(event.uuid);
+    const sourceLeg = existing?.legs.find(
+      (l) => l.extension !== event.extension && !!l.answerTime
+    );
+    if (sourceLeg) {
+      record.transferredFrom = sourceLeg.extension;
+      record.transferredFromName = sourceLeg.extensionName;
+      record.originalCaller = existing?.caller;
+      log.debug("Calls", `Same-uuid transfer: ${record.extensionName}(${record.extension}) ← ${sourceLeg.extensionName}(${sourceLeg.extension})`);
+    }
+  }
+
   // Detect transfer outbound leg: extension makes outbound call while having an active inbound call
   if (isNew && event.direction === "outbound" && extensionNames.has(event.extension)) {
     const activeInbound = getActiveCallForExtension(event.extension);
