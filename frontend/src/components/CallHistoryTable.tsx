@@ -410,6 +410,11 @@ export function CallHistoryTable({ calls, loading, kopfnummern, kopfnummernMap, 
                     <div className="text-xs text-purple-600 dark:text-purple-400 mt-0.5 font-sans">
                       &#8618; weitergeleitet an <span className="font-medium">{call.transferredToName || call.transferredTo}</span>
                       <span className="text-gray-400 ml-1">({call.transferredTo})</span>
+                      {call.originalCaller && (
+                        <span className="text-gray-400 ml-1">
+                          &mdash; Anrufer: <PhoneWithPf number={call.originalCaller} kopfnummern={kopfnummern} kopfnummernMap={kopfnummernMap} pfContacts={pfContacts} extensions={extensions} specialNumbers={specialNumbers} className="inline" />
+                        </span>
+                      )}
                     </div>
                   )}
                 </td>

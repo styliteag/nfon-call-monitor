@@ -108,7 +108,36 @@ describe("aggregateLegs", () => {
     expect(call.transferredFrom).toBeUndefined(); // no recipient-anchored "von"
     expect(call.transferredTo).toBe("54");
     expect(call.transferredToName).toBe("Robin Will");
-    expect(call.originalCaller).toBeUndefined();
+    expect(call.originalCaller).toBe("4961313861172"); // surfaced to link back to the original caller
+  });
+
+  it("names the recipient (not the transferrer) when an outbound self-marker leg shares the uuid", () => {
+    // Real case 983lv4b8: Michael(52) answered a hunt call, then forwarded the
+    // external caller to Wim(20) on the same uuid. Michael's outbound dial leg
+    // carries the outbound-transfer self-marker (transferredFrom === own ext);
+    // Wim's inbound leg is the genuine recipient (transferredFrom = 52). Both
+    // start at the same instant, so the leg finder must pick Wim, not Michael.
+    const legs: CallLeg[] = [
+      leg({ extension: "52", extensionName: "Michael Seifert", direction: "outbound", caller: "52", callee: "20", status: "answered", duration: 15, startTime: "2026-07-14T09:03:29.000Z", answerTime: "2026-07-14T09:03:38.000Z", transferredFrom: "52", transferredFromName: "Michael Seifert" }),
+      leg({ extension: "20", extensionName: "Wim Bonis", direction: "inbound", caller: "4915757344532", callee: "20", status: "answered", duration: 458, startTime: "2026-07-14T09:03:29.000Z", answerTime: "2026-07-14T09:03:38.000Z", transferredFrom: "52", transferredFromName: "Michael Seifert", originalCaller: "4915757344532" }),
+    ];
+    const call = aggregateLegs(legs);
+    expect(call.transferredTo).toBe("20");
+    expect(call.transferredToName).toBe("Wim Bonis");
+    expect(call.transferredFrom).toBeUndefined();
+    expect(call.originalCaller).toBe("4915757344532"); // link back to the original external caller
+  });
+
+  it("keeps an outbound-transfer self-marker leg out of the transferredTo path", () => {
+    // A standalone answered outbound transfer (transferredFrom === own ext) must
+    // keep its recipient-perspective "Weiterleitung an {callee}" rendering and
+    // never surface a self-referential transferredTo.
+    const legs: CallLeg[] = [
+      leg({ extension: "52", extensionName: "Michael Seifert", direction: "outbound", caller: "52", callee: "20", status: "answered", duration: 15, answerTime: "2026-07-14T09:03:38.000Z", transferredFrom: "52", transferredFromName: "Michael Seifert", originalCaller: "4915757344532" }),
+    ];
+    const call = aggregateLegs(legs);
+    expect(call.transferredTo).toBeUndefined();
+    expect(call.transferredFrom).toBe("52");
   });
 
   it("keeps recipient-anchored transfer when the source is not a leg (cross-uuid)", () => {

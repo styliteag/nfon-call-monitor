@@ -396,9 +396,18 @@ export function aggregateLegs(legs: CallLeg[]): Call {
   // (answered) leg of this call. Anchor the row on the transferrer and expose
   // the target via transferredTo, rather than the recipient-anchored "von"
   // rendering used for cross-uuid transfers (where the source is not a leg).
-  const sameUuidSource = transferLeg
-    ? sorted.find((l) => l.extension === transferLeg.transferredFrom && !!l.answerTime)
-    : undefined;
+  //
+  // The recipient leg carries transferredFrom pointing at a DIFFERENT extension
+  // that is itself an answered leg. Exclude the outbound-transfer self-marker
+  // (transferredFrom === extension, set when an extension dials out to forward
+  // a caller) so it cannot masquerade as the recipient — otherwise a call that
+  // holds both legs would name the transferrer instead of the target.
+  const sameUuidRecipient = sorted.find(
+    (l) =>
+      l.transferredFrom &&
+      l.transferredFrom !== l.extension &&
+      sorted.some((s) => s.extension === l.transferredFrom && !!s.answerTime)
+  );
   return {
     id: first.id,
     caller: first.caller,
@@ -410,11 +419,13 @@ export function aggregateLegs(legs: CallLeg[]): Call {
     duration: answerer?.duration ?? first.duration,
     status,
     endReason: answerer?.endReason ?? first.endReason,
-    transferredFrom: sameUuidSource ? undefined : transferLeg?.transferredFrom,
-    transferredFromName: sameUuidSource ? undefined : transferLeg?.transferredFromName,
-    transferredTo: sameUuidSource ? transferLeg?.extension : undefined,
-    transferredToName: sameUuidSource ? transferLeg?.extensionName : undefined,
-    originalCaller: sameUuidSource ? undefined : (transferLeg?.originalCaller ?? first.originalCaller),
+    transferredFrom: sameUuidRecipient ? undefined : transferLeg?.transferredFrom,
+    transferredFromName: sameUuidRecipient ? undefined : transferLeg?.transferredFromName,
+    transferredTo: sameUuidRecipient ? sameUuidRecipient.extension : undefined,
+    transferredToName: sameUuidRecipient ? sameUuidRecipient.extensionName : undefined,
+    originalCaller: sameUuidRecipient
+      ? (sameUuidRecipient.originalCaller ?? sameUuidRecipient.caller)
+      : (transferLeg?.originalCaller ?? first.originalCaller),
     answeredBy: answerer?.extension,
     answeredByName: answerer?.extensionName,
     legs: sorted,
