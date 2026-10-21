@@ -1,7 +1,8 @@
+ARG NODE_VERSION=22.23.4
 ARG VERSION=unknown
 
 # Stage 1: Build frontend (run on host platform to avoid QEMU arm64 issues)
-FROM --platform=$BUILDPLATFORM node:22-alpine AS frontend-build
+FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-alpine AS frontend-build
 ARG VERSION
 WORKDIR /app
 
@@ -14,7 +15,7 @@ ENV VITE_APP_VERSION=$VERSION
 RUN cd frontend && npm run build
 
 # Stage 2: Build backend (run on host platform to avoid QEMU arm64 issues)
-FROM --platform=$BUILDPLATFORM node:22-alpine AS backend-build
+FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-alpine AS backend-build
 WORKDIR /app
 
 COPY package.json package-lock.json tsconfig.json tsconfig.build.json ./
@@ -23,7 +24,7 @@ COPY src/ src/
 RUN npm ci && npm run build && cp src/*.json dist/src/
 
 # Stage 3: Production
-FROM node:22-alpine
+FROM node:${NODE_VERSION}-alpine
 WORKDIR /app
 
 RUN apk add --no-cache tzdata

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+- **Node.js 22.23.4** — Docker-Image auf gepatchte Version gepinnt (Node.js October 2026 Security Releases: Brotli-RCE CVE-2026-111497, TLS-Hostname-Bypass CVE-2026-105483/106069/106072, Keep-Alive CVE-2026-105481, SQLite/undici/c-ares/OpenSSL-Updates)
+
 ## [1.8.13] - 2026-07-14
 
 ## [1.8.12] - 2026-07-01
